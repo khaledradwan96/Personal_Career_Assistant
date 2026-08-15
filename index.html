@@ -1,1196 +1,804 @@
-<!doctype html>
-<html lang="ar" dir="rtl">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Professional Development Record</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-    <style>
-      @import url("https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@300;400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap");
+<!DOCTYPE html><html lang="ar" dir="rtl"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Professional Development Record — V4.0</title><script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap');
+:root{
+ --bg:#f4f7fc;--surface:#fff;--surface2:#f8faff;--text:#15233e;--muted:#718099;
+ --line:#e3e9f2;--purple:#7147e8;--purple2:#8b5cf6;--blue:#3478e8;
+ --cyan:#55d9eb;--green:#19ae7d;--orange:#ee9b32;--danger:#dc3e3e;
+ --nav:#fbfcff;--hero:#111c37;--hero2:#213568;--shadow:0 12px 34px rgba(35,55,92,.08);
+}
+html[data-theme="dark"]{
+ --bg:#070d19;--surface:#0f182a;--surface2:#121e32;--text:#eef3ff;--muted:#9aa8bf;
+ --line:#202c43;--purple:#8b63f5;--purple2:#a27cff;--blue:#4d8af7;
+ --cyan:#63e6f7;--green:#25c995;--orange:#f1aa4d;--danger:#ff6565;
+ --nav:#09111f;--hero:#0d1730;--hero2:#1b2b55;--shadow:0 15px 45px rgba(0,0,0,.28);
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{background:radial-gradient(circle at 15% -5%,#dbeafe 0,transparent 27%),radial-gradient(circle at 90% 0,#cffafe 0,transparent 23%),var(--bg);color:var(--text);font-family:Cairo,Tahoma,Arial,sans-serif;min-height:100vh;transition:.25s}
+html[data-theme="dark"] body{background:radial-gradient(circle at 15% -5%,#15264b 0,transparent 27%),var(--bg)}
+button,input,select,textarea{font:inherit}
+.wrap{max-width:1500px;margin:auto;padding:0 22px 50px}
+.appbar{height:74px;background:var(--surface);border-bottom:1px solid var(--line);display:flex;align-items:center;gap:18px;padding:0 24px;position:sticky;top:0;z-index:20;box-shadow:0 4px 18px rgba(0,0,0,.03)}
+.brand{display:flex;align-items:center;gap:9px;min-width:215px}.brand-logo{width:40px;height:40px;border-radius:12px;background:linear-gradient(135deg,var(--purple),#9a64ff);display:grid;place-items:center;color:#fff;font-weight:800;box-shadow:0 7px 18px #7147e82d}.brand b{font-family:"Space Grotesk";font-size:14px;letter-spacing:.08em}.brand small{display:block;color:var(--muted);font-size:8px}
+.search{height:40px;max-width:430px;flex:1;margin:auto;border:1px solid var(--line);background:var(--surface2);border-radius:12px;display:flex;align-items:center;padding:0 12px;color:var(--muted)}.search input{border:0;outline:0;background:transparent;color:var(--text);width:100%;font-size:11px}.search kbd{font-size:8px;border:1px solid var(--line);padding:3px 6px;border-radius:5px}
+.top-actions{display:flex;align-items:center;gap:12px}.theme{display:flex;align-items:center;gap:5px;color:var(--muted);font-size:12px}.toggle{width:43px;height:24px;border:1px solid var(--line);background:var(--surface2);border-radius:20px;padding:2px;cursor:pointer}.toggle i{display:block;width:18px;height:18px;border-radius:50%;background:var(--purple);transition:.2s}.toggle.dark i{transform:translateX(-17px)}
+.user{display:flex;align-items:center;gap:8px}.avatar{width:34px;height:34px;border-radius:50%;display:grid;place-items:center;background:linear-gradient(135deg,var(--purple),#9a67ff);color:#fff;font-size:10px;font-weight:800}.user strong{font-size:10px}.user small{display:block;color:var(--muted);font-size:7px}
+.rev-strip{display:none}.version-badge{background:linear-gradient(135deg,var(--purple),#7045d9);color:#fff;padding:5px 10px;border-radius:8px;font-weight:800}
+.titleblock{background:linear-gradient(135deg,var(--hero),var(--hero2));color:#fff;border:0;border-radius:23px;box-shadow:0 18px 50px rgba(15,23,42,.17);display:grid;grid-template-columns:270px 1fr auto;overflow:hidden;margin:18px 0;position:relative;min-height:285px}
+.titleblock .main{padding:34px 38px;grid-column:2;direction:rtl}.titleblock .visual{grid-column:1;display:flex;align-items:center;justify-content:center;padding:20px;direction:ltr}.titleblock .visual img{width:220px;height:220px;object-fit:cover;border-radius:14px}.titleblock .side{padding:28px 25px;min-width:230px;background:rgba(255,255,255,.045);display:flex;flex-direction:column;justify-content:center}.eyebrow{font-family:"Space Grotesk";font-size:11px;letter-spacing:.13em;color:var(--cyan);margin-bottom:7px;direction:ltr}.titleblock h1{font-size:39px;line-height:1.25;margin:0 0 10px}.titleblock p{margin:0;color:#d1daea;font-size:13px;line-height:2;max-width:700px}.side .row{display:flex;justify-content:space-between;gap:20px;padding:10px 0;border-bottom:1px solid rgba(255,255,255,.09);font-size:10px}.side .row:last-child{border-bottom:0}.side span{color:#9eacc6}.side b{font-size:11px}.gear-btn{position:absolute;top:16px;right:16px;border:1px solid rgba(255,255,255,.2);background:rgba(255,255,255,.1);color:#fff;border-radius:11px;width:38px;height:38px;cursor:pointer;z-index:2}
+.dashboard{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:16px}.stat-card{border-radius:15px;padding:16px;color:#fff;box-shadow:var(--shadow);min-height:105px}.stat-label{font-size:9px;opacity:.9}.stat-value{font-family:"Space Grotesk";font-size:29px;font-weight:700;margin-top:6px}.stat-note{font-size:8px;opacity:.7;margin-top:3px}.stat-card:nth-child(1){background:linear-gradient(135deg,#5832a8,#7950dc)}.stat-card:nth-child(2){background:linear-gradient(135deg,#2454a4,#3d78df)}.stat-card:nth-child(3){background:linear-gradient(135deg,#14765c,#20a77f)}.stat-card:nth-child(4){background:linear-gradient(135deg,#79512d,#a16b39)}.stat-card:nth-child(5){background:linear-gradient(135deg,#126c78,#1a9dac)}
+.layout{display:grid;grid-template-columns:1fr 275px;gap:15px}.quick,.card,.settings-panel{background:var(--surface);border:1px solid var(--line);border-radius:17px;box-shadow:var(--shadow)}
+.quick{padding:14px;grid-column:2;grid-row:1}.quick h3{font-size:14px;margin:3px 5px 11px}.quick-list{display:flex;flex-direction:column;gap:8px}.quick button{border:1px solid var(--line);background:var(--surface2);border-radius:11px;padding:9px;display:flex;align-items:center;gap:9px;text-align:right;color:var(--text);cursor:pointer}.qicon{width:36px;height:36px;border-radius:10px;display:grid;place-items:center;color:#fff;font-size:17px;flex-shrink:0}.qpurple{background:#7b4df0}.qgreen{background:#20b781}.qblue{background:#3a7fea}.qorange{background:#ee9b32}.quick button div{flex:1}.quick strong{display:block;font-size:10px}.quick small{color:var(--muted);font-size:7px}
+.workspace{grid-column:1;grid-row:1 / span 5}.card{margin-bottom:15px;overflow:hidden}.card-head{display:flex;align-items:center;justify-content:space-between;padding:15px 20px;border-bottom:1px solid var(--line);gap:10px;flex-wrap:wrap}.card-head h2{font-size:15px;margin:0;display:flex;align-items:center;gap:9px}.step-num{width:27px;height:27px;border-radius:9px;background:#eef3ff;color:var(--purple);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:11px}.card-body{padding:20px}
+.dropzone{border:2px dashed #c5d7ef;background:linear-gradient(135deg,var(--surface2),var(--surface));padding:40px 20px;text-align:center;cursor:pointer;border-radius:17px;transition:.2s}.dropzone:hover,.dropzone.drag{border-color:var(--purple);transform:translateY(-1px);box-shadow:0 8px 24px #7147e81a}.dropzone .icon{font-size:40px;margin-bottom:8px}.dropzone .main-txt{font-weight:800;color:var(--text);font-size:15px}.dropzone .sub-txt{color:var(--muted);font-size:10px;margin-top:5px}input[type=file]{display:none}.file-chip{display:flex;align-items:center;gap:10px;padding:10px 13px;background:var(--surface2);border:1px solid var(--line);border-radius:11px;margin-top:12px}.file-chip .name{flex:1;font-size:11px}.file-chip .meta{font-size:9px;color:var(--muted)}.file-chip button{border:0;background:#fee2e2;color:#b91c1c;padding:4px 8px;border-radius:7px;cursor:pointer}
+.btn{font-weight:700;font-size:11px;padding:9px 14px;border:1px solid var(--purple);background:var(--purple);color:#fff;cursor:pointer;border-radius:9px;transition:.16s;display:inline-flex;align-items:center;gap:7px}.btn:hover:not(:disabled){background:var(--purple2);transform:translateY(-1px);box-shadow:0 7px 18px #7147e82b}.btn:disabled{opacity:.45;cursor:not-allowed}.btn.stamp{background:linear-gradient(135deg,var(--purple),#5540d9);border-color:transparent}.btn.ghost{background:var(--surface);color:var(--text);border-color:var(--line)}.btn.sm{padding:7px 10px;font-size:10px}.actions{display:flex;gap:8px;margin-top:13px;flex-wrap:wrap}
+.loader{display:flex;align-items:center;gap:9px;color:var(--muted);padding:12px 0;font-size:11px}.spinner{width:16px;height:16px;border:2px solid var(--line);border-top-color:var(--purple);border-radius:50%;animation:spin .8s linear infinite}@keyframes spin{to{transform:rotate(360deg)}}.errbox{background:#fff1f1;border:1px solid #ffcaca;color:#a52525;padding:10px 13px;border-radius:9px;font-size:10px;margin-top:10px}.okbox{background:#effbf6;border:1px solid #b9edd9;color:#11734f;padding:10px 13px;border-radius:9px;font-size:10px;margin-top:10px}
+.settings-panel{display:none;padding:15px 18px;margin-bottom:15px}.settings-panel.open{display:block}.settings-panel h3{font-size:13px;margin:0 0 5px}.settings-panel p{font-size:9px;color:var(--muted);line-height:1.8;margin:0 0 10px}.settings-row{display:flex;gap:8px;align-items:center}.settings-row input{flex:1}
+.key-status{font-size:9px;color:var(--green)}.key-status.missing{color:var(--danger)}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:13px}.grid .full{grid-column:1/-1}label{display:block;font-size:9px;font-weight:800;color:var(--muted);margin-bottom:5px}input[type=text],input[type=date],input[type=password],select,textarea{width:100%;border:1px solid var(--line);background:var(--surface2);border-radius:8px;padding:8px 9px;font-family:inherit;font-size:11px;color:var(--text)}textarea{resize:vertical;min-height:55px}input:focus,select:focus,textarea:focus{outline:3px solid #8b5cf626;border-color:var(--purple)}.hint{font-size:9px;color:var(--muted);margin-top:4px}.approved-stamp{position:absolute;top:14px;left:22px;border:2px solid var(--green);color:var(--green);border-radius:8px;padding:5px 10px;font-weight:800;transform:rotate(-5deg);opacity:0}.approved-stamp.show{animation:stampIn .35s;opacity:1}@keyframes stampIn{from{transform:rotate(-5deg) scale(1.5);opacity:0}to{transform:rotate(-5deg) scale(1);opacity:1}}
+.post-box{border:1px dashed #b9cef0;background:var(--surface2);padding:13px;border-radius:10px;margin-top:13px;display:none}.post-box textarea{min-height:130px}
+.section-title{font-family:"Space Grotesk";color:var(--purple);font-weight:700;font-size:13px;margin:18px 0 9px;display:flex;align-items:center;gap:9px}.section-title:after{content:'';height:1px;background:var(--line);flex:1}
+.tabbar{display:flex;gap:6px;flex-wrap:wrap;padding:12px 15px 0;background:var(--surface)}.tab-btn{font-family:inherit;font-weight:700;font-size:10px;background:var(--surface2);border:1px solid var(--line);color:var(--muted);padding:8px 11px;cursor:pointer;border-radius:9px}.tab-btn:hover{border-color:#b9a4fa;color:var(--purple)}.tab-btn.active{background:#f0ecff;border-color:#c3b1fb;color:#6240c9}.sheet-scroll{width:100%;max-width:100%;overflow-x:auto;overflow-y:hidden;border:1px solid var(--line);border-radius:10px;direction:ltr}table{border-collapse:separate;border-spacing:0;font-size:10px;min-width:1000px;width:100%;direction:ltr}th,td{border-right:1px solid var(--line);border-bottom:1px solid var(--line);padding:7px 8px;text-align:left;vertical-align:top}th{background:#101b34;color:#e7edfa;font-weight:700;font-size:9px;position:sticky;top:0;white-space:nowrap}td{background:var(--surface);min-width:100px;max-width:280px;color:var(--text)}td[contenteditable=true]:focus{outline:2px solid #9c84f5;outline-offset:-2px;background:var(--surface2)}td.wide{min-width:200px}td.col-url{font-size:9px;color:var(--blue)}.del-cell{width:36px;min-width:36px;text-align:center}.del-btn{background:#fff1f1;border:0;color:#d23a3a;border-radius:6px;cursor:pointer}.empty-log{text-align:center;color:var(--muted);font-size:10px;padding:28px}.record-toolbar{display:flex;gap:8px;align-items:center;flex-wrap:wrap;padding:13px 15px;border-top:1px solid var(--line)}.record-count{margin-right:auto;color:var(--muted);font-size:9px}
+@media(max-width:1100px){.titleblock{grid-template-columns:210px 1fr}.titleblock .visual{display:none}.dashboard{grid-template-columns:repeat(3,1fr)}.layout{grid-template-columns:1fr}.quick{grid-column:auto;grid-row:auto}.workspace{grid-column:auto;grid-row:auto}.quick-list{display:grid;grid-template-columns:repeat(2,1fr)}}
+@media(max-width:700px){.wrap{padding:0 10px 35px}.appbar{height:auto;min-height:68px;padding:9px 12px;gap:10px;flex-wrap:wrap}.brand{min-width:0}.brand small{display:none}.search{order:3;flex-basis:100%;max-width:none}.user div{display:none}.titleblock{grid-template-columns:1fr;margin-top:12px;min-height:0}.titleblock .main{grid-column:1;padding:27px 20px 24px}.titleblock h1{font-size:30px}.titleblock p{font-size:11px}.titleblock .side{grid-column:1;padding:15px 20px;min-width:0}.dashboard{grid-template-columns:1fr 1fr}.stat-card:last-child{grid-column:1/-1}.quick-list{grid-template-columns:1fr}.grid{grid-template-columns:1fr}.grid .full{grid-column:auto}.card-body{padding:14px}.dropzone{padding:30px 12px}.settings-row{flex-wrap:wrap}.settings-row input{flex-basis:100%}}
 
-      :root {
-        --blueprint-deep: #0f2d4a;
-        --blueprint-mid: #1e4d78;
-        --blueprint-line: #5a9bc0;
-        --cyan: #7fd4e6;
-        --paper: #f3efe4;
-        --paper-dim: #e8e2d2;
-        --ink: #182430;
-        --ink-soft: #4b5a68;
-        --stamp: #b3402c;
-        --stamp-dim: #c96a56;
-        --ok: #2e7d5b;
-      }
-      * {
-        box-sizing: border-box;
-      }
-      html,
-      body {
-        margin: 0;
-        padding: 0;
-      }
-      body {
-        background: var(--blueprint-deep);
-        background-image:
-          linear-gradient(var(--blueprint-mid) 1px, transparent 1px),
-          linear-gradient(90deg, var(--blueprint-mid) 1px, transparent 1px);
-        background-size: 28px 28px;
-        color: var(--ink);
-        font-family: "IBM Plex Sans Arabic", sans-serif;
-        min-height: 100vh;
-        padding: 32px 18px 60px;
-      }
-      .wrap {
-        max-width: 1120px;
-        margin: 0 auto;
-      }
+/* ===== Mobile Excel / Table Fix ===== */
+html, body { max-width:100%; overflow-x:hidden; }
+.wrap, .layout, .workspace, .card, .card-body, .sheet-scroll, #tableHolder {
+  min-width:0;
+  max-width:100%;
+}
+.sheet-scroll {
+  width:100%;
+  max-width:100%;
+  overflow-x:auto !important;
+  overflow-y:hidden;
+  -webkit-overflow-scrolling:touch;
+  overscroll-behavior-x:contain;
+  scrollbar-width:thin;
+}
+.sheet-scroll > div,
+#tableHolder {
+  min-width:0;
+  max-width:100%;
+}
+.sheet-scroll table {
+  width:max-content;
+  min-width:980px;
+  max-width:none;
+}
+@media (max-width:700px){
+  body { width:100%; }
+  .wrap { width:100%; overflow:hidden; }
+  .workspace { width:100%; }
+  .card { width:100%; overflow:hidden; }
+  .card-body { width:100%; overflow:hidden; }
+  .sheet-scroll {
+    border-radius:10px;
+    margin:0;
+    padding-bottom:3px;
+  }
+  .sheet-scroll table {
+    min-width:920px;
+    font-size:9px;
+  }
+  .sheet-scroll th,
+  .sheet-scroll td {
+    padding:7px 8px;
+    white-space:normal;
+  }
+  .record-toolbar {
+    width:100%;
+  }
+  /* Prevent long URLs/text from creating a second page-wide overflow */
+  .sheet-scroll td {
+    overflow-wrap:anywhere;
+    word-break:break-word;
+  }
+}
 
-      .titleblock {
-        background: var(--paper);
-        border: 1.5px solid var(--blueprint-mid);
-        box-shadow:
-          0 0 0 1px rgba(127, 212, 230, 0.15),
-          0 18px 40px rgba(0, 0, 0, 0.35);
-        display: grid;
-        grid-template-columns: 1fr auto;
-        gap: 0;
-        margin-bottom: 22px;
-        position: relative;
-      }
-      .titleblock .main {
-        padding: 22px 26px;
-        border-left: 1.5px solid var(--blueprint-mid);
-      }
-      .titleblock .side {
-        padding: 22px 20px;
-        display: flex;
-        flex-direction: column;
-        justify-content: space-between;
-        font-family: "IBM Plex Mono", monospace;
-        font-size: 11px;
-        color: var(--ink-soft);
-        min-width: 190px;
-      }
-      .eyebrow {
-        font-family: "IBM Plex Mono", monospace;
-        font-size: 11px;
-        letter-spacing: 0.14em;
-        color: var(--blueprint-mid);
-        text-transform: uppercase;
-        margin-bottom: 6px;
-      }
-      h1 {
-        font-family: "Space Grotesk", sans-serif;
-        font-weight: 600;
-        font-size: 26px;
-        margin: 0 0 6px;
-        color: var(--blueprint-deep);
-      }
-      .titleblock p {
-        margin: 0;
-        color: var(--ink-soft);
-        font-size: 14px;
-        line-height: 1.7;
-      }
-      .side .row {
-        display: flex;
-        justify-content: space-between;
-        border-top: 1px dashed #c8c0a8;
-        padding: 6px 0;
-        gap: 10px;
-      }
-      .side .row:first-child {
-        border-top: none;
-      }
-      .side b {
-        color: var(--blueprint-deep);
-      }
-      .gear-btn {
-        position: absolute;
-        top: 14px;
-        left: 14px;
-        background: var(--blueprint-deep);
-        color: var(--cyan);
-        border: 1px solid var(--blueprint-mid);
-        width: 34px;
-        height: 34px;
-        cursor: pointer;
-        font-size: 16px;
-      }
-      .gear-btn:hover {
-        background: var(--blueprint-mid);
-      }
+/* ===== Back to Top ===== */
+#backToTop {
+  position:fixed;
+  right:18px;
+  bottom:20px;
+  width:46px;
+  height:46px;
+  border:1px solid rgba(255,255,255,.16);
+  border-radius:50%;
+  background:linear-gradient(135deg,var(--purple),var(--purple2));
+  color:#fff;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:20px;
+  font-weight:800;
+  line-height:1;
+  cursor:pointer;
+  z-index:100;
+  box-shadow:0 10px 28px rgba(72,45,160,.30);
+  opacity:0;
+  visibility:hidden;
+  transform:translateY(12px);
+  transition:opacity .22s, transform .22s, visibility .22s;
+}
+#backToTop.show {
+  opacity:1;
+  visibility:visible;
+  transform:translateY(0);
+}
+#backToTop:hover { transform:translateY(-2px); }
+@media (max-width:700px){
+  #backToTop {
+    right:14px;
+    bottom:72px;
+    width:43px;
+    height:43px;
+    font-size:18px;
+  }
+}
 
-      .settings-panel {
-        display: none;
-        background: var(--paper);
-        border: 1.5px solid var(--stamp);
-        padding: 18px 20px;
-        margin-bottom: 20px;
-      }
-      .settings-panel.open {
-        display: block;
-      }
-      .settings-panel h3 {
-        margin: 0 0 8px;
-        font-family: "Space Grotesk", sans-serif;
-        font-size: 15px;
-        color: var(--blueprint-deep);
-      }
-      .settings-panel p {
-        font-size: 12.5px;
-        color: var(--ink-soft);
-        margin: 0 0 12px;
-        line-height: 1.7;
-      }
-      .settings-panel a {
-        color: var(--stamp);
-      }
-      .settings-row {
-        display: flex;
-        gap: 10px;
-        flex-wrap: wrap;
-        align-items: center;
-      }
-      .settings-row input {
-        flex: 1;
-        min-width: 220px;
-      }
-      .key-status {
-        font-family: "IBM Plex Mono", monospace;
-        font-size: 11px;
-        padding: 4px 10px;
-        border: 1px solid var(--ok);
-        color: var(--ok);
-      }
-      .key-status.missing {
-        border-color: var(--stamp);
-        color: var(--stamp);
-      }
 
-      .card {
-        background: var(--paper);
-        border: 1.5px solid var(--blueprint-mid);
-        margin-bottom: 20px;
-        position: relative;
-      }
-      .card-head {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        padding: 14px 20px;
-        border-bottom: 1.5px dashed #c8c0a8;
-        flex-wrap: wrap;
-        gap: 10px;
-      }
-      .card-head h2 {
-        font-family: "Space Grotesk", sans-serif;
-        font-size: 15px;
-        font-weight: 600;
-        margin: 0;
-        color: var(--blueprint-deep);
-        display: flex;
-        align-items: center;
-        gap: 10px;
-      }
-      .step-num {
-        font-family: "IBM Plex Mono", monospace;
-        font-size: 12px;
-        width: 22px;
-        height: 22px;
-        border-radius: 50%;
-        background: var(--blueprint-deep);
-        color: var(--cyan);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        flex-shrink: 0;
-      }
-      .card-body {
-        padding: 20px;
-      }
+/* =========================================================
+   V4 DASHBOARD UI — visual redesign, functions preserved
+   ========================================================= */
+:root{
+  --bg:#f7f9fe;
+  --surface:#ffffff;
+  --surface2:#fbfcff;
+  --text:#17233c;
+  --muted:#7a879d;
+  --line:#e7ebf3;
+  --purple:#7046e8;
+  --purple2:#8c5cf2;
+  --blue:#347ce8;
+  --green:#19b77f;
+  --orange:#f09b38;
+  --cyan:#27b8c9;
+  --shadow:0 12px 34px rgba(48,67,102,.075);
+}
+body{
+  background:
+    radial-gradient(circle at 15% 15%,#edf3ff 0,transparent 25%),
+    radial-gradient(circle at 85% 8%,#f1ebff 0,transparent 23%),
+    var(--bg);
+}
+html[data-theme="dark"] body{
+  background:
+    radial-gradient(circle at 10% 5%,#17264a 0,transparent 28%),
+    var(--bg);
+}
+.app-sidebar{
+  position:fixed;
+  z-index:30;
+  top:0;
+  left:0;
+  width:92px;
+  height:100vh;
+  background:rgba(255,255,255,.92);
+  backdrop-filter:blur(16px);
+  border-right:1px solid var(--line);
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  padding:22px 8px 15px;
+  gap:6px;
+}
+html[data-theme="dark"] .app-sidebar{background:rgba(9,17,31,.94)}
+.sidebar-logo{
+  width:46px;height:46px;border-radius:14px;
+  display:grid;place-items:center;color:#fff;font-size:22px;
+  background:linear-gradient(135deg,var(--purple),#9a65ff);
+  box-shadow:0 9px 22px #7046e82b;
+  margin-bottom:16px;
+}
+.side-item{
+  width:76px;min-height:61px;border:0;background:transparent;
+  color:var(--muted);border-radius:10px;cursor:pointer;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:4px;position:relative;transition:.18s;
+}
+.side-item span{font-size:21px;line-height:1}
+.side-item b{font-family:Cairo;font-size:9px;font-weight:700}
+.side-item:hover{background:var(--surface2);color:var(--purple)}
+.side-item.active{background:#f3efff;color:var(--purple)}
+html[data-theme="dark"] .side-item.active{background:#211947}
+.side-item.active:before{
+  content:"";position:absolute;left:0;top:8px;bottom:8px;width:3px;
+  border-radius:0 3px 3px 0;background:var(--purple);
+}
+#homeTop{position:absolute;top:0}
+.appbar{
+  margin-left:92px;
+  height:78px;
+  background:rgba(255,255,255,.72);
+  backdrop-filter:blur(14px);
+  border-bottom:1px solid var(--line);
+  box-shadow:none;
+}
+html[data-theme="dark"] .appbar{background:rgba(9,17,31,.72)}
+.wrap{
+  max-width:1450px;
+  margin-left:92px;
+  padding:20px 28px 55px;
+}
+.titleblock{
+  position:relative;
+  display:grid;
+  grid-template-columns:330px minmax(0,1fr);
+  min-height:355px;
+  background:linear-gradient(135deg,#fdfdff,#f7f8ff);
+  border:1px solid var(--line);
+  border-radius:24px;
+  overflow:hidden;
+  box-shadow:var(--shadow);
+  margin-bottom:18px;
+}
+html[data-theme="dark"] .titleblock{
+  background:linear-gradient(135deg,#101a30,#162746);
+}
+.hero-art{
+  position:relative;
+  min-height:300px;
+  display:grid;
+  place-items:center;
+  background:
+    radial-gradient(circle at 50% 55%,#eeeaff 0,transparent 48%),
+    linear-gradient(135deg,#faf9ff,#f2f5ff);
+}
+html[data-theme="dark"] .hero-art{
+  background:radial-gradient(circle at 50% 55%,#283b69 0,transparent 55%),#121d35;
+}
+.folder{
+  position:relative;
+  width:190px;height:145px;
+  transform:translateY(7px) rotate(-2deg);
+}
+.folder-tab{
+  position:absolute;top:0;left:18px;width:72px;height:28px;
+  border-radius:14px 14px 0 0;
+  background:linear-gradient(135deg,#7650ec,#9b7af6);
+}
+.folder-body{
+  position:absolute;left:0;right:0;top:20px;bottom:0;
+  border-radius:18px 18px 25px 25px;
+  background:linear-gradient(145deg,#8160ee,#6c4ad8);
+  box-shadow:0 22px 30px #6e4be82b;
+  padding:30px 22px;
+}
+.mini-chart,.mini-lines{background:#ffffffb8;border-radius:9px}
+.mini-chart{height:42px;display:flex;align-items:end;gap:6px;padding:8px;margin-bottom:9px}
+.mini-chart i{display:block;width:14px;border-radius:3px 3px 0 0;background:#62d3f2}
+.mini-chart i:nth-child(1){height:16px}.mini-chart i:nth-child(2){height:27px}.mini-chart i:nth-child(3){height:21px}
+.mini-lines{padding:7px 9px}
+.mini-lines b{display:block;height:4px;border-radius:4px;background:#ffffff;margin:4px 0}
+.hero-badge{
+  position:absolute;right:-9px;bottom:-9px;width:48px;height:48px;border-radius:14px;
+  background:#fff;color:var(--green);display:grid;place-items:center;font-size:22px;
+  box-shadow:0 10px 25px rgba(30,60,100,.15);
+}
+.float-card{
+  position:absolute;width:46px;height:46px;border-radius:13px;background:#fff;
+  color:var(--purple);display:grid;place-items:center;font-weight:800;
+  box-shadow:0 12px 25px rgba(30,60,100,.12);
+}
+.card-a{left:55px;top:65px}.card-b{right:45px;bottom:58px;color:var(--green)}
+.titleblock .main{padding:58px 55px 25px 35px;display:flex;flex-direction:column;justify-content:center}
+.eyebrow{font-size:10px;letter-spacing:.16em;color:var(--purple);font-family:"Space Grotesk";font-weight:700}
+.titleblock h1{
+  font-size:39px;line-height:1.3;margin:10px 0 12px;color:var(--text);
+  letter-spacing:-.03em;
+}
+.titleblock p{
+  font-size:13px;line-height:2.05;color:var(--muted);max-width:650px;margin:0;
+}
+.hero-meta{
+  grid-column:1/-1;
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:10px;
+  padding:0 18px 18px;
+}
+.hero-meta>div{
+  background:rgba(255,255,255,.78);
+  border:1px solid var(--line);
+  border-radius:12px;
+  padding:10px 13px;
+  display:flex;justify-content:space-between;gap:10px;align-items:center;
+}
+html[data-theme="dark"] .hero-meta>div{background:#14223c}
+.hero-meta span{font-size:8px;color:var(--muted)}
+.hero-meta b{font-size:10px;color:var(--text)}
+.titleblock .gear-btn{
+  position:absolute;top:20px;right:20px;z-index:3;
+  width:46px;height:46px;border-radius:14px;
+  background:#fff;border:1px solid var(--line);color:var(--text);
+  box-shadow:0 8px 20px rgba(30,50,90,.08);cursor:pointer;
+}
+html[data-theme="dark"] .titleblock .gear-btn{background:#172642}
+.dashboard{
+  grid-template-columns:repeat(5,1fr);
+  gap:12px;
+  margin:0 0 22px;
+}
+.stat-card{
+  border-radius:15px!important;
+  border:1px solid var(--line)!important;
+  box-shadow:none!important;
+  min-height:108px;
+  padding:16px!important;
+  background:var(--surface)!important;
+}
+.stat-value{font-size:28px!important}
+.layout{
+  display:block;
+}
+.quick{
+  padding:0!important;
+  margin-bottom:20px;
+  background:transparent!important;
+  border:0!important;
+  box-shadow:none!important;
+}
+.quick h3{
+  font-size:16px;
+  margin:0 0 10px;
+}
+.quick-list{
+  display:grid!important;
+  grid-template-columns:repeat(4,1fr);
+  gap:12px;
+}
+.quick button{
+  min-height:105px;
+  border-radius:15px;
+  background:var(--surface);
+  box-shadow:var(--shadow);
+  border:1px solid var(--line);
+  padding:16px;
+  transition:.18s;
+}
+.quick button:hover{transform:translateY(-2px);border-color:#d2c5ff}
+.qicon{width:42px;height:42px;border-radius:50%}
+.quick strong{font-size:11px}
+.quick small{font-size:8px}
+.workspace{width:100%}
+.card{
+  border-radius:18px;
+  box-shadow:var(--shadow);
+}
+.card-head{padding:16px 20px}
+.tabbar{
+  gap:7px;
+  padding:14px 16px 0;
+}
+.tab-btn{
+  border-radius:10px;
+  padding:9px 13px;
+}
+.sheet-scroll{
+  border-radius:0 0 12px 12px;
+}
+#recordsSection .card-head .step-num{display:none}
+.section-title{
+  font-size:16px;
+  margin:25px 0 11px;
+  color:var(--text);
+  font-family:Cairo;
+}
+@media(max-width:1100px){
+  .app-sidebar{display:none}
+  .appbar,.wrap{margin-left:0}
+  .wrap{padding:18px 20px 45px}
+  .titleblock{grid-template-columns:270px 1fr}
+  .hero-meta{grid-column:1/-1}
+  .dashboard{grid-template-columns:repeat(3,1fr)}
+}
+@media(max-width:700px){
+  .appbar{margin-left:0}
+  .wrap{padding:12px 10px 35px}
+  .titleblock{
+    display:grid;
+    grid-template-columns:1fr;
+    min-height:0;
+    border-radius:22px;
+  }
+  .hero-art{display:none}
+  .titleblock .main{
+    padding:55px 25px 22px;
+    text-align:right;
+  }
+  .titleblock h1{font-size:31px}
+  .titleblock p{font-size:11px;line-height:2}
+  .hero-meta{
+    grid-template-columns:1fr 1fr;
+    padding:0 13px 14px;
+  }
+  .hero-meta>div{display:block;padding:9px 11px}
+  .hero-meta span,.hero-meta b{display:block}
+  .hero-meta b{margin-top:3px}
+  .titleblock .gear-btn{top:16px;right:16px}
+  .dashboard{grid-template-columns:repeat(2,1fr);gap:9px}
+  .stat-card{min-height:92px;padding:12px!important}
+  .stat-value{font-size:23px!important}
+  .quick-list{grid-template-columns:1fr 1fr!important;gap:9px}
+  .quick button{min-height:100px;padding:12px}
+  .quick small{font-size:7px}
+}
 
-      .dropzone {
-        border: 2px dashed var(--blueprint-mid);
-        background: repeating-linear-gradient(
-          135deg,
-          rgba(30, 77, 120, 0.04) 0 10px,
-          transparent 10px 20px
-        );
-        padding: 36px 20px;
-        text-align: center;
-        cursor: pointer;
-        transition:
-          border-color 0.15s,
-          background 0.15s;
-      }
-      .dropzone:hover,
-      .dropzone.drag {
-        border-color: var(--stamp);
-        background: rgba(179, 64, 44, 0.05);
-      }
-      .dropzone .icon {
-        font-size: 34px;
-        margin-bottom: 10px;
-      }
-      .dropzone .main-txt {
-        font-weight: 600;
-        color: var(--blueprint-deep);
-        font-size: 15px;
-        margin-bottom: 4px;
-      }
-      .dropzone .sub-txt {
-        color: var(--ink-soft);
-        font-size: 12.5px;
-        font-family: "IBM Plex Mono", monospace;
-      }
-      input[type="file"] {
-        display: none;
-      }
 
-      .file-chip {
-        display: flex;
-        align-items: center;
-        gap: 12px;
-        padding: 12px 16px;
-        background: #fff;
-        border: 1px solid var(--paper-dim);
-        margin-top: 14px;
-      }
-      .file-chip .name {
-        flex: 1;
-        font-size: 13.5px;
-        color: var(--ink);
-        word-break: break-all;
-      }
-      .file-chip .meta {
-        font-family: "IBM Plex Mono", monospace;
-        font-size: 11px;
-        color: var(--ink-soft);
-      }
-      .file-chip button {
-        background: none;
-        border: none;
-        color: var(--stamp);
-        cursor: pointer;
-        font-size: 13px;
-        font-family: "IBM Plex Sans Arabic", sans-serif;
-      }
+/* ===== Fix: Dashboard statistic cards were white-on-white ===== */
+.stat-card{
+  color:#fff !important;
+  border:0 !important;
+  box-shadow:0 10px 24px rgba(45,65,110,.10) !important;
+  background:linear-gradient(135deg,#7046e8,#8b61ef) !important;
+}
+.stat-card:nth-child(1){background:linear-gradient(135deg,#7046e8,#8b61ef) !important}
+.stat-card:nth-child(2){background:linear-gradient(135deg,#347ce8,#5a91ef) !important}
+.stat-card:nth-child(3){background:linear-gradient(135deg,#19a77c,#2bc08f) !important}
+.stat-card:nth-child(4){background:linear-gradient(135deg,#b67838,#d3944f) !important}
+.stat-card:nth-child(5){background:linear-gradient(135deg,#17828e,#27a9b4) !important}
+.stat-label,.stat-value,.stat-note{color:#fff !important}
 
-      .btn {
-        font-family: "Space Grotesk", sans-serif;
-        font-weight: 600;
-        font-size: 14px;
-        padding: 12px 22px;
-        border: 1.5px solid var(--blueprint-deep);
-        background: var(--blueprint-deep);
-        color: #fff;
-        cursor: pointer;
-        transition:
-          transform 0.1s,
-          box-shadow 0.15s;
-        display: inline-flex;
-        align-items: center;
-        gap: 8px;
-      }
-      .btn:hover:not(:disabled) {
-        box-shadow: 0 4px 0 0 var(--cyan);
-        transform: translateY(-2px);
-      }
-      .btn:active:not(:disabled) {
-        transform: translateY(0);
-        box-shadow: none;
-      }
-      .btn:disabled {
-        opacity: 0.45;
-        cursor: not-allowed;
-      }
-      .btn.stamp {
-        background: var(--stamp);
-        border-color: var(--stamp);
-      }
-      .btn.stamp:hover:not(:disabled) {
-        box-shadow: 0 4px 0 0 var(--stamp-dim);
-      }
-      .btn.ghost {
-        background: transparent;
-        color: var(--blueprint-deep);
-      }
-      .btn.ghost:hover:not(:disabled) {
-        box-shadow: 0 4px 0 0 var(--paper-dim);
-      }
-      .btn.sm {
-        padding: 8px 14px;
-        font-size: 12.5px;
-      }
-      .actions {
-        display: flex;
-        gap: 12px;
-        margin-top: 16px;
-        flex-wrap: wrap;
-      }
+@media(max-width:700px){
+  .dashboard{grid-template-columns:1fr 1fr !important;gap:9px !important}
+  .stat-card:last-child{grid-column:auto !important}
+  .stat-card{min-height:96px !important;padding:13px !important}
+}
 
-      .loader {
-        display: flex;
-        align-items: center;
-        gap: 12px;
-        font-family: "IBM Plex Mono", monospace;
-        font-size: 13px;
-        color: var(--blueprint-deep);
-        padding: 14px 0;
-      }
-      .spinner {
-        width: 16px;
-        height: 16px;
-        border: 2px solid var(--paper-dim);
-        border-top-color: var(--stamp);
-        border-radius: 50%;
-        animation: spin 0.8s linear infinite;
-      }
-      @keyframes spin {
-        to {
-          transform: rotate(360deg);
-        }
-      }
+</style>
+</head>
+<body>
+<div id="homeTop"></div>
 
-      .errbox {
-        background: #fbe9e6;
-        border: 1px solid var(--stamp);
-        color: #7a2a1a;
-        padding: 12px 16px;
-        font-size: 13px;
-        margin-top: 14px;
-      }
-      .okbox {
-        background: #e7f3ec;
-        border: 1px solid var(--ok);
-        color: #1d5c40;
-        padding: 12px 16px;
-        font-size: 13px;
-        margin-top: 14px;
-      }
+<aside class="app-sidebar" aria-label="التنقل الرئيسي">
+  <div class="sidebar-logo">💼</div>
+  <button class="side-item active" data-target="homeTop"><span>⌂</span><b>الرئيسية</b></button>
+  <button class="side-item" data-target="certificateSection"><span>▣</span><b>الشهادات</b></button>
+  <button class="side-item" data-target="recordsSection"><span>▤</span><b>الخبرات</b></button>
+  <button class="side-item" data-target="recordsSection"><span>♧</span><b>الإجتماعات</b></button>
+  <button class="side-item" data-target="recordsSection"><span>♡</span><b>التطوع</b></button>
+  <button class="side-item" data-target="recordsSection"><span>☆</span><b>المهارات</b></button>
+  <button class="side-item" data-target="recordsSection"><span>▱</span><b>الملف المهني</b></button>
+  <button class="side-item" data-target="recordsSection"><span>▥</span><b>التقارير</b></button>
+  <button class="side-item" data-target="gearBtn"><span>⚙</span><b>الإعدادات</b></button>
+</aside>
 
-      .grid {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 14px 16px;
-      }
-      .grid .full {
-        grid-column: 1 / -1;
-      }
-      label {
-        display: block;
-        font-family: "IBM Plex Mono", monospace;
-        font-size: 11px;
-        letter-spacing: 0.05em;
-        color: var(--blueprint-mid);
-        margin-bottom: 5px;
-        text-transform: uppercase;
-      }
-      input[type="text"],
-      input[type="date"],
-      input[type="password"],
-      select,
-      textarea {
-        width: 100%;
-        border: 1px solid #c8c0a8;
-        background: #fff;
-        padding: 9px 10px;
-        font-family: "IBM Plex Sans Arabic", sans-serif;
-        font-size: 13.5px;
-        color: var(--ink);
-      }
-      textarea {
-        resize: vertical;
-        min-height: 56px;
-        line-height: 1.6;
-      }
-      input:focus,
-      select:focus,
-      textarea:focus {
-        outline: 2px solid var(--cyan);
-        outline-offset: 1px;
-        border-color: var(--blueprint-mid);
-      }
-      .hint {
-        font-size: 11px;
-        color: var(--ink-soft);
-        margin-top: 3px;
-      }
+<div class="appbar">
+  <div class="brand"><div class="brand-logo">💼</div><div><b>PROFESSIONAL DEVELOPMENT RECORD</b><small>Personal Career Management System</small></div></div>
+  <div class="search"><span>⌕</span><input id="globalSearch" placeholder="ابحث في السجل المهني..."><kbd>Ctrl + K</kbd></div>
+  <div class="top-actions">
+    <div class="theme"><span>☼</span><button class="toggle" id="themeToggle" title="تبديل المظهر"><i></i></button><span>☾</span></div>
+    <div class="user"><div class="avatar">KR</div><div><strong>م. خالد رضوان</strong><small>المهندس المدني</small></div></div>
+  </div>
+</div>
 
-      .approved-stamp {
-        position: absolute;
-        top: 14px;
-        left: 22px;
-        border: 3px solid var(--stamp);
-        color: var(--stamp);
-        font-family: "Space Grotesk", sans-serif;
-        font-weight: 700;
-        font-size: 13px;
-        letter-spacing: 0.12em;
-        padding: 5px 12px;
-        transform: rotate(-8deg);
-        opacity: 0;
-        pointer-events: none;
-        transition: opacity 0.25s;
-      }
-      .approved-stamp.show {
-        animation: stampIn 0.35s ease-out;
-        opacity: 1;
-      }
-      @keyframes stampIn {
-        0% {
-          opacity: 0;
-          transform: rotate(-8deg) scale(1.8);
-        }
-        60% {
-          opacity: 1;
-          transform: rotate(-8deg) scale(0.92);
-        }
-        100% {
-          opacity: 1;
-          transform: rotate(-8deg) scale(1);
-        }
-      }
-
-      /* Post generator */
-      .post-box {
-        border: 1.5px dashed var(--blueprint-mid);
-        background: #fff;
-        padding: 14px;
-        margin-top: 14px;
-        display: none;
-      }
-      .post-box textarea {
-        min-height: 140px;
-        font-family: "IBM Plex Sans Arabic", sans-serif;
-        direction: rtl;
-      }
-
-      /* Tabs */
-      .tabbar {
-        display: flex;
-        gap: 6px;
-        flex-wrap: wrap;
-        padding: 12px 20px 0;
-      }
-      .tab-btn {
-        font-family: "IBM Plex Mono", monospace;
-        font-size: 12px;
-        background: transparent;
-        border: 1px solid var(--blueprint-mid);
-        color: var(--blueprint-deep);
-        padding: 8px 14px;
-        cursor: pointer;
-        border-bottom: none;
-      }
-      .tab-btn.active {
-        background: var(--blueprint-deep);
-        color: var(--cyan);
-      }
-
-      /* Sheet table (rendered LTR for clean column reading, like a real spreadsheet) */
-      .sheet-scroll {
-        overflow-x: auto;
-        border: 1px solid var(--paper-dim);
-        direction: ltr;
-      }
-      table {
-        border-collapse: collapse;
-        font-size: 12px;
-        min-width: 1000px;
-        width: 100%;
-        direction: ltr;
-      }
-      th,
-      td {
-        border: 1px solid var(--paper-dim);
-        padding: 7px 9px;
-        text-align: left;
-        vertical-align: top;
-      }
-      th {
-        background: var(--blueprint-deep);
-        color: var(--cyan);
-        font-family: "IBM Plex Mono", monospace;
-        font-weight: 500;
-        font-size: 10.5px;
-        text-transform: uppercase;
-        letter-spacing: 0.03em;
-        position: sticky;
-        top: 0;
-        white-space: nowrap;
-      }
-      td {
-        background: #fff;
-        min-width: 110px;
-        max-width: 260px;
-      }
-      td[contenteditable="true"] {
-        cursor: text;
-      }
-      td[contenteditable="true"]:focus {
-        outline: 2px solid var(--cyan);
-        outline-offset: -2px;
-        background: #fdfcf7;
-      }
-      td.wide {
-        min-width: 200px;
-      }
-      td.col-url {
-        font-family: "IBM Plex Mono", monospace;
-        font-size: 10.5px;
-        color: var(--blueprint-mid);
-        min-width: 170px;
-      }
-      tr:nth-child(even) td {
-        background: #fbfaf6;
-      }
-      .del-cell {
-        text-align: center;
-        width: 34px;
-        min-width: 34px;
-      }
-      .del-btn {
-        background: none;
-        border: none;
-        color: var(--stamp);
-        cursor: pointer;
-        font-size: 14px;
-      }
-      .empty-log {
-        text-align: center;
-        color: var(--ink-soft);
-        font-size: 13px;
-        padding: 24px 0;
-        font-family: "IBM Plex Mono", monospace;
-        direction: rtl;
-      }
-
-      .toast {
-        position: fixed;
-        bottom: 22px;
-        left: 50%;
-        transform: translateX(-50%);
-        background: var(--blueprint-deep);
-        color: var(--cyan);
-        padding: 10px 20px;
-        font-family: "IBM Plex Mono", monospace;
-        font-size: 13px;
-        border: 1px solid var(--cyan);
-        opacity: 0;
-        transition: opacity 0.25s;
-        pointer-events: none;
-        z-index: 50;
-        max-width: 90vw;
-        text-align: center;
-      }
-      .toast.show {
-        opacity: 1;
-      }
-
-      .section-title {
-        font-family: "Space Grotesk", sans-serif;
-        color: var(--cyan);
-        font-weight: 600;
-        font-size: 13px;
-        margin: 26px 0 10px;
-        letter-spacing: 0.04em;
-        display: flex;
-        align-items: center;
-        gap: 10px;
-      }
-      .section-title::after {
-        content: "";
-        flex: 1;
-        height: 1px;
-        background: var(--blueprint-mid);
-      }
-
-      @media (max-width: 640px) {
-        .titleblock {
-          grid-template-columns: 1fr;
-        }
-        .titleblock .main {
-          border-left: none;
-          border-bottom: 1.5px solid var(--blueprint-mid);
-        }
-        .grid {
-          grid-template-columns: 1fr;
-        }
-      }
-    </style>
-  </head>
-  <body>
-    <div class="wrap">
-      <div class="titleblock">
-        <button class="gear-btn" id="gearBtn" title="إعدادات مفتاح Gemini">
-          ⚙
-        </button>
-        <div class="main">
-          <div class="eyebrow">Professional Development Record</div>
-          <h1>السجل المهني الشامل</h1>
-          <p>
-            أربع صفحات في مكان واحد: الشهادات، الخبرات، الاجتماعات، والعمل
-            التطوعي — استورد شيتك، حدّثه، وصدّره وقتما تحب.
-          </p>
-        </div>
-        <div class="side">
-          <div class="row"><span>ENGINEER</span><b>م. خالد رضوان</b></div>
-          <div class="row"><span>DISCIPLINE</span><b>Civil Eng.</b></div>
-          <div class="row">
-            <span>AI ENGINE</span><b>Gemini 3.5 Flash-Lite</b>
-          </div>
-        </div>
+<div class="wrap">
+  
+<div class="titleblock">
+  <div class="hero-art" aria-hidden="true">
+    <div class="folder">
+      <div class="folder-tab"></div>
+      <div class="folder-body">
+        <div class="mini-chart"><i></i><i></i><i></i></div>
+        <div class="mini-lines"><b></b><b></b><b></b></div>
       </div>
+      <div class="hero-badge">✓</div>
+    </div>
+    <div class="float-card card-a">◫</div>
+    <div class="float-card card-b">✓</div>
+  </div>
 
+  <div class="main">
+    <div class="eyebrow">PROFESSIONAL DEVELOPMENT RECORD</div>
+    <h1>السجل المهني الشامل</h1>
+    <p>كل إنجازاتك المهنية في مكان واحد — الشهادات، الخبرات، الاجتماعات، التطوع والمهارات، وكل ما يعكس تطورك المهني.</p>
+  </div>
+
+  <div class="hero-meta">
+    <div><span>المهندس</span><b>م. خالد رضوان</b></div>
+    <div><span>التاريخ</span><b id="heroDate">—</b></div>
+    <div><span>اليوم</span><b id="heroDay">—</b></div>
+    <div><span>الوقت (القاهرة)</span><b id="heroTime">—</b></div>
+  </div>
+
+  <button class="gear-btn" id="gearBtn" title="إعدادات مفتاح Gemini">⚙</button>
+</div>
+
+  <div class="dashboard" id="dashboard">
+    <div class="stat-card"><div class="stat-label">Certificates & Courses</div><div class="stat-value" id="statCerts">0</div><div class="stat-note">Professional evidence</div></div>
+    <div class="stat-card"><div class="stat-label">Experience</div><div class="stat-value" id="statExperience">0</div><div class="stat-note">Career records</div></div>
+    <div class="stat-card"><div class="stat-label">Meetings & Activities</div><div class="stat-value" id="statMeetings">0</div><div class="stat-note">Professional exposure</div></div>
+    <div class="stat-card"><div class="stat-label">Volunteering</div><div class="stat-value" id="statVolunteering">0</div><div class="stat-note">Community evidence</div></div>
+    <div class="stat-card"><div class="stat-label">Skills Identified</div><div class="stat-value" id="statSkills">0</div><div class="stat-note">From your records</div></div>
+  </div>
+
+  <div class="layout">
+    <aside class="quick">
+      <h3>إجراءات سريعة</h3>
+      <div class="quick-list">
+        <button id="quickUpload"><span class="qicon qpurple">☁</span><div><strong>رفع شهادة جديدة</strong><small>استخراج البيانات بالذكاء الاصطناعي</small></div></button>
+        <button id="quickImport"><span class="qicon qgreen">▣</span><div><strong>استيراد من Excel</strong><small>قراءة الصفحات الأربع تلقائيًا</small></div></button>
+        <button id="quickExport"><span class="qicon qblue">↓</span><div><strong>تصدير إلى Excel</strong><small>حفظ النسخة المحدثة</small></div></button>
+        <button id="quickSkills"><span class="qicon qorange">✧</span><div><strong>إدارة المهارات</strong><small>عرض المهارات المستخرجة</small></div></button>
+      </div>
+    </aside>
+
+    <div class="workspace">
       <div class="settings-panel" id="settingsPanel">
         <h3>مفتاح Gemini API</h3>
-        <p>
-          هذه صفحة مستقلة تعمل من متصفحك مباشرة، والتحليل يحتاج مفتاح Gemini API
-          خاص بك من
-          <a
-            href="https://aistudio.google.com/apikey"
-            target="_blank"
-            rel="noopener"
-            >aistudio.google.com/apikey</a
-          >. المفتاح يُخزَّن في متصفحك أنت فقط.
-        </p>
+        <p>التحليل يعمل من المتصفح مباشرة باستخدام مفتاحك الشخصي. المفتاح يُخزّن محليًا في متصفحك.</p>
         <div class="settings-row">
-          <input
-            type="password"
-            id="geminiKeyInput"
-            placeholder="الصق مفتاح Gemini API هنا..."
-          />
+          <input type="password" id="geminiKeyInput" placeholder="الصق مفتاح Gemini API هنا...">
           <button class="btn stamp sm" id="saveKeyBtn">حفظ المفتاح</button>
-          <span class="key-status missing" id="keyStatus"
-            >لا يوجد مفتاح محفوظ</span
-          >
+          <span class="key-status missing" id="keyStatus">لا يوجد مفتاح محفوظ</span>
         </div>
       </div>
 
-      <!-- STEP 1: Upload & analyze a certificate -->
-      <div class="card">
-        <div class="card-head">
-          <h2><span class="step-num">1</span>تحليل شهادة جديدة</h2>
-        </div>
+      <div class="card" id="certificateSection">
+        <div class="card-head"><h2><span class="step-num">1</span>تحليل شهادة جديدة</h2><span style="font-size:9px;color:var(--muted)">AI / OCR</span></div>
         <div class="card-body">
           <div class="dropzone" id="dropzone">
             <div class="icon">📄</div>
-            <div class="main-txt">
-              اضغط هنا لاختيار ملف، أو اسحب الشهادة وأفلتها
-            </div>
+            <div class="main-txt">اضغط هنا لاختيار ملف، أو اسحب الشهادة وأفلتها</div>
             <div class="sub-txt">JPG · PNG · WEBP · PDF</div>
-            <input
-              type="file"
-              id="fileInput"
-              accept="image/*,application/pdf"
-            />
+            <input type="file" id="fileInput" accept="image/*,application/pdf">
           </div>
           <div id="fileChipHolder"></div>
           <div class="actions">
-            <button class="btn stamp" id="analyzeBtn" disabled>
-              🔍 تحليل الشهادة بالذكاء الاصطناعي
-            </button>
+            <button class="btn stamp" id="analyzeBtn" disabled>🔍 تحليل الشهادة بالذكاء الاصطناعي</button>
           </div>
-          <div id="loaderHolder"></div>
-          <div id="errHolder"></div>
+          <div id="loaderHolder"></div><div id="errHolder"></div>
         </div>
       </div>
 
-      <!-- STEP 2: Review -->
-      <div class="card" id="formCard" style="display: none">
+      <div class="card" id="formCard" style="display:none;">
         <div class="approved-stamp" id="approvedStamp">ADDED</div>
-        <div class="card-head">
-          <h2>
-            <span class="step-num">2</span>مراجعة البيانات قبل الإضافة للشيت
-          </h2>
-        </div>
+        <div class="card-head"><h2><span class="step-num">2</span>مراجعة البيانات قبل الإضافة للسجل</h2></div>
         <div class="card-body">
           <div class="grid">
-            <div><label>No.</label><input type="text" id="f_no" /></div>
-            <div><label>Date</label><input type="date" id="f_date" /></div>
-            <div class="full">
-              <label>Name</label><input type="text" id="f_name" />
-            </div>
-            <div>
-              <label>Category</label
-              ><select id="f_category"></select>
-            </div>
-            <div>
-              <label>Mode</label
-              ><select id="f_mode"></select>
-            </div>
-            <div>
-              <label>Provider</label><input type="text" id="f_provider" />
-            </div>
-            <div>
-              <label>Dur.</label
-              ><input type="text" id="f_dur" placeholder="e.g. 2 Hrs." />
-            </div>
-            <div class="full">
-              <label>Skills Gained</label><textarea id="f_skills"></textarea>
-            </div>
-            <div class="full">
-              <label>Short Description (Arabic)</label
-              ><textarea id="f_desc" style="min-height: 80px"></textarea>
-            </div>
-            <div>
-              <label>Hyperlink (link text)</label
-              ><input type="text" id="f_hyperlink" value="Certification" />
-            </div>
-            <div>
-              <label>رابط الشهادة الفعلي (Drive) — اختياري</label
-              ><input
-                type="text"
-                id="f_hyperlink_url"
-                placeholder="الصقه بعد رفع الملف على الدرايف"
-              />
-            </div>
-            <div>
-              <label>Instructor</label><input type="text" id="f_instructor" />
-            </div>
-            <div>
-              <label>Verification</label
-              ><input type="text" id="f_verification" />
-            </div>
-            <div class="full">
-              <label>رابط التحقق الفعلي — اختياري</label
-              ><input type="text" id="f_verification_url" />
-            </div>
-            <div>
-              <label>Certificate Format</label>
-              <select id="f_format">
-                <option>Digital Only</option>
-                <option>Hard + Scan</option>
-                <option>Both (Hard + Scan)</option>
-                <option>None</option>
-              </select>
-            </div>
-            <div class="full">
-              <label>اسم الملف الجديد المقترح (لإعادة تسمية ملف الشهادة)</label>
-              <input type="text" id="f_filename" />
-              <div class="hint">
-                النمط: YYYY-MM Name.ext — مثال: 2025-06 Front-End Web
-                Development - Top Achiever.pdf
-              </div>
-            </div>
+            <div><label>No.</label><input type="text" id="f_no"></div><div><label>Date</label><input type="date" id="f_date"></div>
+            <div class="full"><label>Name</label><input type="text" id="f_name"></div>
+            <div><label>Category</label><select id="f_category"></select></div><div><label>Mode</label><select id="f_mode"></select></div>
+            <div><label>Provider</label><input type="text" id="f_provider"></div><div><label>Dur.</label><input type="text" id="f_dur" placeholder="e.g. 2 Hrs."></div>
+            <div class="full"><label>Skills Gained</label><textarea id="f_skills"></textarea></div>
+            <div class="full"><label>Short Description (Arabic)</label><textarea id="f_desc" style="min-height:80px;"></textarea></div>
+            <div><label>Hyperlink</label><input type="text" id="f_hyperlink" value="Certification"></div>
+            <div><label>رابط الشهادة الفعلي (Drive) — اختياري</label><input type="text" id="f_hyperlink_url" placeholder="الصقه بعد رفع الملف على الدرايف"></div>
+            <div><label>Instructor</label><input type="text" id="f_instructor"></div><div><label>Verification</label><input type="text" id="f_verification"></div>
+            <div class="full"><label>رابط التحقق الفعلي — اختياري</label><input type="text" id="f_verification_url"></div>
+            <div><label>Certificate Format</label><select id="f_format"><option>Digital Only</option><option>Hard + Scan</option><option>Both (Hard + Scan)</option><option>None</option></select></div>
+            <div class="full"><label>اسم الملف الجديد المقترح</label><input type="text" id="f_filename"><div class="hint">YYYY-MM Name.ext</div></div>
           </div>
-          <div class="actions">
-            <button class="btn stamp" id="confirmBtn">
-              ✅ تأكيد وإضافة للشيت (+ تنزيل الملف بالاسم الجديد)
-            </button>
-            <button class="btn ghost" id="generatePostBtn">
-              📝 اكتب منشور إنجاز (LinkedIn)
-            </button>
-          </div>
-          <div class="post-box" id="postBox">
-            <label>مسودة المنشور — راجعها وعدّل فيها قبل النشر</label>
-            <textarea id="postTextarea"></textarea>
-            <div class="actions">
-              <button class="btn ghost sm" id="selectPostBtn">
-                🖱 تحديد الكل للنسخ (Ctrl+C)
-              </button>
-            </div>
-            <div id="postLoader"></div>
-          </div>
+          <div class="actions"><button class="btn stamp" id="confirmBtn">✅ تأكيد وإضافة للسجل + تنزيل الملف بالاسم الجديد</button><button class="btn ghost" id="generatePostBtn">📝 اكتب منشور إنجاز (LinkedIn)</button></div>
+          <div class="post-box" id="postBox"><label>مسودة المنشور</label><textarea id="postTextarea"></textarea><div class="actions"><button class="btn ghost sm" id="selectPostBtn">تحديد الكل للنسخ</button></div><div id="postLoader"></div></div>
         </div>
       </div>
 
-      <!-- STEP 3: Full record -->
-      <div class="section-title">
-        السجل الكامل — Professional Development Record
-      </div>
-      <div class="card">
+      <div class="section-title">السجل الكامل — Professional Development Record</div>
+      <div class="card" id="recordsSection">
         <div class="card-head">
           <h2><span class="step-num">3</span>كل صفحات السجل</h2>
-          <div style="display: flex; gap: 8px; flex-wrap: wrap">
-            <button class="btn ghost sm" id="importBtn">
-              ⬆ استيراد شيت سابق (.xlsx)
-            </button>
-            <input
-              type="file"
-              id="importInput"
-              accept=".xlsx,.xls"
-              style="display: none"
-            />
-            <button class="btn stamp sm" id="exportBtn">
-              ⬇ تصدير السجل الكامل (.xlsx)
-            </button>
+          <div style="display:flex;gap:7px;flex-wrap:wrap">
+            <button class="btn ghost sm" id="importBtn">⬆ استيراد Excel</button>
+            <input type="file" id="importInput" accept=".xlsx,.xls" style="display:none;">
+            <button class="btn stamp sm" id="exportBtn">⬇ تصدير Excel</button>
           </div>
         </div>
-        <div id="importMsgHolder" style="padding: 0 20px"></div>
+        <div id="importMsgHolder" style="padding:0 15px"></div>
         <div class="tabbar" id="tabbar"></div>
-        <div class="card-body">
-          <div class="actions" style="margin-top: 0; margin-bottom: 14px">
-            <button class="btn ghost sm" id="addRowBtn">➕ صف يدوي</button>
-            <button class="btn ghost sm" id="clearLogBtn">
-              🗑 مسح هذه الصفحة
-            </button>
-          </div>
-          <div class="sheet-scroll"><div id="tableHolder"></div></div>
-          <p class="hint" style="margin-top: 10px">
-            الخلايا قابلة للتعديل مباشرة، محفوظة تلقائياً على متصفحك. عند
-            التصدير يتم إخراج الملف بترتيب أعمدة من اليسار لليمين (LTR) مع رأس
-            منسّق وصفوف متبادلة اللون وفلتر تلقائي — أقرب شكل ممكن لجدول Excel
-            منسّق من داخل المتصفح.
-          </p>
-        </div>
+        <div class="record-toolbar"><button class="btn ghost sm" id="addRowBtn">➕ صف يدوي</button><button class="btn ghost sm" id="clearLogBtn">🗑 مسح هذه الصفحة</button><span class="record-count">البيانات محفوظة تلقائيًا في المتصفح</span></div>
+        <div class="card-body" style="padding-top:8px"><div class="sheet-scroll"><div id="tableHolder"></div></div><p class="hint">يمكن تعديل الخلايا مباشرة. البيانات تحفظ محليًا، ويمكن تصديرها إلى Excel في أي وقت.</p></div>
       </div>
     </div>
+  </div>
+</div>
 
-    <div class="toast" id="toast"></div>
+<button id="backToTop" aria-label="الانتقال إلى أعلى الصفحة" title="الانتقال إلى أعلى الصفحة">↑</button>
 
-    <script>
-      const KNOWN_CATEGORIES = [
-        "Infrastructure & Roads",
-        "Soft Skills",
-        "Strategy & Governance",
-        "Water Treatment",
-        "Water & Environment",
-        "Project Management",
-        "AI & Productivity",
-        "Web Development",
-      ];
-      const KNOWN_MODES = [
-        "Self-Paced",
-        "Online Test",
-        "In-Person Conference",
-        "Live Online Course",
-        "In-Person",
-        "Live Online Workshop",
-        "Hybrid Interactive Bootcamp",
-      ];
+<div class="toast" id="toast"></div>
+<script>
+const KNOWN_CATEGORIES = ["Infrastructure & Roads","Soft Skills","Strategy & Governance","Water Treatment","Water & Environment","Project Management","AI & Productivity","Web Development"];
+const KNOWN_MODES = ["Self-Paced","Online Test","In-Person Conference","Live Online Course","In-Person","Live Online Workshop","Hybrid Interactive Bootcamp"];
 
-      // ---------- Section (sheet) schemas ----------
-      const CERT_COLS = [
-        { key: "no", header: "No." },
-        { key: "name", header: "Name", wide: true },
-        { key: "category", header: "Category" },
-        { key: "mode", header: "Mode" },
-        { key: "provider", header: "Provider" },
-        { key: "date", header: "Date" },
-        { key: "dur", header: "Dur." },
-        { key: "skills", header: "Skills Gained", wide: true },
-        { key: "desc", header: "Short Description", wide: true },
-        { key: "hyperlink", header: "Hyperlink" },
-        { key: "hyperlink_url", header: "Hyperlink URL", isUrl: true },
-        { key: "instructor", header: "Instructor" },
-        { key: "verification", header: "Verification" },
-        { key: "verification_url", header: "Verification URL", isUrl: true },
-        { key: "format", header: "Certificate Format" },
-      ];
-      const EXP_COLS = [
-        { key: "no", header: "No." },
-        { key: "job_title", header: "Job Title", wide: true },
-        { key: "project_dept", header: "Project/Dept.", wide: true },
-        { key: "organization", header: "Organization", wide: true },
-        { key: "start_date", header: "Start Date" },
-        { key: "end_date", header: "End Date" },
-        { key: "achievements", header: "Major Achievements", wide: true },
-        { key: "reference_person", header: "Reference Person" },
-      ];
-      const MEET_COLS = [
-        { key: "no", header: "م" },
-        { key: "date", header: "التاريخ" },
-        { key: "title", header: "عنوان الاجتماع", wide: true },
-        { key: "project_entity", header: "المشروع/الجهة", wide: true },
-        { key: "location", header: "مكان الاجتماع" },
-        { key: "content", header: "المحتوي", wide: true },
-        { key: "post_link", header: "Post link" },
-        { key: "post_link_url", header: "Post link URL", isUrl: true },
-      ];
-      const VOL_COLS = [
-        { key: "no", header: "No." },
-        { key: "role", header: "Role", wide: true },
-        { key: "organization", header: "Organization/Initiative", wide: true },
-        { key: "impact", header: "Impact", wide: true },
-        { key: "skills_applied", header: "Skills Applied", wide: true },
-        { key: "start_date", header: "Start Date" },
-        { key: "end_date", header: "End Date" },
-      ];
+// ---------- Section (sheet) schemas ----------
+const CERT_COLS = [
+  {key:'no', header:'No.'},
+  {key:'name', header:'Name', aliases:['Course Name','Certificate Name','اسم الشهادة','اسم الدورة'], wide:true},
+  {key:'category', header:'Category', aliases:['الفئة','التصنيف']},
+  {key:'mode', header:'Mode', aliases:['Attendance Mode','طريقة الحضور','نوع الحضور']},
+  {key:'provider', header:'Provider', aliases:['Issuer','Organization','الجهة','الجهة المانحة']},
+  {key:'date', header:'Date', aliases:['Issue Date','تاريخ','التاريخ']},
+  {key:'dur', header:'Dur.', aliases:['Duration','المدة']},
+  {key:'skills', header:'Skills Gained', wide:true},
+  {key:'desc', header:'Short Description', wide:true},
+  {key:'hyperlink', header:'Hyperlink'},
+  {key:'hyperlink_url', header:'Hyperlink URL', isUrl:true},
+  {key:'instructor', header:'Instructor'},
+  {key:'verification', header:'Verification'},
+  {key:'verification_url', header:'Verification URL', isUrl:true},
+  {key:'format', header:'Certificate Format'}
+];
+const EXP_COLS = [
+  {key:'no', header:'No.'},
+  {key:'job_title', header:'Job Title', wide:true},
+  {key:'project_dept', header:'Project/Dept.', wide:true},
+  {key:'organization', header:'Organization', wide:true},
+  {key:'start_date', header:'Start Date'},
+  {key:'end_date', header:'End Date'},
+  {key:'achievements', header:'Major Achievements', wide:true},
+  {key:'reference_person', header:'Reference Person'}
+];
+const MEET_COLS = [
+  {key:'no', header:'م'},
+  {key:'date', header:'التاريخ'},
+  {key:'title', header:'عنوان الاجتماع / الورشة', aliases:['عنوان الاجتماع','عنوان الاجتماع / الورشة','Meeting Title','Workshop Title'], wide:true},
+  {key:'project_entity', header:'المشروع/الجهة', wide:true},
+  {key:'location', header:'مكان الاجتماع'},
+  {key:'content', header:'المحتوي', wide:true},
+  {key:'post_link', header:'Post link'},
+  {key:'post_link_url', header:'Post link URL', isUrl:true}
+];
+const VOL_COLS = [
+  {key:'no', header:'No.'},
+  {key:'role', header:'Role', wide:true},
+  {key:'organization', header:'Organization/Initiative', wide:true},
+  {key:'impact', header:'Impact', wide:true},
+  {key:'skills_applied', header:'Skills Applied', wide:true},
+  {key:'start_date', header:'Start Date'},
+  {key:'end_date', header:'End Date'}
+];
 
-      const SECTIONS = {
-        certifications: {
-          key: "certifications",
-          tabLabel: "Certifications & Courses",
-          sheetLabel: "Certifications & Courses",
-          cols: CERT_COLS,
-          urlKeys: ["hyperlink", "verification"],
-          storageKey: "sheet-certifications",
-          rows: [],
-          sheetNameResolved: null,
-        },
-        experience: {
-          key: "experience",
-          tabLabel: "Experience",
-          sheetLabel: "Experience",
-          cols: EXP_COLS,
-          urlKeys: [],
-          storageKey: "sheet-experience",
-          rows: [],
-          sheetNameResolved: null,
-        },
-        meetings: {
-          key: "meetings",
-          tabLabel: "الإجتماعات",
-          sheetLabel: "الإجتماعات",
-          cols: MEET_COLS,
-          urlKeys: ["post_link"],
-          storageKey: "sheet-meetings",
-          rows: [],
-          sheetNameResolved: null,
-        },
-        volunteering: {
-          key: "volunteering",
-          tabLabel: "Volunteering",
-          sheetLabel: "Volunteering",
-          cols: VOL_COLS,
-          urlKeys: [],
-          storageKey: "sheet-volunteering",
-          rows: [],
-          sheetNameResolved: null,
-        },
-      };
-      const SECTION_ORDER = [
-        "certifications",
-        "experience",
-        "meetings",
-        "volunteering",
-      ];
-      let activeTab = "certifications";
+const SECTIONS = {
+  certifications: { key:'certifications', tabLabel:'Certifications & Courses', sheetLabel:'Certifications & Courses', sheetAliases:['Certifications','Courses'], cols:CERT_COLS, urlKeys:['hyperlink','verification'], storageKey:'sheet-certifications', rows:[], sheetNameResolved:null },
+  experience:     { key:'experience',     tabLabel:'Experience',               sheetLabel:'Experience',               cols:EXP_COLS,  urlKeys:[],                            storageKey:'sheet-experience',     rows:[], sheetNameResolved:null },
+  meetings:       { key:'meetings',       tabLabel:'الإجتماعات',                sheetLabel:'الإجتماعات', sheetAliases:['الاجتماعات','Meeting','Meetings'],                cols:MEET_COLS, urlKeys:['post_link'],                 storageKey:'sheet-meetings',       rows:[], sheetNameResolved:null },
+  volunteering:   { key:'volunteering',   tabLabel:'Volunteering',             sheetLabel:'Volunteering',             cols:VOL_COLS,  urlKeys:[],                            storageKey:'sheet-volunteering',   rows:[], sheetNameResolved:null }
+};
+const SECTION_ORDER = ['certifications','experience','meetings','volunteering'];
+let activeTab = 'certifications';
 
-      let currentFile = null;
-      let geminiKey = "";
-      let importedWorkbook = null; // the FULL original workbook — every sheet we don't touch stays byte-identical
+let currentFile = null;
+let geminiKey = '';
+let importedWorkbook = null; // the FULL original workbook — every sheet we don't touch stays byte-identical
 
-      const storage = {
-        async get(key) {
-          try {
-            const v = localStorage.getItem(key);
-            return v == null ? null : { value: v };
-          } catch (e) {
-            return null;
-          }
-        },
-        async set(key, value) {
-          try {
-            localStorage.setItem(key, value);
-            return { key, value };
-          } catch (e) {
-            return null;
-          }
-        },
-      };
+const storage = {
+  async get(key){ try{ const v = localStorage.getItem(key); return v==null ? null : { value:v }; } catch(e){ return null; } },
+  async set(key, value){ try{ localStorage.setItem(key, value); return { key, value }; } catch(e){ return null; } }
+};
 
-      function $(id) {
-        return document.getElementById(id);
-      }
-      function toast(msg, ms) {
-        const t = $("toast");
-        t.textContent = msg;
-        t.classList.add("show");
-        clearTimeout(toast._t);
-        toast._t = setTimeout(() => t.classList.remove("show"), ms || 3200);
-      }
-      function escapeHtml(s) {
-        return String(s == null ? "" : s).replace(
-          /[&<>"']/g,
-          (c) =>
-            ({
-              "&": "&amp;",
-              "<": "&lt;",
-              ">": "&gt;",
-              '"': "&quot;",
-              "'": "&#39;",
-            })[c],
-        );
-      }
+function $(id){ return document.getElementById(id); }
 
-      function fillSelect(sel, options) {
-        sel.innerHTML = "";
-        options.forEach((o) => {
-          const op = document.createElement("option");
-          op.value = o;
-          op.textContent = o;
-          sel.appendChild(op);
-        });
-        const custom = document.createElement("option");
-        custom.value = "__custom__";
-        custom.textContent = "أخرى (اكتب يدوياً)…";
-        sel.appendChild(custom);
-      }
-      fillSelect($("f_category"), KNOWN_CATEGORIES);
-      fillSelect($("f_mode"), KNOWN_MODES);
-      function attachCustomHandler(selectEl) {
-        selectEl.addEventListener("change", () => {
-          if (selectEl.value === "__custom__") {
-            const val = prompt("اكتب القيمة المخصصة:", "");
-            if (val) {
-              const op = document.createElement("option");
-              op.value = val;
-              op.textContent = val;
-              op.selected = true;
-              selectEl.insertBefore(op, selectEl.lastChild);
-            } else {
-              selectEl.selectedIndex = 0;
-            }
-          }
-        });
-      }
-      attachCustomHandler($("f_category"));
-      attachCustomHandler($("f_mode"));
-      function setSelectValue(selectEl, value) {
-        if (!value) return;
-        if (![...selectEl.options].some((o) => o.value === value)) {
-          const op = document.createElement("option");
-          op.value = value;
-          op.textContent = value;
-          selectEl.insertBefore(op, selectEl.lastChild);
-        }
-        selectEl.value = value;
-      }
+// ---------- Live clock (Cairo time) ----------
+function updateClock(){
+  const el = $('liveClock');
+  if(!el) return;
+  const now = new Date();
+  const datePart = now.toLocaleDateString('ar-EG', { timeZone:'Africa/Cairo', weekday:'long', year:'numeric', month:'long', day:'numeric' });
+  const timePart = now.toLocaleTimeString('en-GB', { timeZone:'Africa/Cairo', hour:'2-digit', minute:'2-digit', second:'2-digit' });
+  el.textContent = `${datePart} — ${timePart} (توقيت القاهرة)`;
+}
+updateClock();
+setInterval(updateClock, 1000);
 
-      // ---------- Settings / API key ----------
-      $("gearBtn").addEventListener("click", () =>
-        $("settingsPanel").classList.toggle("open"),
-      );
-      $("saveKeyBtn").addEventListener("click", async () => {
-        const val = $("geminiKeyInput").value.trim();
-        if (!val) {
-          toast("من فضلك الصق مفتاح صالح");
-          return;
-        }
-        geminiKey = val;
-        try {
-          await storage.set("gemini-api-key", geminiKey);
-          updateKeyStatus();
-          toast("تم حفظ المفتاح ✅");
-          $("settingsPanel").classList.remove("open");
-        } catch (e) {
-          toast("تعذر حفظ المفتاح");
-        }
-      });
-      function updateKeyStatus() {
-        const st = $("keyStatus");
-        if (geminiKey) {
-          st.textContent = "مفتاح محفوظ ✓";
-          st.classList.remove("missing");
-        } else {
-          st.textContent = "لا يوجد مفتاح محفوظ";
-          st.classList.add("missing");
-        }
-        $("analyzeBtn").disabled = !(currentFile && geminiKey);
-      }
-      async function loadKey() {
-        try {
-          const res = await storage.get("gemini-api-key");
-          if (res && res.value) {
-            geminiKey = res.value;
-            $("geminiKeyInput").value = geminiKey;
-          }
-        } catch (e) {}
-        updateKeyStatus();
-        if (!geminiKey) $("settingsPanel").classList.add("open");
-      }
+function toast(msg, ms){
+  const t = $('toast'); t.textContent = msg; t.classList.add('show');
+  clearTimeout(toast._t); toast._t = setTimeout(()=>t.classList.remove('show'), ms || 3200);
+}
+function escapeHtml(s){ return String(s==null?'':s).replace(/[&<>"']/g, c=>({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c])); }
 
-      // ---------- Upload handling ----------
-      const dropzone = $("dropzone");
-      const fileInput = $("fileInput");
-      dropzone.addEventListener("click", () => fileInput.click());
-      dropzone.addEventListener("dragover", (e) => {
-        e.preventDefault();
-        dropzone.classList.add("drag");
-      });
-      dropzone.addEventListener("dragleave", () =>
-        dropzone.classList.remove("drag"),
-      );
-      dropzone.addEventListener("drop", (e) => {
-        e.preventDefault();
-        dropzone.classList.remove("drag");
-        if (e.dataTransfer.files.length) handleFile(e.dataTransfer.files[0]);
-      });
-      fileInput.addEventListener("change", (e) => {
-        if (e.target.files.length) handleFile(e.target.files[0]);
-      });
+function fillSelect(sel, options){
+  sel.innerHTML = '';
+  options.forEach(o=>{ const op=document.createElement('option'); op.value=o; op.textContent=o; sel.appendChild(op); });
+  const custom = document.createElement('option'); custom.value='__custom__'; custom.textContent='أخرى (اكتب يدوياً)…';
+  sel.appendChild(custom);
+}
+fillSelect($('f_category'), KNOWN_CATEGORIES);
+fillSelect($('f_mode'), KNOWN_MODES);
+function attachCustomHandler(selectEl){
+  selectEl.addEventListener('change', ()=>{
+    if(selectEl.value === '__custom__'){
+      const val = prompt('اكتب القيمة المخصصة:', '');
+      if(val){
+        const op = document.createElement('option'); op.value=val; op.textContent=val; op.selected=true;
+        selectEl.insertBefore(op, selectEl.lastChild);
+      } else { selectEl.selectedIndex = 0; }
+    }
+  });
+}
+attachCustomHandler($('f_category'));
+attachCustomHandler($('f_mode'));
+function setSelectValue(selectEl, value){
+  if(!value) return;
+  if(![...selectEl.options].some(o=>o.value===value)){
+    const op=document.createElement('option'); op.value=value; op.textContent=value;
+    selectEl.insertBefore(op, selectEl.lastChild);
+  }
+  selectEl.value = value;
+}
 
-      async function handleFile(file) {
-        const okTypes = [
-          "image/jpeg",
-          "image/png",
-          "image/webp",
-          "image/gif",
-          "application/pdf",
-        ];
-        if (!okTypes.includes(file.type)) {
-          showError(
-            "نوع الملف غير مدعوم. الرجاء رفع صورة (JPG/PNG/WEBP) أو ملف PDF.",
-          );
-          return;
-        }
-        clearError();
-        const buf = await file.arrayBuffer();
-        const base64 = arrayBufferToBase64(buf);
-        const ext = file.name.includes(".")
-          ? file.name.split(".").pop()
-          : file.type === "application/pdf"
-            ? "pdf"
-            : "jpg";
-        currentFile = {
-          arrayBuffer: buf,
-          base64,
-          mime: file.type,
-          name: file.name,
-          ext,
-          size: file.size,
-        };
-        $("fileChipHolder").innerHTML = `
+// ---------- Settings / API key ----------
+$('gearBtn').addEventListener('click', ()=> $('settingsPanel').classList.toggle('open'));
+$('saveKeyBtn').addEventListener('click', async ()=>{
+  const val = $('geminiKeyInput').value.trim();
+  if(!val){ toast('من فضلك الصق مفتاح صالح'); return; }
+  geminiKey = val;
+  try{
+    await storage.set('gemini-api-key', geminiKey);
+    updateKeyStatus();
+    toast('تم حفظ المفتاح ✅');
+    $('settingsPanel').classList.remove('open');
+  }catch(e){ toast('تعذر حفظ المفتاح'); }
+});
+function updateKeyStatus(){
+  const st = $('keyStatus');
+  if(geminiKey){ st.textContent='مفتاح محفوظ ✓'; st.classList.remove('missing'); }
+  else { st.textContent='لا يوجد مفتاح محفوظ'; st.classList.add('missing'); }
+  $('analyzeBtn').disabled = !(currentFile && geminiKey);
+}
+async function loadKey(){
+  try{
+    const res = await storage.get('gemini-api-key');
+    if(res && res.value){ geminiKey = res.value; $('geminiKeyInput').value = geminiKey; }
+  }catch(e){}
+  updateKeyStatus();
+  if(!geminiKey) $('settingsPanel').classList.add('open');
+}
+
+// ---------- Upload handling ----------
+const dropzone = $('dropzone');
+const fileInput = $('fileInput');
+dropzone.addEventListener('click', ()=>fileInput.click());
+dropzone.addEventListener('dragover', e=>{ e.preventDefault(); dropzone.classList.add('drag'); });
+dropzone.addEventListener('dragleave', ()=> dropzone.classList.remove('drag'));
+dropzone.addEventListener('drop', e=>{
+  e.preventDefault(); dropzone.classList.remove('drag');
+  if(e.dataTransfer.files.length) handleFile(e.dataTransfer.files[0]);
+});
+fileInput.addEventListener('change', e=>{ if(e.target.files.length) handleFile(e.target.files[0]); });
+
+async function handleFile(file){
+  const okTypes = ['image/jpeg','image/png','image/webp','image/gif','application/pdf'];
+  if(!okTypes.includes(file.type)){ showError('نوع الملف غير مدعوم. الرجاء رفع صورة (JPG/PNG/WEBP) أو ملف PDF.'); return; }
+  clearError();
+  const buf = await file.arrayBuffer();
+  const base64 = arrayBufferToBase64(buf);
+  const ext = file.name.includes('.') ? file.name.split('.').pop() : (file.type==='application/pdf' ? 'pdf':'jpg');
+  currentFile = { arrayBuffer: buf, base64, mime: file.type, name: file.name, ext, size: file.size };
+  $('fileChipHolder').innerHTML = `
     <div class="file-chip">
-      <span>${file.type === "application/pdf" ? "📕" : "🖼️"}</span>
+      <span>${file.type === 'application/pdf' ? '📕' : '🖼️'}</span>
       <span class="name">${escapeHtml(file.name)}</span>
-      <span class="meta">${(file.size / 1024).toFixed(0)} KB</span>
+      <span class="meta">${(file.size/1024).toFixed(0)} KB</span>
       <button id="removeFileBtn">إزالة</button>
     </div>`;
-        $("removeFileBtn").addEventListener("click", () => {
-          currentFile = null;
-          $("fileChipHolder").innerHTML = "";
-          updateKeyStatus();
-        });
-        updateKeyStatus();
-      }
-      function arrayBufferToBase64(buffer) {
-        let binary = "";
-        const bytes = new Uint8Array(buffer);
-        const chunk = 0x8000;
-        for (let i = 0; i < bytes.length; i += chunk) {
-          binary += String.fromCharCode.apply(
-            null,
-            bytes.subarray(i, i + chunk),
-          );
-        }
-        return btoa(binary);
-      }
-      function showError(msg) {
-        $("errHolder").innerHTML =
-          `<div class="errbox">⚠️ ${escapeHtml(msg)}</div>`;
-      }
-      function clearError() {
-        $("errHolder").innerHTML = "";
-      }
+  $('removeFileBtn').addEventListener('click', ()=>{
+    currentFile = null; $('fileChipHolder').innerHTML=''; updateKeyStatus();
+  });
+  updateKeyStatus();
+}
+function arrayBufferToBase64(buffer){
+  let binary=''; const bytes=new Uint8Array(buffer); const chunk=0x8000;
+  for(let i=0;i<bytes.length;i+=chunk){ binary += String.fromCharCode.apply(null, bytes.subarray(i, i+chunk)); }
+  return btoa(binary);
+}
+function showError(msg){ $('errHolder').innerHTML = `<div class="errbox">⚠️ ${escapeHtml(msg)}</div>`; }
+function clearError(){ $('errHolder').innerHTML=''; }
 
-      // ---------- AI Analysis (Gemini) ----------
-      $("analyzeBtn").addEventListener("click", analyzeCertificate);
+// ---------- AI Analysis (Gemini) ----------
+$('analyzeBtn').addEventListener('click', analyzeCertificate);
 
-      async function analyzeCertificate() {
-        if (!currentFile || !geminiKey) return;
-        clearError();
-        $("analyzeBtn").disabled = true;
-        $("loaderHolder").innerHTML =
-          `<div class="loader"><div class="spinner"></div> جارِ تحليل الشهادة بواسطة Gemini ...</div>`;
-        $("formCard").style.display = "none";
-        $("postBox").style.display = "none";
+async function analyzeCertificate(){
+  if(!currentFile || !geminiKey) return;
+  clearError();
+  $('analyzeBtn').disabled = true;
+  $('loaderHolder').innerHTML = `<div class="loader"><div class="spinner"></div> جارِ تحليل الشهادة بواسطة Gemini ...</div>`;
+  $('formCard').style.display = 'none';
+  $('postBox').style.display = 'none';
 
-        const promptText = `أنت مساعد أرشفة شهادات مهنية لمهندس مدني مصري. حلل ملف الشهادة المرفق بدقة شديدة واستخرج بياناتها.
+  const promptText = `أنت مساعد أرشفة شهادات مهنية لمهندس مدني مصري. حلل ملف الشهادة المرفق بدقة شديدة واستخرج بياناتها.
 أعد فقط كائن JSON صالح بالمفاتيح التالية بالضبط (بدون أي نص إضافي):
 {
  "name": "اسم الشهادة/الدورة بالإنجليزية",
@@ -1208,583 +816,544 @@
  "suggested_filename": "بصيغة 'YYYY-MM Name.ext' بنفس امتداد الملف الأصلي (${currentFile.ext})، وأضف لاحقة ' - Top Achiever' فقط إذا ظهر تكريم أو تميز واضح بالشهادة"
 }
 قواعد:
-- category: اختر من [${KNOWN_CATEGORIES.join(", ")}] إن ناسب، وإلا اقترح فئة جديدة قصيرة بالإنجليزية.
-- mode: اختر من [${KNOWN_MODES.join(", ")}] إن ناسب، وإلا اقترح قيمة جديدة بنفس الأسلوب.
+- category: اختر من [${KNOWN_CATEGORIES.join(', ')}] إن ناسب، وإلا اقترح فئة جديدة قصيرة بالإنجليزية.
+- mode: اختر من [${KNOWN_MODES.join(', ')}] إن ناسب، وإلا اقترح قيمة جديدة بنفس الأسلوب.
 - date: إن ظهر الشهر والسنة فقط بدون يوم استخدم اليوم 01.
 - short_description بأسلوب رسمي تقني (مثال أسلوب فقط، لا تنسخه): "ندوة تقنية متخصصة تناولت أساسيات هندسة النقل وتخطيط الطرق، وركزت على تكامل تصميم البنية التحتية مع تكنولوجيا BIM."
 - إن تعذر تحديد حقل بثقة اجعل قيمته "".
 - أعد كائن JSON فقط بدون أي Markdown أو نص إضافي.`;
 
-        const body = {
-          contents: [
-            {
-              parts: [
-                {
-                  inline_data: {
-                    mime_type: currentFile.mime,
-                    data: currentFile.base64,
-                  },
-                },
-                { text: promptText },
-              ],
-            },
-          ],
-          generationConfig: { responseMimeType: "application/json" },
-        };
+  const body = {
+    contents: [{ parts: [ { inline_data: { mime_type: currentFile.mime, data: currentFile.base64 } }, { text: promptText } ] }],
+    generationConfig: { responseMimeType: "application/json" }
+  };
 
-        try {
-          const response = await fetch(
-            `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash-lite:generateContent?key=${encodeURIComponent(geminiKey)}`,
-            {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify(body),
-            },
-          );
-          const data = await response.json();
-          if (!response.ok) {
-            const msg =
-              data && data.error && data.error.message
-                ? data.error.message
-                : "HTTP " + response.status;
-            throw new Error(msg);
-          }
-          const cand = data.candidates && data.candidates[0];
-          const textOut =
-            cand && cand.content && cand.content.parts
-              ? cand.content.parts.map((p) => p.text || "").join("")
-              : "";
-          let clean = textOut
-            .trim()
-            .replace(/^```json/i, "")
-            .replace(/^```/, "")
-            .replace(/```$/, "")
-            .trim();
-          let parsed;
-          try {
-            parsed = JSON.parse(clean);
-          } catch (e) {
-            const m = clean.match(/\{[\s\S]*\}/);
-            if (m) {
-              parsed = JSON.parse(m[0]);
-            } else {
-              throw new Error("تعذّر فهم استجابة النموذج");
-            }
-          }
-          populateForm(parsed);
-          switchTab("certifications");
-          $("formCard").style.display = "block";
-          $("formCard").scrollIntoView({ behavior: "smooth", block: "start" });
-        } catch (err) {
-          console.error(err);
-          showError(
-            "حدث خطأ أثناء التحليل عبر Gemini: " +
-              err.message +
-              ". تأكد من صحة المفتاح في الإعدادات ⚙، أو عبّئ البيانات يدوياً بالأسفل.",
-          );
-          populateForm({});
-          $("formCard").style.display = "block";
-        } finally {
-          $("loaderHolder").innerHTML = "";
-          updateKeyStatus();
-        }
-      }
+  try{
+    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash-lite:generateContent?key=${encodeURIComponent(geminiKey)}`, {
+      method:'POST', headers:{ 'Content-Type':'application/json' }, body: JSON.stringify(body)
+    });
+    const data = await response.json();
+    if(!response.ok){
+      const msg = (data && data.error && data.error.message) ? data.error.message : ('HTTP ' + response.status);
+      throw new Error(msg);
+    }
+    const cand = data.candidates && data.candidates[0];
+    const textOut = cand && cand.content && cand.content.parts ? cand.content.parts.map(p=>p.text||'').join('') : '';
+    let clean = textOut.trim().replace(/^```json/i,'').replace(/^```/,'').replace(/```$/,'').trim();
+    let parsed;
+    try{ parsed = JSON.parse(clean); }
+    catch(e){ const m = clean.match(/\{[\s\S]*\}/); if(m){ parsed = JSON.parse(m[0]); } else { throw new Error('تعذّر فهم استجابة النموذج'); } }
+    populateForm(parsed);
+    switchTab('certifications');
+    $('formCard').style.display = 'block';
+    $('formCard').scrollIntoView({behavior:'smooth', block:'start'});
+  }catch(err){
+    console.error(err);
+    showError('حدث خطأ أثناء التحليل عبر Gemini: ' + err.message + '. تأكد من صحة المفتاح في الإعدادات ⚙، أو عبّئ البيانات يدوياً بالأسفل.');
+    populateForm({});
+    $('formCard').style.display = 'block';
+  }finally{
+    $('loaderHolder').innerHTML = '';
+    updateKeyStatus();
+  }
+}
 
-      function populateForm(d) {
-        const maxNo = SECTIONS.certifications.rows.reduce(
-          (m, r) => Math.max(m, parseInt(r.no) || 0),
-          0,
-        );
-        $("f_no").value = String(maxNo + 1);
-        $("f_name").value = d.name || "";
-        setSelectValue($("f_category"), d.category || "");
-        setSelectValue($("f_mode"), d.mode || "");
-        $("f_provider").value = d.provider || "";
-        $("f_date").value = d.date || "";
-        $("f_dur").value = d.duration || "";
-        $("f_skills").value = Array.isArray(d.skills)
-          ? d.skills.join(", ")
-          : d.skills || "";
-        $("f_desc").value = d.short_description || "";
-        $("f_hyperlink").value = d.hyperlink_text || "Certification";
-        $("f_hyperlink_url").value = "";
-        $("f_instructor").value = d.instructor || "-";
-        $("f_verification").value = d.verification || "-";
-        $("f_verification_url").value = "";
-        if (
-          d.certificate_format &&
-          [...$("f_format").options].some(
-            (o) => o.value === d.certificate_format,
-          )
-        ) {
-          $("f_format").value = d.certificate_format;
-        } else {
-          $("f_format").value = "Digital Only";
-        }
-        $("f_filename").value =
-          d.suggested_filename || buildFallbackFilename(d);
-        $("postBox").style.display = "none";
-      }
-      function buildFallbackFilename(d) {
-        if (!currentFile) return "";
-        const dateStr = d.date ? d.date.slice(0, 7) : "";
-        const name = d.name || currentFile.name.replace(/\.[^.]+$/, "");
-        return `${dateStr ? dateStr + " " : ""}${name}.${currentFile.ext}`.trim();
-      }
+function populateForm(d){
+  const maxNo = SECTIONS.certifications.rows.reduce((m,r)=> Math.max(m, parseInt(r.no)||0), 0);
+  $('f_no').value = String(maxNo + 1);
+  $('f_name').value = d.name || '';
+  setSelectValue($('f_category'), d.category || '');
+  setSelectValue($('f_mode'), d.mode || '');
+  $('f_provider').value = d.provider || '';
+  $('f_date').value = d.date || '';
+  $('f_dur').value = d.duration || '';
+  $('f_skills').value = Array.isArray(d.skills) ? d.skills.join(', ') : (d.skills || '');
+  $('f_desc').value = d.short_description || '';
+  $('f_hyperlink').value = d.hyperlink_text || 'Certification';
+  $('f_hyperlink_url').value = '';
+  $('f_instructor').value = d.instructor || '-';
+  $('f_verification').value = d.verification || '-';
+  $('f_verification_url').value = '';
+  if(d.certificate_format && [...$('f_format').options].some(o=>o.value===d.certificate_format)){ $('f_format').value = d.certificate_format; }
+  else { $('f_format').value = 'Digital Only'; }
+  $('f_filename').value = d.suggested_filename || buildFallbackFilename(d);
+  $('postBox').style.display = 'none';
+}
+function buildFallbackFilename(d){
+  if(!currentFile) return '';
+  const dateStr = d.date ? d.date.slice(0,7) : '';
+  const name = d.name || currentFile.name.replace(/\.[^.]+$/, '');
+  return `${dateStr ? dateStr + ' ' : ''}${name}.${currentFile.ext}`.trim();
+}
 
-      function currentRowData() {
-        return {
-          no: $("f_no").value,
-          name: $("f_name").value,
-          category:
-            $("f_category").value === "__custom__" ? "" : $("f_category").value,
-          mode: $("f_mode").value === "__custom__" ? "" : $("f_mode").value,
-          provider: $("f_provider").value,
-          date: $("f_date").value,
-          dur: $("f_dur").value,
-          skills: $("f_skills").value,
-          desc: $("f_desc").value,
-          hyperlink: $("f_hyperlink").value,
-          hyperlink_url: $("f_hyperlink_url").value,
-          instructor: $("f_instructor").value,
-          verification: $("f_verification").value,
-          verification_url: $("f_verification_url").value,
-          format: $("f_format").value,
-        };
-      }
+function currentRowData(){
+  return {
+    no: $('f_no').value, name: $('f_name').value,
+    category: $('f_category').value === '__custom__' ? '' : $('f_category').value,
+    mode: $('f_mode').value === '__custom__' ? '' : $('f_mode').value,
+    provider: $('f_provider').value, date: $('f_date').value, dur: $('f_dur').value,
+    skills: $('f_skills').value, desc: $('f_desc').value, hyperlink: $('f_hyperlink').value,
+    hyperlink_url: $('f_hyperlink_url').value,
+    instructor: $('f_instructor').value, verification: $('f_verification').value,
+    verification_url: $('f_verification_url').value,
+    format: $('f_format').value
+  };
+}
 
-      // ---------- Confirm & add to sheet ----------
-      $("confirmBtn").addEventListener("click", confirmAndAdd);
-      async function confirmAndAdd() {
-        if (!currentFile) {
-          showError("لا يوجد ملف محمّل.");
-          return;
-        }
-        const row = currentRowData();
-        const filename = $("f_filename").value || currentFile.name;
-        if (
-          !row.name &&
-          !confirm('حقل "Name" فارغ. هل تريد المتابعة على أي حال؟')
-        )
-          return;
+// ---------- Confirm & add to sheet ----------
+$('confirmBtn').addEventListener('click', confirmAndAdd);
+async function confirmAndAdd(){
+  if(!currentFile){ showError('لا يوجد ملف محمّل.'); return; }
+  const row = currentRowData();
+  const filename = $('f_filename').value || currentFile.name;
+  if(!row.name && !confirm('حقل "Name" فارغ. هل تريد المتابعة على أي حال؟')) return;
 
-        try {
-          const blob = new Blob([currentFile.arrayBuffer], {
-            type: currentFile.mime,
-          });
-          const url = URL.createObjectURL(blob);
-          const a = document.createElement("a");
-          a.href = url;
-          a.download = filename;
-          document.body.appendChild(a);
-          a.click();
-          document.body.removeChild(a);
-          setTimeout(() => URL.revokeObjectURL(url), 4000);
-        } catch (e) {
-          console.error(e);
-        }
+  try{
+    const blob = new Blob([currentFile.arrayBuffer], { type: currentFile.mime });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a'); a.href=url; a.download = filename;
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    setTimeout(()=>URL.revokeObjectURL(url), 4000);
+  }catch(e){ console.error(e); }
 
-        SECTIONS.certifications.rows.push(row);
-        await persistSection("certifications");
-        switchTab("certifications");
+  SECTIONS.certifications.rows.push(row);
+  await persistSection('certifications');
+  switchTab('certifications');
 
-        $("approvedStamp").classList.remove("show");
-        void $("approvedStamp").offsetWidth;
-        $("approvedStamp").classList.add("show");
-        toast("تمت إضافة الشهادة للشيت وتنزيل الملف بالاسم الجديد ✅");
-        $("formCard").style.display = "none";
-        currentFile = null;
-        $("fileChipHolder").innerHTML = "";
-        updateKeyStatus();
-        document
-          .querySelector(".section-title")
-          .scrollIntoView({ behavior: "smooth" });
-      }
+  $('approvedStamp').classList.remove('show');
+  void $('approvedStamp').offsetWidth;
+  $('approvedStamp').classList.add('show');
+  toast('تمت إضافة الشهادة للشيت وتنزيل الملف بالاسم الجديد ✅');
+  $('formCard').style.display = 'none';
+  currentFile = null; $('fileChipHolder').innerHTML=''; updateKeyStatus();
+  document.querySelector('.section-title').scrollIntoView({behavior:'smooth'});
+}
 
-      // ---------- Achievement post generator ----------
-      $("generatePostBtn").addEventListener("click", generatePost);
-      $("selectPostBtn").addEventListener("click", () => {
-        const ta = $("postTextarea");
-        ta.focus();
-        ta.select();
-        toast("محدد — دلوقتي Ctrl+C (أو Cmd+C) للنسخ");
-      });
-      async function generatePost() {
-        if (!geminiKey) {
-          toast("محتاج مفتاح Gemini أولاً — افتح ⚙");
-          $("settingsPanel").classList.add("open");
-          return;
-        }
-        const row = currentRowData();
-        if (!row.name) {
-          toast("عبّئ اسم الشهادة أولاً");
-          return;
-        }
-        $("postBox").style.display = "block";
-        $("postLoader").innerHTML =
-          `<div class="loader"><div class="spinner"></div> جارِ كتابة المنشور...</div>`;
-        const prompt = `اكتب منشور لينكدإن (LinkedIn) احترافي وقصير باللغة العربية الفصحى، بضمير المتكلم، يعبر عن اعتزاز مهندس مدني مصري بحصوله على شهادة/دورة جديدة، من غير مبالغة أو أسلوب دعائي فج.
+// ---------- Achievement post generator ----------
+$('generatePostBtn').addEventListener('click', generatePost);
+$('selectPostBtn').addEventListener('click', ()=>{
+  const ta = $('postTextarea'); ta.focus(); ta.select();
+  toast('محدد — دلوقتي Ctrl+C (أو Cmd+C) للنسخ');
+});
+async function generatePost(){
+  if(!geminiKey){ toast('محتاج مفتاح Gemini أولاً — افتح ⚙'); $('settingsPanel').classList.add('open'); return; }
+  const row = currentRowData();
+  if(!row.name){ toast('عبّئ اسم الشهادة أولاً'); return; }
+  $('postBox').style.display = 'block';
+  $('postLoader').innerHTML = `<div class="loader"><div class="spinner"></div> جارِ كتابة المنشور...</div>`;
+  const prompt = `اكتب منشور لينكدإن (LinkedIn) احترافي وقصير باللغة العربية الفصحى، بضمير المتكلم، يعبر عن اعتزاز مهندس مدني مصري بحصوله على شهادة/دورة جديدة، من غير مبالغة أو أسلوب دعائي فج.
 معلومات الشهادة:
 - الاسم: ${row.name}
 - الجهة المانحة: ${row.provider}
 - المهارات المكتسبة: ${row.skills}
 - وصف مختصر: ${row.desc}
 اجعل المنشور من 4 إلى 6 أسطر بأسلوب طبيعي، واختم بـ 4-6 هاشتاجات مناسبة بالإنجليزية متعلقة بالهندسة المدنية والتطوير المهني. أعد نص المنشور فقط بدون أي مقدمات أو شرح أو علامات اقتباس.`;
-        try {
-          const resp = await fetch(
-            `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash-lite:generateContent?key=${encodeURIComponent(geminiKey)}`,
-            {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({
-                contents: [{ parts: [{ text: prompt }] }],
-              }),
-            },
-          );
-          const data = await resp.json();
-          if (!resp.ok) {
-            throw new Error(
-              (data.error && data.error.message) || "HTTP " + resp.status,
-            );
-          }
-          const cand = data.candidates && data.candidates[0];
-          const text =
-            cand && cand.content && cand.content.parts
-              ? cand.content.parts.map((p) => p.text || "").join("")
-              : "";
-          $("postTextarea").value = text.trim();
-        } catch (err) {
-          console.error(err);
-          toast("تعذر توليد المنشور: " + err.message);
-        } finally {
-          $("postLoader").innerHTML = "";
-        }
-      }
+  try{
+    const resp = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash-lite:generateContent?key=${encodeURIComponent(geminiKey)}`, {
+      method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ contents:[{parts:[{text:prompt}]}] })
+    });
+    const data = await resp.json();
+    if(!resp.ok){ throw new Error((data.error && data.error.message) || ('HTTP ' + resp.status)); }
+    const cand = data.candidates && data.candidates[0];
+    const text = cand && cand.content && cand.content.parts ? cand.content.parts.map(p=>p.text||'').join('') : '';
+    $('postTextarea').value = text.trim();
+  }catch(err){
+    console.error(err);
+    toast('تعذر توليد المنشور: ' + err.message);
+  }finally{
+    $('postLoader').innerHTML = '';
+  }
+}
 
-      // ---------- Tabs ----------
-      function renderTabs() {
-        const bar = $("tabbar");
-        bar.innerHTML = SECTION_ORDER.map((k) => {
-          const s = SECTIONS[k];
-          return `<button class="tab-btn${k === activeTab ? " active" : ""}" data-tab="${k}">${escapeHtml(s.tabLabel)} (${s.rows.length})</button>`;
-        }).join("");
-        [...bar.querySelectorAll(".tab-btn")].forEach((btn) => {
-          btn.addEventListener("click", () => switchTab(btn.dataset.tab));
-        });
-      }
-      function switchTab(key) {
-        activeTab = key;
-        renderTabs();
-        renderTable();
-      }
+// ---------- Tabs ----------
+function renderTabs(){
+  const bar = $('tabbar');
+  bar.innerHTML = SECTION_ORDER.map(k=>{
+    const s = SECTIONS[k];
+    return `<button class="tab-btn${k===activeTab?' active':''}" data-tab="${k}">${escapeHtml(s.tabLabel)} (${s.rows.length})</button>`;
+  }).join('');
+  [...bar.querySelectorAll('.tab-btn')].forEach(btn=>{
+    btn.addEventListener('click', ()=> switchTab(btn.dataset.tab));
+  });
+}
+function switchTab(key){
+  activeTab = key;
+  renderTabs();
+  renderTable();
+}
 
-      // ---------- Generic editable table for the active section ----------
-      function renderTable() {
-        const section = SECTIONS[activeTab];
-        const holder = $("tableHolder");
-        if (!section.rows.length) {
-          holder.innerHTML = `<div class="empty-log">صفحة "${escapeHtml(section.tabLabel)}" فارغة — استورد شيتاً سابقاً أو أضف صف يدوي</div>`;
-          return;
-        }
-        let thead =
-          "<tr>" +
-          section.cols.map((c) => `<th>${escapeHtml(c.header)}</th>`).join("") +
-          '<th class="del-cell"></th></tr>';
-        let rows = section.rows
-          .map((r, i) => {
-            let tds = section.cols
-              .map(
-                (c) =>
-                  `<td contenteditable="true" data-row="${i}" data-key="${c.key}" class="${c.wide ? "wide" : ""}${c.isUrl ? " col-url" : ""}">${escapeHtml(r[c.key])}</td>`,
-              )
-              .join("");
-            return `<tr>${tds}<td class="del-cell"><button class="del-btn" data-del="${i}" title="حذف الصف">✕</button></td></tr>`;
-          })
-          .join("");
-        holder.innerHTML = `<table><thead>${thead}</thead><tbody>${rows}</tbody></table>`;
-      }
+// ---------- Generic editable table for the active section ----------
+function renderTable(){
+  const section = SECTIONS[activeTab];
+  const holder = $('tableHolder');
+  if(!section.rows.length){
+    holder.innerHTML = `<div class="empty-log">صفحة "${escapeHtml(section.tabLabel)}" فارغة — استورد شيتاً سابقاً أو أضف صف يدوي</div>`;
+    return;
+  }
+  let thead = '<tr>' + section.cols.map(c=>`<th>${escapeHtml(c.header)}</th>`).join('') + '<th class="del-cell"></th></tr>';
+  let rows = section.rows.map((r,i)=>{
+    let tds = section.cols.map(c=>`<td contenteditable="true" data-row="${i}" data-key="${c.key}" class="${c.wide?'wide':''}${c.isUrl?' col-url':''}">${escapeHtml(r[c.key])}</td>`).join('');
+    return `<tr>${tds}<td class="del-cell"><button class="del-btn" data-del="${i}" title="حذف الصف">✕</button></td></tr>`;
+  }).join('');
+  holder.innerHTML = `<table><thead>${thead}</thead><tbody>${rows}</tbody></table>`;
+}
 
-      let saveTimer = null;
-      document.addEventListener("input", (e) => {
-        if (e.target.matches('#tableHolder td[contenteditable="true"]')) {
-          const row = parseInt(e.target.dataset.row);
-          const key = e.target.dataset.key;
-          const section = SECTIONS[activeTab];
-          if (section.rows[row]) section.rows[row][key] = e.target.textContent;
-          clearTimeout(saveTimer);
-          saveTimer = setTimeout(() => persistSection(activeTab), 600);
-        }
+let saveTimer = null;
+document.addEventListener('input', e=>{
+  if(e.target.matches('#tableHolder td[contenteditable="true"]')){
+    const row = parseInt(e.target.dataset.row); const key = e.target.dataset.key;
+    const section = SECTIONS[activeTab];
+    if(section.rows[row]) section.rows[row][key] = e.target.textContent;
+    clearTimeout(saveTimer); saveTimer = setTimeout(()=>persistSection(activeTab), 600);
+  }
+});
+document.addEventListener('click', e=>{
+  if(e.target.matches('#tableHolder [data-del]')){
+    const idx = parseInt(e.target.dataset.del);
+    if(confirm('حذف هذا الصف؟')){
+      SECTIONS[activeTab].rows.splice(idx,1);
+      persistSection(activeTab); renderTabs(); renderTable(); if(window.updatePdrDashboard) window.updatePdrDashboard();
+    }
+  }
+});
+
+$('addRowBtn').addEventListener('click', ()=>{
+  const section = SECTIONS[activeTab];
+  const blank = {}; section.cols.forEach(c=>blank[c.key]='');
+  const noCol = section.cols.find(c=>c.key==='no');
+  if(noCol){
+    const maxNo = section.rows.reduce((m,r)=> Math.max(m, parseInt(r.no)||0), 0);
+    blank.no = String(maxNo+1);
+  }
+  section.rows.push(blank);
+  persistSection(activeTab); renderTabs(); renderTable(); if(window.updatePdrDashboard) window.updatePdrDashboard();
+  toast('تمت إضافة صف فارغ — عدّل الخلايا مباشرة');
+});
+
+$('clearLogBtn').addEventListener('click', async ()=>{
+  const section = SECTIONS[activeTab];
+  if(!confirm(`هل تريد مسح كل بيانات صفحة "${section.tabLabel}" من التطبيق؟ (صدّر أولاً لو محتاج نسخة)`)) return;
+  section.rows = []; await persistSection(activeTab); renderTabs(); renderTable(); if(window.updatePdrDashboard) window.updatePdrDashboard();
+  toast('تم مسح الصفحة من التطبيق');
+});
+
+async function persistSection(key){
+  const section = SECTIONS[key];
+  try{ await storage.set(section.storageKey, JSON.stringify(section.rows)); }
+  catch(e){ console.error('storage set failed', e); }
+}
+async function loadAllSections(){
+  for(const key of SECTION_ORDER){
+    try{
+      const res = await storage.get(SECTIONS[key].storageKey);
+      if(res && res.value){ SECTIONS[key].rows = JSON.parse(res.value); }
+    }catch(e){ /* nothing saved yet */ }
+  }
+  renderTabs();
+  renderTable();
+  if(window.updatePdrDashboard) window.updatePdrDashboard();
+}
+
+// ---------- Import existing xlsx (reads ALL 4 sheets) ----------
+function normalizeHeader(value){
+  return String(value ?? '')
+    .trim()
+    .toLowerCase()
+    .replace(/[\u200f\u200e]/g,'')
+    .replace(/\s+/g,' ')
+    .replace(/[–—]/g,'-');
+}
+function buildAliasMap(cols){
+  const map = {};
+  cols.filter(c=>!c.isUrl).forEach(c=>{
+    const aliases = [c.header, ...(c.aliases||[])];
+    aliases.forEach(a=> map[normalizeHeader(a)] = c.key);
+  });
+  // Common bilingual/legacy variants
+  const extra = {
+    'description':'desc',
+    'short description (arabic)':'desc',
+    'skills':'skills',
+    'duration':'dur',
+    'date':'date',
+    'meeting title':'title',
+    'workshop title':'title',
+    'عنوان الاجتماع':'title',
+    'عنوان الاجتماع / الورشة':'title'
+  };
+  Object.keys(extra).forEach(k=>map[normalizeHeader(k)] = extra[k]);
+  return map;
+}
+function resolveSheetName(wb, section){
+  // 1) Prefer exact/known sheet-name aliases.
+  const aliases = [section.sheetLabel, ...(section.sheetAliases||[])].map(normalizeHeader);
+  const byName = wb.SheetNames.find(n=>aliases.includes(normalizeHeader(n)));
+  if(byName) return byName;
+
+  // 2) Fallback: identify the sheet by its column headers.
+  // This makes the importer resilient when the user renames a worksheet tab.
+  const expected = buildAliasMap(section.cols);
+  let best = null, bestScore = 0;
+  wb.SheetNames.forEach(name=>{
+    const ws = wb.Sheets[name];
+    const aoa = XLSX.utils.sheet_to_json(ws, {header:1, defval:'', raw:true});
+    if(!aoa.length) return;
+    const headers = aoa[0].map(normalizeHeader);
+    const matched = new Set(headers.filter(h=>expected[h]!=null).map(h=>expected[h]));
+    const score = matched.size;
+    if(score > bestScore){ bestScore=score; best=name; }
+  });
+  // Require at least 2 recognizable columns to avoid accidental matches.
+  return bestScore >= Math.min(2, section.cols.filter(c=>!c.isUrl).length) ? best : null;
+}
+function parseSheetRows(ws, cols, urlKeys){
+  const aoa = XLSX.utils.sheet_to_json(ws, { header:1, defval:'', raw:true });
+  if(!aoa.length) return [];
+  const headerRow = aoa[0].map(normalizeHeader);
+  const aliasMap = buildAliasMap(cols);
+  const colIndex = {};
+  headerRow.forEach((h,i)=>{ if(aliasMap[h]!=null) colIndex[aliasMap[h]] = i; });
+  const rows = [];
+  for(let r=1; r<aoa.length; r++){
+    const rowArr = aoa[r];
+    if(!rowArr || rowArr.every(v => v==='' || v==null)) continue;
+    const obj = {};
+    cols.forEach(c=>{
+      if(c.isUrl){ obj[c.key]=''; return; }
+      let v = colIndex[c.key]!=null ? rowArr[colIndex[c.key]] : '';
+      if(v instanceof Date){
+        const y=v.getFullYear(), m=String(v.getMonth()+1).padStart(2,'0'), d=String(v.getDate()).padStart(2,'0');
+        v = `${y}-${m}-${d}`;
+      } else if(v == null){ v = ''; } else { v = String(v); }
+      obj[c.key] = v;
+    });
+    urlKeys.forEach(baseKey=>{
+      if(colIndex[baseKey]==null) return;
+      const cellRef = XLSX.utils.encode_cell({ r:r, c: colIndex[baseKey] });
+      const cell = ws[cellRef];
+      if(cell && cell.l && cell.l.Target) obj[baseKey+'_url'] = cell.l.Target;
+    });
+    rows.push(obj);
+  }
+  return rows;
+}
+
+$('importBtn').addEventListener('click', ()=> $('importInput').click());
+$('importInput').addEventListener('change', async e=>{
+  const file = e.target.files[0];
+  if(!file) return;
+  $('importMsgHolder').innerHTML = `<div class="loader"><div class="spinner"></div> جارِ استيراد الشيت...</div>`;
+  try{
+    const buf = await file.arrayBuffer();
+    const wb = XLSX.read(buf, { type:'array', cellDates:true });
+    importedWorkbook = wb;
+    const foundList = [];
+    SECTION_ORDER.forEach(key=>{
+      const section = SECTIONS[key];
+      const match = resolveSheetName(wb, section);
+      if(!match) return;
+      section.sheetNameResolved = match;
+      const parsed = parseSheetRows(wb.Sheets[match], section.cols, section.urlKeys);
+      section.rows = parsed; // importing a workbook becomes the source of truth; avoid duplicate imports
+      foundList.push(`${section.tabLabel} ← ${match} (${parsed.length})`);
+    });
+    SECTION_ORDER.forEach(key=> persistSection(key));
+    renderTabs(); renderTable();
+    if(window.updatePdrDashboard) window.updatePdrDashboard();
+    if(!foundList.length){ throw new Error('لم يتم العثور على أي من الصفحات المعروفة في الملف'); }
+    $('importMsgHolder').innerHTML = `<div class="okbox">✅ تم الاستيراد: ${foundList.map(escapeHtml).join(' — ')}. أي صفحات أخرى غير معروفة في الملف الأصلي ستبقى محفوظة كما هي عند التصدير.</div>`;
+  }catch(err){
+    console.error(err);
+    $('importMsgHolder').innerHTML = `<div class="errbox">⚠️ تعذر استيراد الملف: ${escapeHtml(err.message)}</div>`;
+  }finally{
+    e.target.value = '';
+  }
+});
+
+// ---------- Export xlsx (all sections, LTR, styled header, banded rows, autofilter, real hyperlinks) ----------
+function buildSheetForExport(section){
+  const exportCols = section.cols.filter(c=>!c.isUrl);
+  const headerRow = exportCols.map(c=>c.header);
+  const aoa = [headerRow].concat(section.rows.map(r => exportCols.map(c => r[c.key] || '')));
+  const ws = XLSX.utils.aoa_to_sheet(aoa);
+  ws['!cols'] = exportCols.map(c => ({ wch: c.wide ? 38 : 16 }));
+
+  const range = XLSX.utils.decode_range(ws['!ref']);
+  // Header styling
+  for(let C=range.s.c; C<=range.e.c; C++){
+    const ref = XLSX.utils.encode_cell({ r:0, c:C });
+    if(ws[ref]) ws[ref].s = { font:{ bold:true, color:{ rgb:"FFFFFF" } }, fill:{ fgColor:{ rgb:"0F2D4A" } }, alignment:{ horizontal:"center", vertical:"center", wrapText:true } };
+  }
+  // Banded rows
+  for(let R=1; R<=range.e.r; R++){
+    if(R % 2 === 0) continue;
+    for(let C=range.s.c; C<=range.e.c; C++){
+      const ref = XLSX.utils.encode_cell({ r:R, c:C });
+      if(ws[ref]) ws[ref].s = Object.assign({}, ws[ref].s, { fill:{ fgColor:{ rgb:"F3EFE4" } } });
+    }
+  }
+  ws['!autofilter'] = { ref: ws['!ref'] };
+
+  // Real clickable hyperlinks
+  section.urlKeys.forEach(baseKey=>{
+    const colIdx = exportCols.findIndex(c=>c.key===baseKey);
+    if(colIdx < 0) return;
+    section.rows.forEach((row,i)=>{
+      const url = row[baseKey+'_url'];
+      if(!url) return;
+      const ref = XLSX.utils.encode_cell({ r:i+1, c:colIdx });
+      if(!ws[ref]){ ws[ref] = { t:'s', v: row[baseKey] || 'Link' }; }
+      if(!ws[ref].v){ ws[ref].v = row[baseKey] || 'Link'; ws[ref].t='s'; }
+      ws[ref].l = { Target: url };
+      ws[ref].s = Object.assign({}, ws[ref].s, { font:{ color:{ rgb:"1E4D78" }, underline:true } });
+    });
+  });
+  return ws;
+}
+
+$('exportBtn').addEventListener('click', ()=>{
+  const totalRows = SECTION_ORDER.reduce((s,k)=> s + SECTIONS[k].rows.length, 0);
+  if(!totalRows){ toast('السجل فارغ بالكامل، لا يوجد شيء لتصديره'); return; }
+
+  let wb = importedWorkbook || XLSX.utils.book_new();
+  wb.Workbook = wb.Workbook || {};
+  wb.Workbook.Views = [{ RTL: false }]; // force sheets to open left-to-right
+
+  SECTION_ORDER.forEach(key=>{
+    const section = SECTIONS[key];
+    if(!section.rows.length) return; // leave sheets we never touched exactly as imported
+    const ws = buildSheetForExport(section);
+    const targetName = section.sheetNameResolved || section.sheetLabel;
+    wb.Sheets[targetName] = ws;
+    if(!wb.SheetNames.includes(targetName)) wb.SheetNames.push(targetName);
+  });
+
+  XLSX.writeFile(wb, 'Professional_Development_Record.xlsx', { cellStyles:true });
+  toast('تم تصدير السجل الكامل — ارفعه على الدرايف ليحل محل النسخة القديمة');
+});
+
+// ---------- Init ----------
+loadKey();
+loadAllSections();
+</script>
+<script>
+(function(){
+  const root=document.documentElement;
+  const saved=localStorage.getItem('pdr-v4-theme')||'light';
+  root.dataset.theme=saved;
+  const tg=document.getElementById('themeToggle');
+  function syncTheme(){ if(tg) tg.classList.toggle('dark',root.dataset.theme==='dark'); }
+  syncTheme();
+  tg?.addEventListener('click',()=>{root.dataset.theme=root.dataset.theme==='dark'?'light':'dark';localStorage.setItem('pdr-v4-theme',root.dataset.theme);syncTheme();});
+
+  const q=(id)=>document.getElementById(id);
+  q('quickUpload')?.addEventListener('click',()=>q('dropzone')?.scrollIntoView({behavior:'smooth',block:'center'}));
+  q('quickUpload')?.addEventListener('dblclick',()=>q('fileInput')?.click());
+  q('quickImport')?.addEventListener('click',()=>q('importBtn')?.click());
+  q('quickExport')?.addEventListener('click',()=>q('exportBtn')?.click());
+  q('quickSkills')?.addEventListener('click',()=>{
+    q('recordsSection')?.scrollIntoView({behavior:'smooth',block:'start'});
+    const skillBtn=[...document.querySelectorAll('.tab-btn')].find(b=>/مهارات/i.test(b.textContent));
+    if(skillBtn) skillBtn.click();
+    else if(typeof toast==='function') toast('المهارات تُحسب من الحقول Skills Gained داخل السجل');
+  });
+  q('globalSearch')?.addEventListener('input',e=>{
+    const term=e.target.value.trim().toLowerCase();
+    document.querySelectorAll('#tableHolder tbody tr').forEach(tr=>{
+      tr.style.display=!term || tr.textContent.toLowerCase().includes(term)?'':'none';
+    });
+  });
+  document.addEventListener('keydown',e=>{
+    if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='k'){e.preventDefault();q('globalSearch')?.focus();}
+  });
+
+  function updateDashboard(){
+    // SECTIONS is a lexical const in the main application scope, not window.SECTIONS.
+    // Using window.SECTIONS here caused all dashboard counters to remain 0.
+    const get = k => (SECTIONS[k] && Array.isArray(SECTIONS[k].rows)) ? SECTIONS[k].rows.length : 0;
+
+    const all = SECTION_ORDER.flatMap(k =>
+      (SECTIONS[k] && Array.isArray(SECTIONS[k].rows)) ? SECTIONS[k].rows : []
+    );
+
+    const skills = new Set();
+    all.forEach(r => {
+      ['skills','skills_applied'].forEach(key => {
+        String(r[key] || '')
+          .split(/[,،;|\n]/)
+          .map(x => x.trim())
+          .filter(Boolean)
+          .forEach(x => skills.add(x.toLowerCase()));
       });
-      document.addEventListener("click", (e) => {
-        if (e.target.matches("#tableHolder [data-del]")) {
-          const idx = parseInt(e.target.dataset.del);
-          if (confirm("حذف هذا الصف؟")) {
-            SECTIONS[activeTab].rows.splice(idx, 1);
-            persistSection(activeTab);
-            renderTabs();
-            renderTable();
-          }
-        }
-      });
+    });
 
-      $("addRowBtn").addEventListener("click", () => {
-        const section = SECTIONS[activeTab];
-        const blank = {};
-        section.cols.forEach((c) => (blank[c.key] = ""));
-        const noCol = section.cols.find((c) => c.key === "no");
-        if (noCol) {
-          const maxNo = section.rows.reduce(
-            (m, r) => Math.max(m, parseInt(r.no) || 0),
-            0,
-          );
-          blank.no = String(maxNo + 1);
-        }
-        section.rows.push(blank);
-        persistSection(activeTab);
-        renderTabs();
-        renderTable();
-        toast("تمت إضافة صف فارغ — عدّل الخلايا مباشرة");
-      });
+    const vals = {
+      statCerts: get('certifications'),
+      statExperience: get('experience'),
+      statMeetings: get('meetings'),
+      statVolunteering: get('volunteering'),
+      statSkills: skills.size
+    };
 
-      $("clearLogBtn").addEventListener("click", async () => {
-        const section = SECTIONS[activeTab];
-        if (
-          !confirm(
-            `هل تريد مسح كل بيانات صفحة "${section.tabLabel}" من التطبيق؟ (صدّر أولاً لو محتاج نسخة)`,
-          )
-        )
-          return;
-        section.rows = [];
-        await persistSection(activeTab);
-        renderTabs();
-        renderTable();
-        toast("تم مسح الصفحة من التطبيق");
-      });
+    Object.entries(vals).forEach(([id,v]) => {
+      const el = q(id);
+      if(el) el.textContent = v;
+    });
+  }
+  window.updatePdrDashboard=updateDashboard;
+  setTimeout(updateDashboard,300);
+  const oldRenderTable=window.renderTable;
+  if(oldRenderTable){ window.renderTable=function(){oldRenderTable();updateDashboard();};}
+})();
+</script>
 
-      async function persistSection(key) {
-        const section = SECTIONS[key];
-        try {
-          await storage.set(section.storageKey, JSON.stringify(section.rows));
-        } catch (e) {
-          console.error("storage set failed", e);
-        }
-      }
-      async function loadAllSections() {
-        for (const key of SECTION_ORDER) {
-          try {
-            const res = await storage.get(SECTIONS[key].storageKey);
-            if (res && res.value) {
-              SECTIONS[key].rows = JSON.parse(res.value);
-            }
-          } catch (e) {
-            /* nothing saved yet */
-          }
-        }
-        renderTabs();
-        renderTable();
-      }
+<script>
+(function(){
+  const btn = document.getElementById('backToTop');
+  if(!btn) return;
 
-      // ---------- Import existing xlsx (reads ALL 4 sheets) ----------
-      function buildAliasMap(cols) {
-        const map = {};
-        cols
-          .filter((c) => !c.isUrl)
-          .forEach((c) => (map[c.header.trim().toLowerCase()] = c.key));
-        return map;
-      }
-      function parseSheetRows(ws, cols, urlKeys) {
-        const aoa = XLSX.utils.sheet_to_json(ws, { header: 1, defval: "" });
-        if (!aoa.length) return [];
-        const headerRow = aoa[0].map((h) =>
-          String(h || "")
-            .trim()
-            .toLowerCase(),
-        );
-        const aliasMap = buildAliasMap(cols);
-        const colIndex = {};
-        headerRow.forEach((h, i) => {
-          if (aliasMap[h] != null) colIndex[aliasMap[h]] = i;
-        });
-        const rows = [];
-        for (let r = 1; r < aoa.length; r++) {
-          const rowArr = aoa[r];
-          if (!rowArr || rowArr.every((v) => v === "" || v == null)) continue;
-          const obj = {};
-          cols.forEach((c) => {
-            if (c.isUrl) {
-              obj[c.key] = "";
-              return;
-            }
-            let v = colIndex[c.key] != null ? rowArr[colIndex[c.key]] : "";
-            if (v instanceof Date) {
-              v = v.toISOString().slice(0, 10);
-            } else if (v == null) {
-              v = "";
-            } else {
-              v = String(v);
-            }
-            obj[c.key] = v;
-          });
-          urlKeys.forEach((baseKey) => {
-            if (colIndex[baseKey] == null) return;
-            const cellRef = XLSX.utils.encode_cell({
-              r: r,
-              c: colIndex[baseKey],
-            });
-            const cell = ws[cellRef];
-            if (cell && cell.l && cell.l.Target) {
-              obj[baseKey + "_url"] = cell.l.Target;
-            }
-          });
-          rows.push(obj);
-        }
-        return rows;
-      }
+  function toggleBackToTop(){
+    const y = window.scrollY || document.documentElement.scrollTop;
+    btn.classList.toggle('show', y > 350);
+  }
 
-      $("importBtn").addEventListener("click", () => $("importInput").click());
-      $("importInput").addEventListener("change", async (e) => {
-        const file = e.target.files[0];
-        if (!file) return;
-        $("importMsgHolder").innerHTML =
-          `<div class="loader"><div class="spinner"></div> جارِ استيراد الشيت...</div>`;
-        try {
-          const buf = await file.arrayBuffer();
-          const wb = XLSX.read(buf, { type: "array", cellDates: true });
-          importedWorkbook = wb;
-          const foundList = [];
-          SECTION_ORDER.forEach((key) => {
-            const section = SECTIONS[key];
-            const match = wb.SheetNames.find(
-              (n) =>
-                n.trim().toLowerCase() ===
-                section.sheetLabel.trim().toLowerCase(),
-            );
-            if (!match) return;
-            section.sheetNameResolved = match;
-            const parsed = parseSheetRows(
-              wb.Sheets[match],
-              section.cols,
-              section.urlKeys,
-            );
-            section.rows = section.rows.concat(parsed);
-            foundList.push(`${section.tabLabel} (${parsed.length})`);
-          });
-          SECTION_ORDER.forEach((key) => persistSection(key));
-          renderTabs();
-          renderTable();
-          if (!foundList.length) {
-            throw new Error(
-              "لم يتم العثور على أي من الصفحات المعروفة في الملف",
-            );
-          }
-          $("importMsgHolder").innerHTML =
-            `<div class="okbox">✅ تم الاستيراد: ${foundList.map(escapeHtml).join(" — ")}. أي صفحات أخرى غير معروفة في الملف الأصلي ستبقى محفوظة كما هي عند التصدير.</div>`;
-        } catch (err) {
-          console.error(err);
-          $("importMsgHolder").innerHTML =
-            `<div class="errbox">⚠️ تعذر استيراد الملف: ${escapeHtml(err.message)}</div>`;
-        } finally {
-          e.target.value = "";
-        }
-      });
+  window.addEventListener('scroll', toggleBackToTop, {passive:true});
+  toggleBackToTop();
 
-      // ---------- Export xlsx (all sections, LTR, styled header, banded rows, autofilter, real hyperlinks) ----------
-      function buildSheetForExport(section) {
-        const exportCols = section.cols.filter((c) => !c.isUrl);
-        const headerRow = exportCols.map((c) => c.header);
-        const aoa = [headerRow].concat(
-          section.rows.map((r) => exportCols.map((c) => r[c.key] || "")),
-        );
-        const ws = XLSX.utils.aoa_to_sheet(aoa);
-        ws["!cols"] = exportCols.map((c) => ({ wch: c.wide ? 38 : 16 }));
+  btn.addEventListener('click', function(){
+    window.scrollTo({top:0, behavior:'smooth'});
+  });
+})();
+</script>
 
-        const range = XLSX.utils.decode_range(ws["!ref"]);
-        // Header styling
-        for (let C = range.s.c; C <= range.e.c; C++) {
-          const ref = XLSX.utils.encode_cell({ r: 0, c: C });
-          if (ws[ref])
-            ws[ref].s = {
-              font: { bold: true, color: { rgb: "FFFFFF" } },
-              fill: { fgColor: { rgb: "0F2D4A" } },
-              alignment: {
-                horizontal: "center",
-                vertical: "center",
-                wrapText: true,
-              },
-            };
-        }
-        // Banded rows
-        for (let R = 1; R <= range.e.r; R++) {
-          if (R % 2 === 0) continue;
-          for (let C = range.s.c; C <= range.e.c; C++) {
-            const ref = XLSX.utils.encode_cell({ r: R, c: C });
-            if (ws[ref])
-              ws[ref].s = Object.assign({}, ws[ref].s, {
-                fill: { fgColor: { rgb: "F3EFE4" } },
-              });
-          }
-        }
-        ws["!autofilter"] = { ref: ws["!ref"] };
 
-        // Real clickable hyperlinks
-        section.urlKeys.forEach((baseKey) => {
-          const colIdx = exportCols.findIndex((c) => c.key === baseKey);
-          if (colIdx < 0) return;
-          section.rows.forEach((row, i) => {
-            const url = row[baseKey + "_url"];
-            if (!url) return;
-            const ref = XLSX.utils.encode_cell({ r: i + 1, c: colIdx });
-            if (!ws[ref]) {
-              ws[ref] = { t: "s", v: row[baseKey] || "Link" };
-            }
-            if (!ws[ref].v) {
-              ws[ref].v = row[baseKey] || "Link";
-              ws[ref].t = "s";
-            }
-            ws[ref].l = { Target: url };
-            ws[ref].s = Object.assign({}, ws[ref].s, {
-              font: { color: { rgb: "1E4D78" }, underline: true },
-            });
-          });
-        });
-        return ws;
-      }
+<script>
+(function(){
+  function updateHeroClock(){
+    try{
+      const now = new Date();
+      const locale = 'ar-EG-u-nu-latn';
+      const dateEl = document.getElementById('heroDate');
+      const dayEl = document.getElementById('heroDay');
+      const timeEl = document.getElementById('heroTime');
+      if(dateEl) dateEl.textContent = new Intl.DateTimeFormat(locale,{day:'numeric',month:'long',year:'numeric'}).format(now);
+      if(dayEl) dayEl.textContent = new Intl.DateTimeFormat(locale,{weekday:'long'}).format(now);
+      if(timeEl) timeEl.textContent = new Intl.DateTimeFormat(locale,{hour:'2-digit',minute:'2-digit',hour12:true}).format(now);
+    }catch(e){}
+  }
+  updateHeroClock();
+  setInterval(updateHeroClock,1000);
 
-      $("exportBtn").addEventListener("click", () => {
-        const totalRows = SECTION_ORDER.reduce(
-          (s, k) => s + SECTIONS[k].rows.length,
-          0,
-        );
-        if (!totalRows) {
-          toast("السجل فارغ بالكامل، لا يوجد شيء لتصديره");
-          return;
-        }
+  document.querySelectorAll('.side-item').forEach(btn=>{
+    btn.addEventListener('click',()=>{
+      const id=btn.dataset.target;
+      const el=document.getElementById(id);
+      if(el) el.scrollIntoView({behavior:'smooth',block:'start'});
+      document.querySelectorAll('.side-item').forEach(x=>x.classList.remove('active'));
+      btn.classList.add('active');
+    });
+  });
+})();
+</script>
 
-        let wb = importedWorkbook || XLSX.utils.book_new();
-        wb.Workbook = wb.Workbook || {};
-        wb.Workbook.Views = [{ RTL: false }]; // force sheets to open left-to-right
-
-        SECTION_ORDER.forEach((key) => {
-          const section = SECTIONS[key];
-          if (!section.rows.length) return; // leave sheets we never touched exactly as imported
-          const ws = buildSheetForExport(section);
-          const targetName = section.sheetNameResolved || section.sheetLabel;
-          wb.Sheets[targetName] = ws;
-          if (!wb.SheetNames.includes(targetName))
-            wb.SheetNames.push(targetName);
-        });
-
-        XLSX.writeFile(wb, "Professional_Development_Record.xlsx", {
-          cellStyles: true,
-        });
-        toast(
-          "تم تصدير السجل الكامل — ارفعه على الدرايف ليحل محل النسخة القديمة",
-        );
-      });
-
-      // ---------- Init ----------
-      loadKey();
-      loadAllSections();
-    </script>
-  </body>
 </html>
