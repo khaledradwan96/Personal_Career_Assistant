@@ -448,6 +448,66 @@ html[data-theme="dark"] .titleblock .gear-btn{background:#172642}
   .stat-card{min-height:96px !important;padding:13px !important}
 }
 
+
+/* ===== V4.1 Enhanced UI polish ===== */
+.appbar{
+  box-shadow:0 4px 18px rgba(48,67,102,.035);
+}
+.search{
+  transition:.18s;
+}
+.search:focus-within{
+  border-color:#c9b8ff;
+  box-shadow:0 0 0 3px rgba(112,70,232,.08);
+}
+.theme .theme-label{
+  font-size:9px;
+  font-weight:700;
+}
+.version-badge{
+  display:inline-flex;
+  align-items:center;
+  gap:5px;
+  padding:5px 8px;
+  border:1px solid var(--line);
+  border-radius:8px;
+  color:var(--muted);
+  background:var(--surface2);
+  font-size:8px;
+  font-weight:700;
+}
+.quick button{
+  position:relative;
+  overflow:hidden;
+}
+.quick button::after{
+  content:"";
+  position:absolute;
+  inset:0;
+  background:linear-gradient(120deg,transparent 35%,rgba(255,255,255,.22),transparent 65%);
+  transform:translateX(-120%);
+  transition:.45s;
+}
+.quick button:hover::after{transform:translateX(120%);}
+.search-results-note{
+  margin:8px 0 0;
+  font-size:9px;
+  color:var(--muted);
+}
+@media(max-width:900px){
+  .version-badge{display:none}
+}
+@media(max-width:700px){
+  .appbar{height:auto;min-height:68px;padding:10px 14px;gap:9px;flex-wrap:wrap}
+  .brand{min-width:0;flex:1}
+  .brand b{font-size:12px}
+  .brand small{font-size:7px}
+  .search{order:3;max-width:none;flex-basis:100%;margin:0;height:38px}
+  .top-actions{margin-left:auto}
+  .user strong,.user small{display:none}
+  .theme .theme-label{display:none}
+}
+
 </style>
 </head>
 <body>
@@ -470,7 +530,8 @@ html[data-theme="dark"] .titleblock .gear-btn{background:#172642}
   <div class="brand"><div class="brand-logo">💼</div><div><b>PROFESSIONAL DEVELOPMENT RECORD</b><small>Personal Career Management System</small></div></div>
   <div class="search"><span>⌕</span><input id="globalSearch" placeholder="ابحث في السجل المهني..."><kbd>Ctrl + K</kbd></div>
   <div class="top-actions">
-    <div class="theme"><span>☼</span><button class="toggle" id="themeToggle" title="تبديل المظهر"><i></i></button><span>☾</span></div>
+    <span class="version-badge">V4.1 Enhanced</span>
+    <div class="theme"><span class="theme-label">المظهر</span><span>☼</span><button class="toggle" id="themeToggle" title="تبديل المظهر"><i></i></button><span>☾</span></div>
     <div class="user"><div class="avatar">KR</div><div><strong>م. خالد رضوان</strong><small>المهندس المدني</small></div></div>
   </div>
 </div>
@@ -528,6 +589,13 @@ html[data-theme="dark"] .titleblock .gear-btn{background:#172642}
 
     <div class="workspace">
       <div class="settings-panel" id="settingsPanel">
+    <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap">
+      <div>
+        <h3 style="margin:0 0 4px">إعدادات النظام</h3>
+        <small style="color:var(--muted)">V4.1 Enhanced — تحسينات واجهة وتجربة الاستخدام مع الحفاظ على وظائف V4.</small>
+      </div>
+      <span class="version-badge">Stable Core • V4.1</span>
+    </div>
         <h3>مفتاح Gemini API</h3>
         <p>التحليل يعمل من المتصفح مباشرة باستخدام مفتاحك الشخصي. المفتاح يُخزّن محليًا في متصفحك.</p>
         <div class="settings-row">
@@ -1041,6 +1109,7 @@ async function persistSection(key){
   const section = SECTIONS[key];
   try{ await storage.set(section.storageKey, JSON.stringify(section.rows)); }
   catch(e){ console.error('storage set failed', e); }
+  if(window.updatePdrDashboard) window.updatePdrDashboard();
 }
 async function loadAllSections(){
   for(const key of SECTION_ORDER){
@@ -1247,8 +1316,7 @@ loadAllSections();
   tg?.addEventListener('click',()=>{root.dataset.theme=root.dataset.theme==='dark'?'light':'dark';localStorage.setItem('pdr-v4-theme',root.dataset.theme);syncTheme();});
 
   const q=(id)=>document.getElementById(id);
-  q('quickUpload')?.addEventListener('click',()=>q('dropzone')?.scrollIntoView({behavior:'smooth',block:'center'}));
-  q('quickUpload')?.addEventListener('dblclick',()=>q('fileInput')?.click());
+  q('quickUpload')?.addEventListener('click',()=>q('fileInput')?.click());
   q('quickImport')?.addEventListener('click',()=>q('importBtn')?.click());
   q('quickExport')?.addEventListener('click',()=>q('exportBtn')?.click());
   q('quickSkills')?.addEventListener('click',()=>{
@@ -1259,9 +1327,53 @@ loadAllSections();
   });
   q('globalSearch')?.addEventListener('input',e=>{
     const term=e.target.value.trim().toLowerCase();
-    document.querySelectorAll('#tableHolder tbody tr').forEach(tr=>{
-      tr.style.display=!term || tr.textContent.toLowerCase().includes(term)?'':'none';
+    if(!term){
+      renderTable();
+      const oldNote=q('globalSearchNote'); if(oldNote) oldNote.remove();
+      return;
+    }
+
+    // Search across all loaded sections without changing the active tab.
+    const results=[];
+    SECTION_ORDER.forEach(key=>{
+      const section=SECTIONS[key];
+      section.rows.forEach((row,index)=>{
+        const haystack=section.cols.map(c=>String(row[c.key]||'')).join(' ').toLowerCase();
+        if(haystack.includes(term)) results.push({key,index,row});
+      });
     });
+
+    const holder=q('tableHolder');
+    if(!results.length){
+      holder.innerHTML='<div class="empty-log">لا توجد نتائج مطابقة في السجل المهني.</div>';
+    }else{
+      const rows=results.map(x=>{
+        const s=SECTIONS[x.key];
+        const title=s.tabLabel;
+        const summary=s.cols.slice(0,4).map(c=>String(x.row[c.key]||'')).filter(Boolean).join(' • ');
+        return `<tr>
+          <td>${escapeHtml(title)}</td>
+          <td>${escapeHtml(String(x.row.no||x.index+1))}</td>
+          <td class="wide">${escapeHtml(summary)}</td>
+          <td><button class="btn ghost sm" data-search-open="${escapeHtml(x.key)}">فتح</button></td>
+        </tr>`;
+      }).join('');
+      holder.innerHTML=`<div id="globalSearchNote" class="search-results-note">نتائج البحث: ${results.length} سجل</div>
+        <table class="search-table" style="min-width:720px">
+          <thead><tr><th>القسم</th><th>No.</th><th>البيانات</th><th></th></tr></thead>
+          <tbody>${rows}</tbody>
+        </table>`;
+    }
+  });
+
+  document.addEventListener('click',e=>{
+    const btn=e.target.closest('[data-search-open]');
+    if(!btn) return;
+    const key=btn.getAttribute('data-search-open');
+    activeTab=key;
+    renderTabs();
+    renderTable();
+    q('recordsSection')?.scrollIntoView({behavior:'smooth',block:'start'});
   });
   document.addEventListener('keydown',e=>{
     if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='k'){e.preventDefault();q('globalSearch')?.focus();}
