@@ -1,12 +1,6 @@
-<!DOCTYPE html><html lang="ar" dir="rtl"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Professional Development Record — V4.0</title><script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<!DOCTYPE html><html lang="ar" dir="rtl"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Personal Career Assistant — V6.2</title><script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap');
-:root{
- --bg:#f4f7fc;--surface:#fff;--surface2:#f8faff;--text:#15233e;--muted:#718099;
- --line:#e3e9f2;--purple:#7147e8;--purple2:#8b5cf6;--blue:#3478e8;
- --cyan:#55d9eb;--green:#19ae7d;--orange:#ee9b32;--danger:#dc3e3e;
- --nav:#fbfcff;--hero:#111c37;--hero2:#213568;--shadow:0 12px 34px rgba(35,55,92,.08);
-}
 html[data-theme="dark"]{
  --bg:#070d19;--surface:#0f182a;--surface2:#121e32;--text:#eef3ff;--muted:#9aa8bf;
  --line:#202c43;--purple:#8b63f5;--purple2:#a27cff;--blue:#4d8af7;
@@ -143,6 +137,7 @@ html, body { max-width:100%; overflow-x:hidden; }
 /* =========================================================
    V4 DASHBOARD UI — visual redesign, functions preserved
    ========================================================= */
+/* :root — single active theme-variables block (the old duplicate near the top of <style> was removed as dead code) */
 :root{
   --bg:#f7f9fe;
   --surface:#ffffff;
@@ -156,6 +151,10 @@ html, body { max-width:100%; overflow-x:hidden; }
   --green:#19b77f;
   --orange:#f09b38;
   --cyan:#27b8c9;
+  --danger:#dc3e3e;
+  --nav:#fbfcff;
+  --hero:#111c37;
+  --hero2:#213568;
   --shadow:0 12px 34px rgba(48,67,102,.075);
 }
 body{
@@ -388,12 +387,39 @@ html[data-theme="dark"] .titleblock .gear-btn{background:#172642}
   font-family:Cairo;
 }
 @media(max-width:1100px){
-  .app-sidebar{display:none}
+  .app-sidebar{
+    --hide-x:-100%; /* الشريط في العربية (rtl) ثابت على اليسار الفعلي (left:0)، فالإخفاء لازم يكون بدفعه لخارج الحافة اليسرى، مش اليمنى */
+    transform:translateX(var(--hide-x));
+    transition:transform .25s ease;
+    box-shadow:-8px 0 30px rgba(0,0,0,.18);
+  }
+  html[dir="ltr"] .app-sidebar{
+    --hide-x:100%; /* في الإنجليزية (ltr) الشريط بينقلب لليمين (right:0 — السطر 585)، فالإخفاء لازم يكون لخارج الحافة اليمنى */
+    box-shadow:8px 0 30px rgba(0,0,0,.18);
+  }
+  .app-sidebar.mobile-open{ transform:translateX(0) !important; } /* !important ضروري هنا: بدونه كانت قاعدة html[dir="ltr"] .app-sidebar أعلى تخصيصًا (specificity) من .app-sidebar.mobile-open، فكان فتح القائمة في وضع الإنجليزية مش هيشتغل خالص */
+  .app-sidebar{ width:220px; flex-direction:column; align-items:stretch; }
+  .app-sidebar .side-item{ width:100%; flex-direction:row; justify-content:flex-start; gap:12px; padding:0 14px; }
+  .app-sidebar .side-item.active:before{ left:auto; right:0; top:8px; bottom:8px; }
+  .mobile-nav-toggle{
+    display:flex; position:fixed; z-index:31; top:16px; inset-inline-end:16px;
+    width:44px;height:44px;border-radius:12px;border:1px solid var(--line);
+    background:rgba(255,255,255,.9);backdrop-filter:blur(10px);
+    align-items:center;justify-content:center;font-size:20px;cursor:pointer;
+  }
+  html[data-theme="dark"] .mobile-nav-toggle{background:rgba(9,17,31,.9);color:#fff}
+  .mobile-nav-backdrop{
+    display:none; position:fixed; inset:0; background:rgba(0,0,0,.4); z-index:29;
+  }
+  .mobile-nav-backdrop.show{ display:block; }
   .appbar,.wrap{margin-left:0}
   .wrap{padding:18px 20px 45px}
   .titleblock{grid-template-columns:270px 1fr}
   .hero-meta{grid-column:1/-1}
   .dashboard{grid-template-columns:repeat(3,1fr)}
+}
+@media(min-width:1101px){
+  .mobile-nav-toggle,.mobile-nav-backdrop{ display:none; }
 }
 @media(max-width:700px){
   .appbar{margin-left:0}
@@ -508,31 +534,109 @@ html[data-theme="dark"] .titleblock .gear-btn{background:#172642}
   .theme .theme-label{display:none}
 }
 
+/* ===== V5.0: Toast / popup notification ===== */
+#toast{
+  position:fixed;
+  top:24px;
+  left:50%;
+  transform:translateX(-50%) translateY(-14px);
+  z-index:999;
+  background:var(--hero);
+  color:#fff;
+  padding:13px 22px;
+  border-radius:12px;
+  font-size:12px;
+  font-weight:700;
+  box-shadow:0 16px 40px rgba(15,23,42,.28);
+  opacity:0;
+  visibility:hidden;
+  transition:opacity .22s, transform .22s, visibility .22s;
+  max-width:90vw;
+  text-align:center;
+  pointer-events:none;
+}
+#toast.show{
+  opacity:1;
+  visibility:visible;
+  transform:translateX(-50%) translateY(0);
+}
+html[data-theme="dark"] #toast{background:#1b2b55}
+@media(max-width:700px){
+  #toast{top:14px;font-size:11px;padding:11px 16px;border-radius:10px}
+}
+
+/* ===== V5.0: Language switch button ===== */
+.lang-switch{
+  border:1px solid var(--line);
+  background:var(--surface2);
+  color:var(--text);
+  border-radius:9px;
+  padding:8px 12px;
+  font-size:10px;
+  font-weight:800;
+  font-family:"Space Grotesk";
+  letter-spacing:.03em;
+  cursor:pointer;
+  transition:.16s;
+}
+.lang-switch:hover{border-color:var(--purple);color:var(--purple)}
+@media(max-width:700px){
+  .lang-switch{padding:7px 9px;font-size:9px}
+}
+
+/* ===== V5.0: LTR (English) mode ===== */
+html[dir="ltr"] body{font-family:"Space Grotesk",Tahoma,Arial,sans-serif}
+html[dir="ltr"] .app-sidebar{left:auto;right:0;border-right:0;border-left:1px solid var(--line)}
+html[dir="ltr"] .appbar,html[dir="ltr"] .wrap{margin-left:0;margin-right:92px}
+html[dir="ltr"] .side-item.active:before{left:auto;right:0;border-radius:3px 0 0 3px}
+@media(max-width:1100px){
+  html[dir="ltr"] .appbar,html[dir="ltr"] .wrap{margin-right:0}
+}
+/* ===== V5.1: format checkboxes + row edit button ===== */
+.checkbox-row{display:flex;flex-wrap:wrap;gap:9px;margin-top:4px}
+.check-pill{
+  display:flex;align-items:center;gap:6px;
+  border:1px solid var(--line);background:var(--surface2);
+  border-radius:9px;padding:8px 12px;font-size:10.5px;cursor:pointer;transition:.15s;
+}
+.check-pill:has(input:checked){border-color:var(--purple);background:rgba(124,58,237,.08);color:var(--purple);font-weight:700}
+.check-pill input{accent-color:var(--purple)}
+.edit-btn{
+  background:transparent;border:none;cursor:pointer;font-size:12px;opacity:.6;transition:.15s;padding:2px 5px;
+}
+.edit-btn:hover{opacity:1}
+
 </style>
 </head>
 <body>
 <div id="homeTop"></div>
 
-<aside class="app-sidebar" aria-label="التنقل الرئيسي">
+<aside class="app-sidebar" aria-label="التنقل الرئيسي" id="appSidebar">
   <div class="sidebar-logo">💼</div>
-  <button class="side-item active" data-target="homeTop"><span>⌂</span><b>الرئيسية</b></button>
-  <button class="side-item" data-target="certificateSection"><span>▣</span><b>الشهادات</b></button>
-  <button class="side-item" data-target="recordsSection"><span>▤</span><b>الخبرات</b></button>
-  <button class="side-item" data-target="recordsSection"><span>♧</span><b>الإجتماعات</b></button>
-  <button class="side-item" data-target="recordsSection"><span>♡</span><b>التطوع</b></button>
-  <button class="side-item" data-target="recordsSection"><span>☆</span><b>المهارات</b></button>
-  <button class="side-item" data-target="recordsSection"><span>▱</span><b>الملف المهني</b></button>
-  <button class="side-item" data-target="recordsSection"><span>▥</span><b>التقارير</b></button>
-  <button class="side-item" data-target="gearBtn"><span>⚙</span><b>الإعدادات</b></button>
+  <button class="side-item active" data-target="homeTop"><span>⌂</span><b data-i18n="navHome">الرئيسية</b></button>
+  <button class="side-item" data-target="certificateSection"><span>▣</span><b data-i18n="navCerts">الشهادات</b></button>
+  <button class="side-item" data-target="recordsSection" data-tab="experience"><span>▤</span><b data-i18n="navExp">الخبرات</b></button>
+  <button class="side-item" data-target="recordsSection" data-tab="activities"><span>♧</span><b data-i18n="navAct">الأنشطة</b></button>
+  <button class="side-item" data-target="recordsSection" data-tab="skills"><span>☆</span><b data-i18n="navSkills">المهارات</b></button>
+  <button class="side-item" data-target="recordsSection" data-tab="education"><span>🎓</span><b data-i18n="navEdu">التعليم</b></button>
+  <button class="side-item" data-target="recordsSection" data-tab="jobs"><span>🎯</span><b data-i18n="navJobs">الوظائف المستهدفة</b></button>
+  <button class="side-item" data-target="recordsSection" data-tab="cvVersions"><span>📄</span><b data-i18n="navCvs">نسخ السيرة الذاتية</b></button>
+  <button class="side-item" data-target="profileSection"><span>▱</span><b data-i18n="navProfile">الملف الشخصي</b></button>
+  <button class="side-item" data-target="jobMatchSection"><span>🎯</span><b data-i18n="navJobMatch">مطابقة وCV</b></button>
+  <button class="side-item" data-target="aiCoachSection"><span>🤖</span><b data-i18n="navAiCoach">المساعد الشخصي</b></button>
+  <button class="side-item" data-target="gearBtn"><span>⚙</span><b data-i18n="navSettings">الإعدادات</b></button>
 </aside>
+<button class="mobile-nav-toggle" id="mobileNavToggle" aria-label="فتح قائمة التنقل" title="القائمة">☰</button>
+<div class="mobile-nav-backdrop" id="mobileNavBackdrop"></div>
 
 <div class="appbar">
-  <div class="brand"><div class="brand-logo">💼</div><div><b>PROFESSIONAL DEVELOPMENT RECORD</b><small>Personal Career Management System</small></div></div>
-  <div class="search"><span>⌕</span><input id="globalSearch" placeholder="ابحث في السجل المهني..."><kbd>Ctrl + K</kbd></div>
+  <div class="brand"><div class="brand-logo">💼</div><div><b data-i18n="brandName">PERSONAL CAREER ASSISTANT</b><small data-i18n="brandTagline">Personal Career Management System</small></div></div>
+  <div class="search"><span>⌕</span><input id="globalSearch" data-i18n-ph="searchPh" placeholder="ابحث في السجل المهني..."><kbd>Ctrl + K</kbd></div>
   <div class="top-actions">
-    <span class="version-badge">V4.1 Enhanced</span>
-    <div class="theme"><span class="theme-label">المظهر</span><span>☼</span><button class="toggle" id="themeToggle" title="تبديل المظهر"><i></i></button><span>☾</span></div>
-    <div class="user"><div class="avatar">KR</div><div><strong>م. خالد رضوان</strong><small>المهندس المدني</small></div></div>
+    <span class="version-badge" id="topVersionBadge">V6.2 — CV &amp; Job Match</span>
+    <button class="lang-switch" id="langToggle" title="Switch language / تبديل اللغة">AR / EN</button>
+    <div class="theme"><span class="theme-label" data-i18n="themeLabel">المظهر</span><span>☼</span><button class="toggle" id="themeToggle" title="تبديل المظهر"><i></i></button><span>☾</span></div>
+    <div class="user"><div class="avatar" id="userAvatar">؟</div><div><strong id="userNameLabel">مستخدم جديد</strong><small id="userTitleLabel">أضف بياناتك من ⚙</small></div></div>
   </div>
 </div>
 
@@ -553,70 +657,95 @@ html[data-theme="dark"] .titleblock .gear-btn{background:#172642}
   </div>
 
   <div class="main">
-    <div class="eyebrow">PROFESSIONAL DEVELOPMENT RECORD</div>
-    <h1>السجل المهني الشامل</h1>
-    <p>كل إنجازاتك المهنية في مكان واحد — الشهادات، الخبرات، الاجتماعات، التطوع والمهارات، وكل ما يعكس تطورك المهني.</p>
+    <div class="eyebrow" data-i18n="heroEyebrow">PERSONAL CAREER ASSISTANT</div>
+    <h1 data-i18n="heroTitle">السجل المهني الشامل</h1>
+    <p data-i18n="heroDesc">كل إنجازاتك المهنية في مكان واحد — الشهادات، الخبرات، الاجتماعات، التطوع والمهارات، وكل ما يعكس تطورك المهني.</p>
   </div>
 
   <div class="hero-meta">
-    <div><span>المهندس</span><b>م. خالد رضوان</b></div>
-    <div><span>التاريخ</span><b id="heroDate">—</b></div>
-    <div><span>اليوم</span><b id="heroDay">—</b></div>
-    <div><span>الوقت (القاهرة)</span><b id="heroTime">—</b></div>
+    <div><span id="heroNameLabelTag" data-i18n="heroNameLabel">الاسم</span><b id="heroName">—</b></div>
+    <div><span data-i18n="heroDateLabel">التاريخ</span><b id="heroDate">—</b></div>
+    <div><span data-i18n="heroDayLabel">اليوم</span><b id="heroDay">—</b></div>
+    <div><span data-i18n="heroTimeLabel">الوقت (القاهرة)</span><b id="heroTime">—</b></div>
   </div>
 
-  <button class="gear-btn" id="gearBtn" title="إعدادات مفتاح Gemini">⚙</button>
+  <button class="gear-btn" id="gearBtn" data-i18n-title="gearBtnTitle" title="إعدادات مفتاح Gemini">⚙</button>
 </div>
 
   <div class="dashboard" id="dashboard">
-    <div class="stat-card"><div class="stat-label">Certificates & Courses</div><div class="stat-value" id="statCerts">0</div><div class="stat-note">Professional evidence</div></div>
-    <div class="stat-card"><div class="stat-label">Experience</div><div class="stat-value" id="statExperience">0</div><div class="stat-note">Career records</div></div>
-    <div class="stat-card"><div class="stat-label">Meetings & Activities</div><div class="stat-value" id="statMeetings">0</div><div class="stat-note">Professional exposure</div></div>
-    <div class="stat-card"><div class="stat-label">Volunteering</div><div class="stat-value" id="statVolunteering">0</div><div class="stat-note">Community evidence</div></div>
-    <div class="stat-card"><div class="stat-label">Skills Identified</div><div class="stat-value" id="statSkills">0</div><div class="stat-note">From your records</div></div>
+    <div class="stat-card"><div class="stat-label" data-i18n="statCertsLabel">الشهادات</div><div class="stat-value" id="statCerts">0</div><div class="stat-note" data-i18n="statCertsNote">دليل مهني موثّق</div></div>
+    <div class="stat-card"><div class="stat-label" data-i18n="statExpLabel">الخبرات</div><div class="stat-value" id="statExperience">0</div><div class="stat-note" data-i18n="statExpNote">سجلات مهنية</div></div>
+    <div class="stat-card"><div class="stat-label" data-i18n="statActLabel">الأنشطة</div><div class="stat-value" id="statActivities">0</div><div class="stat-note" data-i18n="statActNote">ورش، اجتماعات، مأموريات</div></div>
+    <div class="stat-card"><div class="stat-label" data-i18n="statSkillsLabel">المهارات الموثّقة</div><div class="stat-value" id="statSkills">0</div><div class="stat-note" data-i18n="statSkillsNote">من سجلاتك</div></div>
+    <div class="stat-card"><div class="stat-label" data-i18n="statEduLabel">التعليم</div><div class="stat-value" id="statEducation">0</div><div class="stat-note" data-i18n="statEduNote">المؤهلات الدراسية</div></div>
+    <div class="stat-card"><div class="stat-label" data-i18n="statJobsLabel">الوظائف المستهدفة</div><div class="stat-value" id="statJobs">0</div><div class="stat-note" data-i18n="statJobsNote">أهداف متابَعة</div></div>
   </div>
+  <div id="momentumBanner" style="display:none;margin-top:10px;padding:10px 16px;border-radius:12px;background:linear-gradient(135deg,#f3efff,#eef4ff);border:1px solid #e4dbff;font-size:12.5px;color:#5b3fb0;font-family:Cairo;"></div>
 
   <div class="layout">
     <aside class="quick">
-      <h3>إجراءات سريعة</h3>
+      <h3 data-i18n="quickActionsTitle">إجراءات سريعة</h3>
       <div class="quick-list">
-        <button id="quickUpload"><span class="qicon qpurple">☁</span><div><strong>رفع شهادة جديدة</strong><small>استخراج البيانات بالذكاء الاصطناعي</small></div></button>
-        <button id="quickImport"><span class="qicon qgreen">▣</span><div><strong>استيراد من Excel</strong><small>قراءة الصفحات الأربع تلقائيًا</small></div></button>
-        <button id="quickExport"><span class="qicon qblue">↓</span><div><strong>تصدير إلى Excel</strong><small>حفظ النسخة المحدثة</small></div></button>
-        <button id="quickSkills"><span class="qicon qorange">✧</span><div><strong>إدارة المهارات</strong><small>عرض المهارات المستخرجة</small></div></button>
+        <button id="quickUpload"><span class="qicon qpurple">☁</span><div><strong data-i18n="quickUploadT">رفع شهادة جديدة</strong><small data-i18n="quickUploadS">استخراج البيانات بالذكاء الاصطناعي</small></div></button>
+        <button id="quickImport"><span class="qicon qgreen">▣</span><div><strong data-i18n="quickImportT">استيراد من Excel</strong><small data-i18n="quickImportS">قراءة الصفحات الأربع تلقائيًا</small></div></button>
+        <button id="quickExport"><span class="qicon qblue">↓</span><div><strong data-i18n="quickExportT">تصدير إلى Excel</strong><small data-i18n="quickExportS">حفظ النسخة المحدثة</small></div></button>
+        <button id="quickSkills"><span class="qicon qorange">✧</span><div><strong data-i18n="quickSkillsT">إدارة المهارات</strong><small data-i18n="quickSkillsS">عرض المهارات المستخرجة</small></div></button>
+        <button id="quickJobMatch"><span class="qicon qpurple">🎯</span><div><strong data-i18n="quickJobT">مطابقة وظيفة + CV</strong><small data-i18n="quickJobS">تحليل التطابق وإنشاء سيرة ذاتية</small></div></button>
+        <button id="quickExportJson"><span class="qicon qblue">{}</span><div><strong data-i18n="quickJsonT">تصدير JSON</strong><small data-i18n="quickJsonS">نسخة احتياطية كاملة</small></div></button>
       </div>
     </aside>
 
     <div class="workspace">
+      <div id="profileSection"></div>
       <div class="settings-panel" id="settingsPanel">
     <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap">
       <div>
         <h3 style="margin:0 0 4px">إعدادات النظام</h3>
-        <small style="color:var(--muted)">V4.1 Enhanced — تحسينات واجهة وتجربة الاستخدام مع الحفاظ على وظائف V4.</small>
+        <small style="color:var(--muted)" id="settingsVersionNote">V6.2 — إدارة ملف شخصي، استيراد/تصدير JSON، وتحليل تطابق الوظائف مع إنشاء سيرة ذاتية مخصصة.</small>
       </div>
-      <span class="version-badge">Stable Core • V4.1</span>
+      <span class="version-badge" id="settingsVersionBadge">Stable Core • V6.2</span>
     </div>
-        <h3>مفتاح Gemini API</h3>
-        <p>التحليل يعمل من المتصفح مباشرة باستخدام مفتاحك الشخصي. المفتاح يُخزّن محليًا في متصفحك.</p>
+    <div class="section-title" style="margin-top:20px" data-i18n="profileSectionTitle">الملف الشخصي (يظهر في الواجهة ويُستخدم عند بناء السيرة الذاتية)</div>
+    <div class="grid">
+      <div><label data-i18n="p_name_label">الاسم</label><input type="text" id="p_name" placeholder="م. خالد رضوان"></div>
+      <div><label data-i18n="p_title_label">المسمى الوظيفي</label><input type="text" id="p_title" placeholder="مهندس مدني"></div>
+      <div><label data-i18n="p_org_label">الجهة</label><input type="text" id="p_org" placeholder="قطاع تطوير الري - وزارة الموارد المائية والري"></div>
+      <div><label data-i18n="p_years_label">سنوات الخبرة</label><input type="text" id="p_years" placeholder="8"></div>
+      <div><label data-i18n="p_email_label">البريد الإلكتروني</label><input type="text" id="p_email" placeholder="name@example.com"></div>
+      <div><label data-i18n="p_phone_label">الهاتف</label><input type="text" id="p_phone" placeholder="+20 1xx xxx xxxx"></div>
+      <div><label data-i18n="p_linkedin_label">حساب LinkedIn</label><input type="text" id="p_linkedin" placeholder="linkedin.com/in/username"></div>
+      <div><label data-i18n="p_location_label">محل الإقامة</label><input type="text" id="p_location" placeholder="القاهرة، مصر"></div>
+    </div>
+    <div class="actions"><button class="btn stamp sm" id="saveProfileBtn" data-i18n="saveProfileBtn">💾 حفظ الملف الشخصي</button></div>
+        <h3 data-i18n="geminiKeyTitle" style="margin-top:22px">مفتاح Gemini API</h3>
+        <p data-i18n="geminiKeyDesc">التحليل يعمل من المتصفح مباشرة باستخدام مفتاحك الشخصي. المفتاح يُخزّن محليًا داخل متصفحك فقط (localStorage) ولا يُرسل لأي سيرفر غير Google Gemini API مباشرة.</p>
         <div class="settings-row">
-          <input type="password" id="geminiKeyInput" placeholder="الصق مفتاح Gemini API هنا...">
-          <button class="btn stamp sm" id="saveKeyBtn">حفظ المفتاح</button>
-          <span class="key-status missing" id="keyStatus">لا يوجد مفتاح محفوظ</span>
+          <input type="password" id="geminiKeyInput" data-i18n-ph="geminiKeyPh" placeholder="الصق مفتاح Gemini API هنا...">
+          <button class="btn stamp sm" id="saveKeyBtn" data-i18n="saveKeyBtn">حفظ المفتاح</button>
+          <span class="key-status missing" id="keyStatus" data-i18n="keyStatusMissing">لا يوجد مفتاح محفوظ</span>
         </div>
+        <p class="hint" style="margin-top:8px">
+          <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noopener" data-i18n="getKeyLink">🔗 ما عندكش مفتاح؟ احصل عليه مجانًا من Google AI Studio</a>
+        </p>
       </div>
 
       <div class="card" id="certificateSection">
-        <div class="card-head"><h2><span class="step-num">1</span>تحليل شهادة جديدة</h2><span style="font-size:9px;color:var(--muted)">AI / OCR</span></div>
+        <div class="card-head"><h2><span data-i18n="certSectionHeading">تحليل شهادة جديدة</span></h2><span style="font-size:9px;color:var(--muted)">AI / OCR</span></div>
         <div class="card-body">
+          <div style="font-size:12px;color:var(--muted);margin-bottom:10px;padding:8px 10px;background:var(--soft-bg,#f7f7fb);border-radius:8px;" data-i18n="certPolicyHint">
+            هذا القسم للشهادات الموثَّقة فقط (لها شهادة فعلية بعد الانتهاء). أي دورة أو ورشة أو اجتماع بدون شهادة رسمية يُسجَّل في قسم "الأنشطة" بدلاً من هنا.
+          </div>
           <div class="dropzone" id="dropzone">
             <div class="icon">📄</div>
-            <div class="main-txt">اضغط هنا لاختيار ملف، أو اسحب الشهادة وأفلتها</div>
-            <div class="sub-txt">JPG · PNG · WEBP · PDF</div>
+            <div class="main-txt" data-i18n="dropzoneMain">اضغط هنا لاختيار ملف، أو اسحب الشهادة وأفلتها</div>
+            <div class="sub-txt">JPG · PNG · WEBP · PDF — الصور تتحول تلقائيًا لملف PDF عند الحفظ</div>
             <input type="file" id="fileInput" accept="image/*,application/pdf">
           </div>
           <div id="fileChipHolder"></div>
+          <div id="extraPagesHolder"></div>
+          <input type="file" id="extraPageInput" accept="image/*" multiple style="display:none">
           <div class="actions">
-            <button class="btn stamp" id="analyzeBtn" disabled>🔍 تحليل الشهادة بالذكاء الاصطناعي</button>
+            <button class="btn stamp" id="analyzeBtn" disabled data-i18n="analyzeBtn">🔍 تحليل الشهادة بالذكاء الاصطناعي</button>
           </div>
           <div id="loaderHolder"></div><div id="errHolder"></div>
         </div>
@@ -624,41 +753,114 @@ html[data-theme="dark"] .titleblock .gear-btn{background:#172642}
 
       <div class="card" id="formCard" style="display:none;">
         <div class="approved-stamp" id="approvedStamp">ADDED</div>
-        <div class="card-head"><h2><span class="step-num">2</span>مراجعة البيانات قبل الإضافة للسجل</h2></div>
+        <div class="card-head"><h2><span data-i18n="formCardHeading" id="formCardHeadingText">مراجعة البيانات قبل الإضافة للسجل</span></h2></div>
         <div class="card-body">
           <div class="grid">
             <div><label>No.</label><input type="text" id="f_no"></div><div><label>Date</label><input type="date" id="f_date"></div>
             <div class="full"><label>Name</label><input type="text" id="f_name"></div>
-            <div><label>Category</label><select id="f_category"></select></div><div><label>Mode</label><select id="f_mode"></select></div>
-            <div><label>Provider</label><input type="text" id="f_provider"></div><div><label>Dur.</label><input type="text" id="f_dur" placeholder="e.g. 2 Hrs."></div>
-            <div class="full"><label>Skills Gained</label><textarea id="f_skills"></textarea></div>
-            <div class="full"><label>Short Description (Arabic)</label><textarea id="f_desc" style="min-height:80px;"></textarea></div>
-            <div><label>Hyperlink</label><input type="text" id="f_hyperlink" value="Certification"></div>
-            <div><label>رابط الشهادة الفعلي (Drive) — اختياري</label><input type="text" id="f_hyperlink_url" placeholder="الصقه بعد رفع الملف على الدرايف"></div>
+            <div class="full"><label data-i18n="f_name_en_label">الاسم بالإنجليزية (لتسهيل البحث)</label><input type="text" id="f_name_en"></div>
+            <div><label data-i18n="f_domain_label">Domain</label><select id="f_category"></select></div><div><label>Mode</label><select id="f_mode"></select></div>
+            <div><label>Provider</label><input type="text" id="f_provider"></div><div><label>Dur. (Hours)</label><input type="number" id="f_dur" min="0" step="1" placeholder="e.g. 8"></div>
+            <div class="full"><label>Skills Gained</label>
+              <div id="f_skills_chips" style="display:flex;flex-wrap:wrap;gap:6px;min-height:34px;padding:6px;border:1px solid var(--line);border-radius:8px;"></div>
+              <button type="button" class="btn ghost sm" id="f_skills_pick_btn" style="margin-top:6px;">🏷️ اختيار المهارات من القائمة</button>
+            </div>
+            <div class="full"><label data-i18n="f_desc_label">الوصف والأثر العملي</label><textarea id="f_desc" style="min-height:100px;" data-i18n-ph="f_desc_ph" placeholder="وصف الشهادة/الدورة، وكيف استفدت منها عمليًا في عملك..."></textarea></div>
+            <div class="full"><label data-i18n="f_tags_label">Tags (كلمات مفتاحية مفصولة بفاصلة)</label><input type="text" id="f_tags" data-i18n-ph="f_tags_ph" placeholder="ري، إدارة مشاريع، BIM"></div>
+            <div class="full"><label data-i18n="f_hyperlink_url_label">Hyperlink</label><input type="text" id="f_hyperlink_url" data-i18n-ph="f_hyperlink_url_ph" placeholder="رابط الملف بعد رفعه على Drive (اختياري)"></div>
             <div><label>Instructor</label><input type="text" id="f_instructor"></div><div><label>Verification</label><input type="text" id="f_verification"></div>
-            <div class="full"><label>رابط التحقق الفعلي — اختياري</label><input type="text" id="f_verification_url"></div>
-            <div><label>Certificate Format</label><select id="f_format"><option>Digital Only</option><option>Hard + Scan</option><option>Both (Hard + Scan)</option><option>None</option></select></div>
-            <div class="full"><label>اسم الملف الجديد المقترح</label><input type="text" id="f_filename"><div class="hint">YYYY-MM Name.ext</div></div>
+            <div class="full"><label data-i18n="f_verification_url_label">رابط التحقق الفعلي — اختياري</label><input type="text" id="f_verification_url"></div>
+            <div class="full">
+              <label data-i18n="f_format_label">Certificate Format</label>
+              <div class="checkbox-row">
+                <label class="check-pill"><input type="checkbox" id="f_format_digital"><span data-i18n="f_format_digital">نسخة رقمية (Digital)</span></label>
+                <label class="check-pill"><input type="checkbox" id="f_format_hard"><span data-i18n="f_format_hard">نسخة ورقية (Hard Copy)</span></label>
+                <label class="check-pill"><input type="checkbox" id="f_format_scanned"><span data-i18n="f_format_scanned">ممسوحة ضوئيًا (Scanned)</span></label>
+              </div>
+            </div>
+            <div class="full"><label data-i18n="f_filename_label">اسم الملف الجديد المقترح</label><input type="text" id="f_filename"><div class="hint">YYYY-MM Name.ext</div></div>
           </div>
-          <div class="actions"><button class="btn stamp" id="confirmBtn">✅ تأكيد وإضافة للسجل + تنزيل الملف بالاسم الجديد</button><button class="btn ghost" id="generatePostBtn">📝 اكتب منشور إنجاز (LinkedIn)</button></div>
-          <div class="post-box" id="postBox"><label>مسودة المنشور</label><textarea id="postTextarea"></textarea><div class="actions"><button class="btn ghost sm" id="selectPostBtn">تحديد الكل للنسخ</button></div><div id="postLoader"></div></div>
+          <div class="actions">
+            <button class="btn stamp" id="confirmBtn" data-i18n="confirmBtn">✅ تأكيد وإضافة للسجل + تنزيل الملف بالاسم الجديد</button>
+            <button class="btn ghost" id="generatePostBtn" data-i18n="generatePostBtn">📝 اكتب منشور إنجاز (LinkedIn)</button>
+            <button class="btn ghost" id="cancelEditBtn" data-i18n="cancelEditBtn" style="display:none">✖ إلغاء التعديل</button>
+          </div>
+          <div class="post-box" id="postBox"><label data-i18n="postBoxLabel">مسودة المنشور</label><textarea id="postTextarea"></textarea><div class="actions"><button class="btn ghost sm" id="selectPostBtn" data-i18n="selectAllCopy">تحديد الكل للنسخ</button></div><div id="postLoader"></div></div>
         </div>
       </div>
 
-      <div class="section-title">السجل الكامل — Professional Development Record</div>
+      <div class="section-title" data-i18n="cvImportSectionTitle">استيراد سيرة ذاتية سابقة</div>
+      <div class="card" id="cvImportSection">
+        <div class="card-head"><h2><span data-i18n="cvImportHeading">حلّل سيرتك الذاتية القديمة</span></h2><span style="font-size:9px;color:var(--muted)">AI / Gemini</span></div>
+        <div class="card-body">
+          <div class="dropzone" id="cvDropzone">
+            <div class="icon">📄</div>
+            <div class="main-txt" data-i18n="cvDropzoneMain">اضغط هنا لاختيار ملف السيرة الذاتية، أو اسحبه وأفلته</div>
+            <div class="sub-txt">PDF · JPG · PNG</div>
+            <input type="file" id="cvFileInput" accept="image/*,application/pdf">
+          </div>
+          <div id="cvFileChipHolder"></div>
+          <div class="actions">
+            <button class="btn stamp" id="analyzeCvBtn" disabled data-i18n="analyzeCvBtn">🔍 تحليل السيرة الذاتية واستخراج البيانات</button>
+          </div>
+          <p class="hint" data-i18n="cvImportHint">هيتم استخراج الخبرات والمهارات والتعليم، وتقييم نقاط القوة والضعف. راجع النتيجة قبل استيرادها للسجل — البيانات لا تُضاف تلقائيًا إلا بعد ضغطك على زر الاستيراد.</p>
+          <div id="cvLoaderHolder"></div><div id="cvErrHolder"></div>
+          <div id="cvResultHolder"></div>
+        </div>
+      </div>
+
+      <div class="section-title" data-i18n="jobMatchSectionTitle">مطابقة وظيفة وإنشاء سيرة ذاتية (CV)</div>
+      <div class="card" id="jobMatchSection">
+        <div class="card-head"><h2><span data-i18n="jobMatchHeading">حلّل وظيفة مستهدفة</span></h2><span style="font-size:9px;color:var(--muted)">AI / Gemini</span></div>
+        <div class="card-body">
+          <div class="grid">
+            <div class="full"><label data-i18n="jobTitleLabel">مسمى الوظيفة (اختياري)</label><input type="text" id="jobTitleInput" data-i18n-ph="jobTitlePh" placeholder="مثال: مهندس ري أول - إدارة مشاريع"></div>
+            <div class="full"><label data-i18n="jobDescLabel">الصق نص الوظيفة / المتطلبات كاملاً</label><textarea id="jobDescInput" style="min-height:140px" data-i18n-ph="jobDescPh" placeholder="الصق هنا وصف الوظيفة والمتطلبات المطلوبة..."></textarea></div>
+          </div>
+          <div class="actions">
+            <button class="btn stamp" id="analyzeJobBtn" data-i18n="analyzeJobBtn">🎯 تحليل التطابق وإنشاء CV مخصص</button>
+          </div>
+          <p class="hint" data-i18n="jobMatchHint">التحليل يعتمد فقط على بياناتك المسجّلة في السجل (الشهادات، الخبرات، التطوع، الاجتماعات) والملف الشخصي — لا يُخترع أي بيانات غير موجودة.</p>
+          <div id="jobMatchLoader"></div>
+          <div id="jobMatchResult"></div>
+        </div>
+      </div>
+
+      <div class="card" id="aiCoachSection">
+        <div class="card-head"><h2><span data-i18n="aiCoachHeading">🤖 المساعد الشخصي للتطوير المهني</span></h2><span style="font-size:9px;color:var(--muted)">AI / Gemini</span></div>
+        <div class="card-body">
+          <p class="hint" data-i18n="aiCoachHint">مساعد محادثة مطّلع على سجلك المهني كامل (الشهادات، الخبرات، المهارات، التعليم، الأنشطة) — استخدمه للنقاش في تطوير نفسك، أو الصق له وصف وظيفة/كورس ليقيّم مدى مناسبته لك، أو استعن به لملء استبيان بناءً على بياناتك الفعلية.</p>
+          <div class="actions" style="margin-bottom:10px;">
+            <button class="btn ghost sm" id="chatStarterCoach">💬 نقاش تطوير ذاتي</button>
+            <button class="btn ghost sm" id="chatStarterOpportunity">🎯 قيّم لي فرصة (وظيفة/كورس)</button>
+            <button class="btn ghost sm" id="chatStarterSurvey">📋 ساعدني أملأ استبيان</button>
+            <button class="btn ghost sm" id="chatClearBtn" style="margin-inline-start:auto;">🗑 مسح المحادثة</button>
+          </div>
+          <div id="chatMessages" style="display:flex;flex-direction:column;gap:10px;max-height:420px;overflow-y:auto;padding:10px;border:1px solid var(--line);border-radius:10px;background:var(--soft-bg,#f9f9fc);"></div>
+          <div id="chatLoader"></div>
+          <div style="display:flex;gap:8px;margin-top:10px;align-items:flex-end;">
+            <textarea id="chatInput" style="flex:1;min-height:52px;max-height:160px;" placeholder="اكتب رسالتك هنا... أو الصق نص وظيفة/كورس/استبيان"></textarea>
+            <button class="btn stamp" id="chatSendBtn">إرسال ⬆</button>
+          </div>
+        </div>
+      </div>
       <div class="card" id="recordsSection">
         <div class="card-head">
-          <h2><span class="step-num">3</span>كل صفحات السجل</h2>
+          <h2><span data-i18n="recordsHeading">كل صفحات السجل</span></h2>
           <div style="display:flex;gap:7px;flex-wrap:wrap">
-            <button class="btn ghost sm" id="importBtn">⬆ استيراد Excel</button>
+            <button class="btn ghost sm" id="importBtn" data-i18n="importExcelBtn">⬆ استيراد Excel</button>
             <input type="file" id="importInput" accept=".xlsx,.xls" style="display:none;">
-            <button class="btn stamp sm" id="exportBtn">⬇ تصدير Excel</button>
+            <button class="btn stamp sm" id="exportBtn" data-i18n="exportExcelBtn">⬇ تصدير Excel</button>
+            <button class="btn ghost sm" id="importJsonBtn" data-i18n="importJsonBtn">⬆ استيراد JSON</button>
+            <input type="file" id="importJsonInput" accept="application/json,.json" style="display:none;">
+            <button class="btn stamp sm" id="exportJsonBtn" data-i18n="exportJsonBtn">⬇ تصدير JSON</button>
           </div>
         </div>
         <div id="importMsgHolder" style="padding:0 15px"></div>
         <div class="tabbar" id="tabbar"></div>
-        <div class="record-toolbar"><button class="btn ghost sm" id="addRowBtn">➕ صف يدوي</button><button class="btn ghost sm" id="clearLogBtn">🗑 مسح هذه الصفحة</button><span class="record-count">البيانات محفوظة تلقائيًا في المتصفح</span></div>
-        <div class="card-body" style="padding-top:8px"><div class="sheet-scroll"><div id="tableHolder"></div></div><p class="hint">يمكن تعديل الخلايا مباشرة. البيانات تحفظ محليًا، ويمكن تصديرها إلى Excel في أي وقت.</p></div>
+        <div id="tabPolicyHint" style="display:none;font-size:12px;color:var(--muted);margin:0 15px 8px;padding:8px 10px;background:var(--soft-bg,#f7f7fb);border-radius:8px;"></div>
+        <div class="record-toolbar"><button class="btn stamp sm" id="addGuidedBtn" style="display:none">📝 إضافة عبر نموذج</button><button class="btn ghost sm" id="sortByDateBtn" style="display:none">↕️ ترتيب حسب التاريخ</button><button class="btn ghost sm" id="cleanupSkillsBtn" style="display:none">🧹 تنظيف المهارات المكررة</button><button class="btn ghost sm" id="addRowBtn" data-i18n="addRowBtn">➕ صف يدوي</button><button class="btn ghost sm" id="clearLogBtn" data-i18n="clearLogBtn">🗑 مسح هذه الصفحة</button><span class="record-count" data-i18n="autoSavedNote">البيانات محفوظة تلقائيًا في المتصفح</span></div>
+        <div class="card-body" style="padding-top:8px"><div class="sheet-scroll"><div id="tableHolder"></div></div><p class="hint" data-i18n="editCellsHint">يمكن تعديل الخلايا مباشرة. البيانات تحفظ محليًا، ويمكن تصديرها إلى Excel أو JSON في أي وقت.</p></div>
       </div>
     </div>
   </div>
@@ -667,70 +869,328 @@ html[data-theme="dark"] .titleblock .gear-btn{background:#172642}
 <button id="backToTop" aria-label="الانتقال إلى أعلى الصفحة" title="الانتقال إلى أعلى الصفحة">↑</button>
 
 <div class="toast" id="toast"></div>
-<script>
-const KNOWN_CATEGORIES = ["Infrastructure & Roads","Soft Skills","Strategy & Governance","Water Treatment","Water & Environment","Project Management","AI & Productivity","Web Development"];
-const KNOWN_MODES = ["Self-Paced","Online Test","In-Person Conference","Live Online Course","In-Person","Live Online Workshop","Hybrid Interactive Bootcamp"];
 
-// ---------- Section (sheet) schemas ----------
+<div id="skillPickerOverlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:9999;align-items:center;justify-content:center;">
+  <div style="background:#fff;max-width:420px;width:92%;max-height:80vh;border-radius:12px;padding:18px;display:flex;flex-direction:column;gap:10px;overflow:hidden;">
+    <h3 style="margin:0;font-size:16px;">اختيار المهارات</h3>
+    <input type="text" id="skillPickerSearch" placeholder="ابحث أو اكتب اسم مهارة جديدة..." style="padding:8px;border:1px solid #ccc;border-radius:8px;">
+    <div id="skillPickerList" style="overflow-y:auto;flex:1;border:1px solid #eee;border-radius:8px;padding:6px;"></div>
+    <button id="skillPickerAddNew" style="padding:8px;border:1px dashed #888;border-radius:8px;background:#fafafa;cursor:pointer;">➕ إضافة كمهارة جديدة للقائمة الموحّدة</button>
+    <div style="display:flex;gap:8px;justify-content:flex-end;">
+      <button id="skillPickerCancel" style="padding:8px 14px;border-radius:8px;border:1px solid #ccc;background:#fff;cursor:pointer;">إلغاء</button>
+      <button id="skillPickerSave" style="padding:8px 14px;border-radius:8px;border:none;background:#2563eb;color:#fff;cursor:pointer;">حفظ</button>
+    </div>
+  </div>
+</div>
+
+<div id="sourceLinkOverlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:9999;align-items:center;justify-content:center;">
+  <div style="background:#fff;max-width:460px;width:92%;max-height:80vh;border-radius:12px;padding:18px;display:flex;flex-direction:column;gap:10px;overflow:hidden;">
+    <h3 style="margin:0;font-size:16px;">ربط المهارة بمصادرها</h3>
+    <small style="color:#777;">اختر الشهادات/الأنشطة/الخبرات اللي اكتسبت منها هذه المهارة — يمكن اختيار أكتر من مصدر.</small>
+    <input type="text" id="sourceLinkSearch" placeholder="ابحث..." style="padding:8px;border:1px solid #ccc;border-radius:8px;">
+    <div id="sourceLinkList" style="overflow-y:auto;flex:1;border:1px solid #eee;border-radius:8px;padding:6px;"></div>
+    <div style="display:flex;gap:8px;justify-content:flex-end;">
+      <button id="sourceLinkCancel" style="padding:8px 14px;border-radius:8px;border:1px solid #ccc;background:#fff;cursor:pointer;">إلغاء</button>
+      <button id="sourceLinkSave" style="padding:8px 14px;border-radius:8px;border:none;background:#2563eb;color:#fff;cursor:pointer;">حفظ</button>
+    </div>
+  </div>
+</div>
+
+<div id="skillCleanupOverlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:9999;align-items:center;justify-content:center;">
+  <div style="background:#fff;max-width:640px;width:94%;max-height:88vh;border-radius:12px;padding:20px;display:flex;flex-direction:column;gap:12px;overflow:hidden;">
+    <div style="display:flex;justify-content:space-between;align-items:center;">
+      <h3 style="margin:0;font-size:16px;">تنظيف ودمج المهارات المكررة</h3>
+      <button id="skillCleanupClose" style="border:none;background:none;font-size:20px;cursor:pointer;">✕</button>
+    </div>
+    <div id="skillCleanupBody" style="overflow-y:auto;flex:1;display:flex;flex-direction:column;gap:14px;"></div>
+  </div>
+</div>
+
+<div id="genericFormOverlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:9999;align-items:center;justify-content:center;">
+  <div style="background:#fff;max-width:560px;width:94%;max-height:88vh;border-radius:12px;padding:20px;display:flex;flex-direction:column;gap:12px;overflow:hidden;">
+    <h3 id="genericFormTitle" style="margin:0;font-size:16px;">إضافة سجل</h3>
+    <div id="genericFormFields" style="overflow-y:auto;flex:1;display:flex;flex-direction:column;gap:12px;padding-inline-end:4px;"></div>
+    <div style="display:flex;gap:8px;justify-content:flex-end;border-top:1px solid #eee;padding-top:10px;">
+      <button id="genericFormCancel" style="padding:9px 16px;border-radius:8px;border:1px solid #ccc;background:#fff;cursor:pointer;">إلغاء</button>
+      <button id="genericFormSave" style="padding:9px 16px;border-radius:8px;border:none;background:#2563eb;color:#fff;cursor:pointer;">✅ حفظ</button>
+    </div>
+  </div>
+</div>
+<script>
+// ---------- مصدر واحد لرقم الإصدار — يُستخدم في العنوان، الشارات، الإعدادات، وأسماء ملفات التصدير ----------
+// عدّل هذا الرقم فقط عند إصدار نسخة جديدة؛ كل الأماكن الأخرى تقرأ منه تلقائيًا بدل أرقام مكتوبة يدويًا متفرقة.
+const APP_VERSION = '6.2';
+window.APP_VERSION = APP_VERSION;
+function syncVersionUI(lang){
+  const isEn = lang === 'en';
+  document.title = isEn ? `Personal Career Assistant — V${APP_VERSION}` : `المساعد المهني الشخصي — V${APP_VERSION}`;
+  const topBadge = document.getElementById('topVersionBadge');
+  if(topBadge) topBadge.textContent = isEn ? `V${APP_VERSION} — CV & Job Match` : `V${APP_VERSION} — تحليل CV والوظائف`;
+  const settingsBadge = document.getElementById('settingsVersionBadge');
+  if(settingsBadge) settingsBadge.textContent = `Stable Core • V${APP_VERSION}`;
+  const settingsNote = document.getElementById('settingsVersionNote');
+  if(settingsNote) settingsNote.textContent = isEn
+    ? `V${APP_VERSION} — Profile management, JSON import/export, and job-match analysis with tailored CV generation.`
+    : `V${APP_VERSION} — إدارة ملف شخصي، استيراد/تصدير JSON، وتحليل تطابق الوظائف مع إنشاء سيرة ذاتية مخصصة.`;
+}
+window.syncVersionUI = syncVersionUI;
+syncVersionUI('ar');
+
+// ---------- V5.0: controlled vocabularies (with persisted custom additions) ----------
+const BASE_CATEGORIES = ["تقنية هندسية","إدارة مشاريع","حوكمة واستراتيجية","مهارات ناعمة وتنمية بشرية","تقنية معلومات وذكاء اصطناعي","لغات","أخرى"];
+const BASE_MODES = ["حضوري","عن بُعد - مباشر","عن بُعد - ذاتي التعلم","مدمج (حضوري وعن بُعد)"];
+function loadCustomList(storageKey){
+  try{ const v = localStorage.getItem(storageKey); return v ? JSON.parse(v) : []; }catch(e){ return []; }
+}
+function saveCustomList(storageKey, list){
+  try{ localStorage.setItem(storageKey, JSON.stringify(list)); }catch(e){}
+}
+let customCategories = loadCustomList('custom-categories');
+let customModes = loadCustomList('custom-modes');
+function getCategoryOptions(){ return [...BASE_CATEGORIES, ...customCategories]; }
+function getModeOptions(){ return [...BASE_MODES, ...customModes]; }
+const KNOWN_CATEGORIES = getCategoryOptions();
+const KNOWN_MODES = getModeOptions();
+
+// ---------- Section (sheet) schemas — طبقًا لدليل هيكل البيانات v4 ----------
+const ACTIVITY_TYPE_OPTIONS = [
+  { value:'workshop', ar:'ورشة عمل', en:'Workshop' },
+  { value:'meeting', ar:'اجتماع', en:'Meeting' },
+  { value:'course_no_certificate', ar:'دورة بدون شهادة', en:'Course (no certificate)' },
+  { value:'podcast', ar:'بودكاست مهني', en:'Professional Podcast' },
+  { value:'mission', ar:'مأمورية', en:'Mission' },
+  { value:'other', ar:'أخرى', en:'Other' }
+];
+const EXP_TYPE_OPTIONS = [
+  { value:'job', ar:'وظيفة/خبرة عملية', en:'Job / Experience' },
+  { value:'volunteering', ar:'تطوع', en:'Volunteering' }
+];
+const EVIDENCE_TYPE_OPTIONS = [
+  { value:'certified', ar:'موثّقة بشهادة', en:'Certified' },
+  { value:'tested', ar:'أثبتها اختبار', en:'Tested' },
+  { value:'self_assessed', ar:'تقييم ذاتي', en:'Self-assessed' }
+];
+const JOB_STATUS_OPTIONS = [
+  { value:'active', ar:'نشطة', en:'Active' },
+  { value:'achieved', ar:'تم تحقيقها', en:'Achieved' },
+  { value:'archived', ar:'مؤرشفة', en:'Archived' }
+];
+const CV_TYPE_OPTIONS = [
+  { value:'general', ar:'عامة', en:'General' },
+  { value:'tailored', ar:'مخصصة لوظيفة', en:'Tailored' }
+];
+
+function genId(prefix){ return prefix + '_' + Date.now().toString(36) + Math.random().toString(36).slice(2,7); }
+
+// certifications: أي عنصر من نوع "دورة/برنامج تدريبي منظم" وله شهادة فعلية (وفق الدليل، القسم 3)
 const CERT_COLS = [
   {key:'no', header:'No.'},
   {key:'name', header:'Name', aliases:['Course Name','Certificate Name','اسم الشهادة','اسم الدورة'], wide:true},
-  {key:'category', header:'Category', aliases:['الفئة','التصنيف']},
-  {key:'mode', header:'Mode', aliases:['Attendance Mode','طريقة الحضور','نوع الحضور']},
-  {key:'provider', header:'Provider', aliases:['Issuer','Organization','الجهة','الجهة المانحة']},
-  {key:'date', header:'Date', aliases:['Issue Date','تاريخ','التاريخ']},
-  {key:'dur', header:'Dur.', aliases:['Duration','المدة']},
-  {key:'skills', header:'Skills Gained', wide:true},
-  {key:'desc', header:'Short Description', wide:true},
-  {key:'hyperlink', header:'Hyperlink'},
-  {key:'hyperlink_url', header:'Hyperlink URL', isUrl:true},
+  {key:'name_en', header:'Name (English)', aliases:['Name EN','English Title','الاسم بالإنجليزية'], wide:true},
+  {key:'domain', header:'Domain', aliases:['الفئة','التصنيف','Category'], type:'select', options:()=>getCategoryOptions(), allowCustom:'custom-categories'},
+  {key:'mode', header:'Delivery Method', aliases:['Attendance Mode','طريقة الحضور','نوع الحضور'], type:'select', options:()=>getModeOptions(), allowCustom:'custom-modes'},
+  {key:'provider', header:'Issuer', aliases:['Issuer','Organization','الجهة','الجهة المانحة']},
   {key:'instructor', header:'Instructor'},
-  {key:'verification', header:'Verification'},
+  {key:'date', header:'Date Issued', aliases:['Issue Date','تاريخ','التاريخ']},
+  {key:'dur', header:'Hours', aliases:['Duration','المدة','عدد الساعات']},
+  {key:'skill_ids', header:'Skills Gained', type:'skills', wide:true},
+  {key:'desc', header:'Description', aliases:['Short Description','Impact','الوصف','الأثر'], wide:true},
+  {key:'tags', header:'Tags', aliases:['Keywords','كلمات مفتاحية']},
+  {key:'hyperlink_url', header:'Certificate File / Drive Link', isUrl:true, aliases:['Hyperlink']},
+  {key:'verification_code', header:'Verification Code', aliases:['Verification']},
   {key:'verification_url', header:'Verification URL', isUrl:true},
   {key:'format', header:'Certificate Format'}
 ];
+// experience: خبرة عمل + تطوع مدموجين بحقل type (الدليل، القسم 4)
 const EXP_COLS = [
   {key:'no', header:'No.'},
-  {key:'job_title', header:'Job Title', wide:true},
+  {key:'type', header:'Type', type:'select', options:EXP_TYPE_OPTIONS},
+  {key:'job_title', header:'Title / Role', wide:true},
+  {key:'job_title_en', header:'Title / Role (English)', wide:true},
   {key:'project_dept', header:'Project/Dept.', wide:true},
   {key:'organization', header:'Organization', wide:true},
   {key:'start_date', header:'Start Date'},
   {key:'end_date', header:'End Date'},
-  {key:'achievements', header:'Major Achievements', wide:true},
+  {key:'tasks', header:'Core Tasks / Responsibilities', aliases:['المهام الأساسية'], wide:true},
+  {key:'achievements', header:'Major Achievements / Impact', wide:true},
+  {key:'skill_ids', header:'Skills Used', type:'skills', wide:true},
+  {key:'tags', header:'Tags', aliases:['Keywords','كلمات مفتاحية']},
   {key:'reference_person', header:'Reference Person'}
 ];
-const MEET_COLS = [
+// activities: أنشطة لحظية/قصيرة المدى (الدليل، القسم 5)
+const ACTIVITY_COLS = [
   {key:'no', header:'م'},
+  {key:'type', header:'Type', type:'select', options:ACTIVITY_TYPE_OPTIONS},
   {key:'date', header:'التاريخ'},
-  {key:'title', header:'عنوان الاجتماع / الورشة', aliases:['عنوان الاجتماع','عنوان الاجتماع / الورشة','Meeting Title','Workshop Title'], wide:true},
+  {key:'title', header:'العنوان', aliases:['عنوان الاجتماع','عنوان الاجتماع / الورشة','Meeting Title','Workshop Title'], wide:true},
+  {key:'title_en', header:'العنوان بالإنجليزية', aliases:['Title EN'], wide:true},
   {key:'project_entity', header:'المشروع/الجهة', wide:true},
-  {key:'location', header:'مكان الاجتماع'},
-  {key:'content', header:'المحتوي', wide:true},
-  {key:'post_link', header:'Post link'},
-  {key:'post_link_url', header:'Post link URL', isUrl:true}
+  {key:'location', header:'مكان الحدث'},
+  {key:'description', header:'الوصف', aliases:['المحتوي'], wide:true},
+  {key:'skill_ids', header:'Skills', type:'skills', wide:true},
+  {key:'proof_link', header:'Proof link'},
+  {key:'proof_url', header:'Proof URL', isUrl:true, aliases:['post_link_url']}
 ];
-const VOL_COLS = [
+// skills: قائمة المهارات الموحّدة — المصدر الوحيد لأي مهارة في التطبيق (الدليل، القسم 2)
+const SKILL_COLS = [
   {key:'no', header:'No.'},
-  {key:'role', header:'Role', wide:true},
-  {key:'organization', header:'Organization/Initiative', wide:true},
-  {key:'impact', header:'Impact', wide:true},
-  {key:'skills_applied', header:'Skills Applied', wide:true},
-  {key:'start_date', header:'Start Date'},
-  {key:'end_date', header:'End Date'}
+  {key:'skill_name', header:'Skill', aliases:['المهارة'], wide:true},
+  {key:'type', header:'Category', aliases:['النوع']},
+  {key:'level', header:'Level', aliases:['المستوى']},
+  {key:'evidence_type', header:'Evidence', type:'select', options:EVIDENCE_TYPE_OPTIONS},
+  {key:'linked_sources', header:'Linked Sources', type:'links', wide:true},
+  {key:'source', header:'Notes', aliases:['مصدر اكتسابها','Source Ref'], wide:true}
+];
+// السجلات القابلة للربط كـ"مصدر" لمهارة — شهادات، أنشطة، خبرات (الأكثر منطقية كمصدر اكتساب مهارة)
+const LINKABLE_SECTIONS = ['certifications','activities','experience'];
+function ensureRowIds(sectionKey){
+  const prefix = sectionKey.slice(0,3);
+  (SECTIONS[sectionKey].rows||[]).forEach(r=>{ if(!r.id) r.id = genId(prefix); });
+}
+function linkableRecordLabel(sectionKey, row){
+  if(sectionKey === 'certifications') return row.name || row.name_en || '(بدون اسم)';
+  if(sectionKey === 'activities') return row.title || row.title_en || '(بدون عنوان)';
+  if(sectionKey === 'experience') return row.job_title || row.job_title_en || '(بدون مسمى)';
+  return '(سجل)';
+}
+const EDU_COLS = [
+  {key:'no', header:'No.'},
+  {key:'degree', header:'Degree/Qualification', aliases:['المؤهل'], wide:true},
+  {key:'degree_en', header:'Degree/Qualification (English)', aliases:['المؤهل بالإنجليزية'], wide:true},
+  {key:'institution', header:'Institution', aliases:['الجهة'], wide:true},
+  {key:'major', header:'Major', aliases:['التخصص'], wide:true},
+  {key:'graduation_date', header:'Graduation Date', aliases:['تاريخ التخرج']},
+  {key:'grade', header:'Grade', aliases:['التقدير']}
+];
+// jobs: الوظائف المستهدفة *المحفوظة* فقط (الدليل، القسم 6) — الفحص السريع غير المحفوظ لا يلمس هذا القسم
+const JOB_COLS = [
+  {key:'no', header:'No.'},
+  {key:'title', header:'Job Title', wide:true},
+  {key:'title_en', header:'Job Title (English)', wide:true},
+  {key:'status', header:'Status', type:'select', options:JOB_STATUS_OPTIONS},
+  {key:'match_score', header:'Match %'},
+  {key:'required_experience_years', header:'Years Required'},
+  {key:'required_skill_ids', header:'Required Skills', type:'skills', wide:true},
+  {key:'date_added', header:'Date Added'}
+];
+// cvVersions: نسخ السيرة الذاتية المولّدة (الدليل، القسم 7)
+const CV_COLS = [
+  {key:'no', header:'No.'},
+  {key:'type', header:'Type', type:'select', options:CV_TYPE_OPTIONS},
+  {key:'job_title_ref', header:'Target Job', wide:true},
+  {key:'language', header:'Language', type:'select', options:[{value:'ar',ar:'عربي',en:'Arabic'},{value:'en',ar:'إنجليزي',en:'English'}]},
+  {key:'generated_date', header:'Generated Date'},
+  {key:'content', header:'CV Content', wide:true}
 ];
 
 const SECTIONS = {
-  certifications: { key:'certifications', tabLabel:'Certifications & Courses', sheetLabel:'Certifications & Courses', sheetAliases:['Certifications','Courses'], cols:CERT_COLS, urlKeys:['hyperlink','verification'], storageKey:'sheet-certifications', rows:[], sheetNameResolved:null },
-  experience:     { key:'experience',     tabLabel:'Experience',               sheetLabel:'Experience',               cols:EXP_COLS,  urlKeys:[],                            storageKey:'sheet-experience',     rows:[], sheetNameResolved:null },
-  meetings:       { key:'meetings',       tabLabel:'الإجتماعات',                sheetLabel:'الإجتماعات', sheetAliases:['الاجتماعات','Meeting','Meetings'],                cols:MEET_COLS, urlKeys:['post_link'],                 storageKey:'sheet-meetings',       rows:[], sheetNameResolved:null },
-  volunteering:   { key:'volunteering',   tabLabel:'Volunteering',             sheetLabel:'Volunteering',             cols:VOL_COLS,  urlKeys:[],                            storageKey:'sheet-volunteering',   rows:[], sheetNameResolved:null }
+  certifications: { key:'certifications', tabLabel:'Certifications', sheetLabel:'Certificate', sheetAliases:['Certifications','Certifications & Courses','الشهادات','Courses','الدورات'], cols:CERT_COLS, urlKeys:['hyperlink_url','verification_url'], storageKey:'sheet-certifications', rows:[], sheetNameResolved:null },
+  experience:     { key:'experience',     tabLabel:'Experience',   sheetLabel:'Experience', sheetAliases:['Volunteering','التطوع'], cols:EXP_COLS,  urlKeys:[], storageKey:'sheet-experience',     rows:[], sheetNameResolved:null },
+  activities:     { key:'activities',     tabLabel:'Activities',   sheetLabel:'الأنشطة', sheetAliases:['الاجتماعات','Meeting','Meetings','الإجتماعات'], cols:ACTIVITY_COLS, urlKeys:['proof_url'], storageKey:'sheet-activities', rows:[], sheetNameResolved:null },
+  skills:         { key:'skills',         tabLabel:'Skills',       sheetLabel:'Skills', sheetAliases:['المهارات'], cols:SKILL_COLS, urlKeys:[], storageKey:'sheet-skills', rows:[], sheetNameResolved:null },
+  education:      { key:'education',      tabLabel:'Education',    sheetLabel:'Education', sheetAliases:['التعليم','المؤهلات'], cols:EDU_COLS, urlKeys:[], storageKey:'sheet-education', rows:[], sheetNameResolved:null },
+  jobs:           { key:'jobs',           tabLabel:'Target Jobs',  sheetLabel:'Target Jobs', sheetAliases:['الوظائف المستهدفة'], cols:JOB_COLS, urlKeys:[], storageKey:'sheet-jobs', rows:[], sheetNameResolved:null },
+  cvVersions:     { key:'cvVersions',      tabLabel:'CV Versions',  sheetLabel:'CV Versions', sheetAliases:['السير الذاتية'], cols:CV_COLS, urlKeys:[], storageKey:'sheet-cvVersions', rows:[], sheetNameResolved:null }
 };
-const SECTION_ORDER = ['certifications','experience','meetings','volunteering'];
+const SECTION_ORDER = ['certifications','experience','activities','skills','education','jobs','cvVersions'];
+window.SECTIONS_REF = SECTIONS;
 let activeTab = 'certifications';
+
+// ---------- Skills master-list helpers (single source of truth — الدليل، القاعدة رقم 1) ----------
+function getSkillById(id){ return SECTIONS.skills.rows.find(s=>s.id===id); }
+function getSkillNames(ids, lang){
+  if(!Array.isArray(ids)) return [];
+  return ids.map(id=>{
+    const s = getSkillById(id);
+    if(!s) return null;
+    return s.skill_name || '';
+  }).filter(Boolean);
+}
+// تطبيع اسم المهارة للمقارنة فقط (العرض يفضل زي ما هو) — يوحّد اختلافات الألف/الهمزة الشائعة
+// في الكتابة العربية (أ/إ/آ/ا) والمسافات الزائدة، عشان "إدارة المشاريع" و"ادارة المشاريع" يتعرفوا
+// كنفس المهارة بدل ما يتسجلوا كصفين منفصلين.
+function normalizeSkillKey(name){
+  return String(name||'')
+    .trim()
+    .toLowerCase()
+    .replace(/[أإآ]/g, 'ا')
+    .replace(/ة/g, 'ه')
+    .replace(/ى/g, 'ي')
+    .replace(/\s+/g, ' ');
+}
+function findOrCreateSkillByName(name, opts){
+  const trimmed = String(name||'').trim();
+  if(!trimmed) return null;
+  const key = normalizeSkillKey(trimmed);
+  let found = SECTIONS.skills.rows.find(s=> normalizeSkillKey(s.skill_name) === key);
+  if(found){
+    if(opts){
+      if(opts.type && !found.type) found.type = opts.type;
+      if(opts.source && !found.source) found.source = opts.source;
+    }
+    return found.id;
+  }
+  const id = genId('sk');
+  const maxNo = SECTIONS.skills.rows.reduce((m,r)=> Math.max(m, parseInt(r.no)||0), 0);
+  SECTIONS.skills.rows.push({ id, no:String(maxNo+1), skill_name:trimmed, type:(opts && opts.type) || '', level:'', evidence_type:'self_assessed', source:(opts && opts.source) || '' });
+  persistSection('skills');
+  return id;
+}
 
 let currentFile = null;
 let geminiKey = '';
+let certFormSkillIds = []; // المهارات المختارة حاليًا في فورم الشهادات (بالـ IDs، عبر منتقي المهارات فقط — بدون كتابة حرة)
+function renderSkillChipsInto(containerEl, ids){
+  if(!containerEl) return;
+  const names = getSkillNames(ids, currentLang());
+  containerEl.innerHTML = names.length
+    ? names.map(n=>`<span class="skill-chip">${escapeHtml(n)}</span>`).join('')
+    : `<span style="color:#999;font-size:12px;">لا توجد مهارات مختارة بعد</span>`;
+}
 let importedWorkbook = null; // the FULL original workbook — every sheet we don't touch stays byte-identical
+
+// ---------- Shared Gemini API helper (single source of truth for model + call logic) ----------
+const GEMINI_MODEL = 'gemini-3.5-flash-lite';
+async function callGeminiAPI(parts, { json = false } = {}){
+  const body = { contents: [{ parts }] };
+  if(json) body.generationConfig = { responseMimeType: "application/json" };
+  const resp = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${encodeURIComponent(geminiKey)}`, {
+    method:'POST', headers:{ 'Content-Type':'application/json' }, body: JSON.stringify(body)
+  });
+  const data = await resp.json();
+  if(!resp.ok){
+    const msg = (data && data.error && data.error.message) ? data.error.message : ('HTTP ' + resp.status);
+    throw new Error(msg);
+  }
+  const cand = data.candidates && data.candidates[0];
+  return cand && cand.content && cand.content.parts ? cand.content.parts.map(p=>p.text||'').join('') : '';
+}
+// نداء محادثة متعددة الأدوار (Multi-turn) — يُستخدم للمساعد الشخصي، بيبعت تاريخ المحادثة كامل مع كل
+// رسالة (مطلوب لأن الـ API بلا حالة/stateless)، مع تعليمات نظام منفصلة (systemInstruction) تحمل سياق
+// السجل المهني كامل، فيفضل محدَّث دايمًا حتى لو طالت المحادثة، من غير ما يظهر كفقاعة رسالة للمستخدم.
+async function callGeminiChat(history, systemText){
+  const body = { contents: history.map(m=>({ role:m.role, parts:[{text:m.text}] })) };
+  if(systemText) body.systemInstruction = { parts:[{text:systemText}] };
+  const resp = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${encodeURIComponent(geminiKey)}`, {
+    method:'POST', headers:{ 'Content-Type':'application/json' }, body: JSON.stringify(body)
+  });
+  const data = await resp.json();
+  if(!resp.ok){
+    const msg = (data && data.error && data.error.message) ? data.error.message : ('HTTP ' + resp.status);
+    throw new Error(msg);
+  }
+  const cand = data.candidates && data.candidates[0];
+  return cand && cand.content && cand.content.parts ? cand.content.parts.map(p=>p.text||'').join('') : '';
+}
+function parseGeminiJson(textOut){
+  let clean = textOut.trim().replace(/^```json/i,'').replace(/^```/,'').replace(/```$/,'').trim();
+  try{ return JSON.parse(clean); }
+  catch(e){
+    const m = clean.match(/\{[\s\S]*\}/);
+    if(m){ return JSON.parse(m[0]); }
+    throw new Error('تعذّر فهم استجابة النموذج');
+  }
+}
 
 const storage = {
   async get(key){ try{ const v = localStorage.getItem(key); return v==null ? null : { value:v }; } catch(e){ return null; } },
@@ -738,18 +1198,6 @@ const storage = {
 };
 
 function $(id){ return document.getElementById(id); }
-
-// ---------- Live clock (Cairo time) ----------
-function updateClock(){
-  const el = $('liveClock');
-  if(!el) return;
-  const now = new Date();
-  const datePart = now.toLocaleDateString('ar-EG', { timeZone:'Africa/Cairo', weekday:'long', year:'numeric', month:'long', day:'numeric' });
-  const timePart = now.toLocaleTimeString('en-GB', { timeZone:'Africa/Cairo', hour:'2-digit', minute:'2-digit', second:'2-digit' });
-  el.textContent = `${datePart} — ${timePart} (توقيت القاهرة)`;
-}
-updateClock();
-setInterval(updateClock, 1000);
 
 function toast(msg, ms){
   const t = $('toast'); t.textContent = msg; t.classList.add('show');
@@ -763,21 +1211,29 @@ function fillSelect(sel, options){
   const custom = document.createElement('option'); custom.value='__custom__'; custom.textContent='أخرى (اكتب يدوياً)…';
   sel.appendChild(custom);
 }
-fillSelect($('f_category'), KNOWN_CATEGORIES);
-fillSelect($('f_mode'), KNOWN_MODES);
-function attachCustomHandler(selectEl){
+fillSelect($('f_category'), getCategoryOptions());
+fillSelect($('f_mode'), getModeOptions());
+function attachCustomHandler(selectEl, kind){
   selectEl.addEventListener('change', ()=>{
     if(selectEl.value === '__custom__'){
-      const val = prompt('اكتب القيمة المخصصة:', '');
-      if(val){
-        const op = document.createElement('option'); op.value=val; op.textContent=val; op.selected=true;
-        selectEl.insertBefore(op, selectEl.lastChild);
+      const val = prompt('اكتب القيمة الجديدة (ستُحفظ وتظهر في القائمة دائمًا):', '');
+      if(val && val.trim()){
+        const trimmed = val.trim();
+        if(kind === 'category'){
+          if(!customCategories.includes(trimmed)){ customCategories.push(trimmed); saveCustomList('custom-categories', customCategories); }
+          fillSelect($('f_category'), getCategoryOptions());
+          setSelectValue($('f_category'), trimmed);
+        } else {
+          if(!customModes.includes(trimmed)){ customModes.push(trimmed); saveCustomList('custom-modes', customModes); }
+          fillSelect($('f_mode'), getModeOptions());
+          setSelectValue($('f_mode'), trimmed);
+        }
       } else { selectEl.selectedIndex = 0; }
     }
   });
 }
-attachCustomHandler($('f_category'));
-attachCustomHandler($('f_mode'));
+attachCustomHandler($('f_category'), 'category');
+attachCustomHandler($('f_mode'), 'mode');
 function setSelectValue(selectEl, value){
   if(!value) return;
   if(![...selectEl.options].some(o=>o.value===value)){
@@ -802,9 +1258,13 @@ $('saveKeyBtn').addEventListener('click', async ()=>{
 });
 function updateKeyStatus(){
   const st = $('keyStatus');
-  if(geminiKey){ st.textContent='مفتاح محفوظ ✓'; st.classList.remove('missing'); }
-  else { st.textContent='لا يوجد مفتاح محفوظ'; st.classList.add('missing'); }
+  const lang = document.documentElement.getAttribute('lang') === 'en' ? 'en' : 'ar';
+  const savedTxt = lang === 'en' ? 'Key saved ✓' : 'مفتاح محفوظ ✓';
+  const missingTxt = lang === 'en' ? 'No key saved' : 'لا يوجد مفتاح محفوظ';
+  if(geminiKey){ st.textContent=savedTxt; st.classList.remove('missing'); }
+  else { st.textContent=missingTxt; st.classList.add('missing'); }
   $('analyzeBtn').disabled = !(currentFile && geminiKey);
+  if($('analyzeCvBtn')) $('analyzeCvBtn').disabled = !(window.cvCurrentFile && geminiKey);
 }
 async function loadKey(){
   try{
@@ -831,10 +1291,12 @@ async function handleFile(file){
   const okTypes = ['image/jpeg','image/png','image/webp','image/gif','application/pdf'];
   if(!okTypes.includes(file.type)){ showError('نوع الملف غير مدعوم. الرجاء رفع صورة (JPG/PNG/WEBP) أو ملف PDF.'); return; }
   clearError();
+  if(typeof resetFormToAddMode === 'function') resetFormToAddMode();
   const buf = await file.arrayBuffer();
   const base64 = arrayBufferToBase64(buf);
   const ext = file.name.includes('.') ? file.name.split('.').pop() : (file.type==='application/pdf' ? 'pdf':'jpg');
   currentFile = { arrayBuffer: buf, base64, mime: file.type, name: file.name, ext, size: file.size };
+  extraPages = [];
   $('fileChipHolder').innerHTML = `
     <div class="file-chip">
       <span>${file.type === 'application/pdf' ? '📕' : '🖼️'}</span>
@@ -844,8 +1306,78 @@ async function handleFile(file){
     </div>`;
   $('removeFileBtn').addEventListener('click', ()=>{
     currentFile = null; $('fileChipHolder').innerHTML=''; updateKeyStatus();
+    extraPages = []; renderExtraPagesUI();
   });
   updateKeyStatus();
+  renderExtraPagesUI();
+}
+
+let extraPages = []; // صفحات إضافية (صور) بتتضاف لنفس ملف الـ PDF النهائي — مثلاً: ظهر الشهادة، أو ملحق مرتبط بيها
+function renderExtraPagesUI(){
+  const holder = $('extraPagesHolder');
+  if(!holder) return;
+  if(!currentFile){ holder.innerHTML = ''; return; }
+  const isMainPdf = currentFile.mime === 'application/pdf';
+  const pagesHtml = extraPages.map((p,i)=>`
+    <div class="file-chip" style="margin-top:8px;">
+      <span>🖼️</span><span class="name">${escapeHtml(p.name)}</span>
+      <span class="meta">${(p.size/1024).toFixed(0)} KB</span>
+      <button data-remove-extra="${i}">إزالة</button>
+    </div>`).join('');
+  const addBtnHtml = isMainPdf
+    ? `<div style="font-size:11px;color:var(--muted);margin-top:8px;">الملف الأساسي PDF بالفعل — إضافة صفحات لملف PDF موجود غير مدعومة حاليًا، فقط عند رفع صورة كملف أساسي.</div>`
+    : `<button type="button" class="btn ghost sm" id="addExtraPageBtn" style="margin-top:8px;">➕ إضافة صورة أخرى لنفس الملف (مثلاً: ظهر الشهادة)</button>`;
+  holder.innerHTML = pagesHtml + addBtnHtml;
+  const addBtn = $('addExtraPageBtn');
+  if(addBtn) addBtn.addEventListener('click', ()=> $('extraPageInput').click());
+  holder.querySelectorAll('[data-remove-extra]').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      extraPages.splice(parseInt(btn.dataset.removeExtra),1);
+      renderExtraPagesUI();
+    });
+  });
+}
+$('extraPageInput').addEventListener('change', async e=>{
+  const files = Array.from(e.target.files || []);
+  for(const file of files){
+    const buf = await file.arrayBuffer();
+    extraPages.push({ arrayBuffer: buf, mime: file.type, name: file.name, size: file.size });
+  }
+  e.target.value = '';
+  renderExtraPagesUI();
+});
+// يبني PDF نهائي واحد من الملف الأساسي (لو صورة) + أي صفحات إضافية، باستخدام jsPDF محليًا بالكامل بدون سيرفر.
+// لو الملف الأساسي PDF جاهز والصفحات الإضافية فاضية، بيرجّع الملف الأصلي زي ما هو من غير تعديل.
+async function buildFinalPdfBlob(){
+  if(currentFile.mime === 'application/pdf' && !extraPages.length){
+    return { blob: new Blob([currentFile.arrayBuffer], { type:'application/pdf' }), ext:'pdf' };
+  }
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF({ unit:'pt' });
+  const imagesToAdd = currentFile.mime.startsWith('image/') ? [currentFile, ...extraPages] : extraPages;
+  for(let i=0;i<imagesToAdd.length;i++){
+    const img = imagesToAdd[i];
+    const dataUrl = await new Promise(res=>{
+      const blob = new Blob([img.arrayBuffer], { type: img.mime });
+      const reader = new FileReader();
+      reader.onload = ()=> res(reader.result);
+      reader.readAsDataURL(blob);
+    });
+    const dims = await new Promise(res=>{
+      const im = new Image();
+      im.onload = ()=> res({ w: im.width, h: im.height });
+      im.src = dataUrl;
+    });
+    if(i>0) doc.addPage();
+    const pageW = doc.internal.pageSize.getWidth();
+    const pageH = doc.internal.pageSize.getHeight();
+    const ratio = Math.min(pageW/dims.w, pageH/dims.h);
+    const w = dims.w*ratio, h = dims.h*ratio;
+    const x = (pageW-w)/2, y = (pageH-h)/2;
+    const fmt = img.mime.includes('png') ? 'PNG' : 'JPEG';
+    doc.addImage(dataUrl, fmt, x, y, w, h);
+  }
+  return { blob: doc.output('blob'), ext:'pdf' };
 }
 function arrayBufferToBase64(buffer){
   let binary=''; const bytes=new Uint8Array(buffer); const chunk=0x8000;
@@ -869,48 +1401,36 @@ async function analyzeCertificate(){
   const promptText = `أنت مساعد أرشفة شهادات مهنية لمهندس مدني مصري. حلل ملف الشهادة المرفق بدقة شديدة واستخرج بياناتها.
 أعد فقط كائن JSON صالح بالمفاتيح التالية بالضبط (بدون أي نص إضافي):
 {
- "name": "اسم الشهادة/الدورة بالإنجليزية",
- "category": "فئة مناسبة",
+ "name_ar": "اسم الشهادة/الدورة بالعربية — لو الاسم مكتوب على الشهادة بالإنجليزية فقط، ترجمه لعربية واضحة ومهنية",
+ "name_en": "اسم الشهادة/الدورة بالإنجليزية — لو الاسم مكتوب على الشهادة بالعربية فقط، ترجمه لإنجليزية واضحة ومهنية",
+ "domain": "المجال الموضوعي المناسب",
  "mode": "طريقة الحضور",
  "provider": "الجهة المانحة",
  "date": "YYYY-MM-DD",
- "duration": "مثل '2 Hrs.' أو '3 Days' أو '-' إن لم تُذكر",
+ "duration": "عدد ساعات التدريب كرقم صحيح فقط (بدون أي نص أو وحدة) — لو الشهادة مذكور فيها المدة بالأيام حوّلها لساعات بافتراض 6 ساعات تدريب لكل يوم (مثال: '3 أيام' → 18)، ولو غير مذكورة نهائيًا استخدم قيمة فارغة \"\"",
  "skills": ["مهارة 1","مهارة 2"],
- "short_description": "وصف قصير بالعربية الفصحى الرسمية، جملتان إلى ثلاث جمل",
- "hyperlink_text": "نص رابط قصير، افتراضياً Certification",
+ "description_and_impact": "فقرة واحدة مدمجة بالعربية الفصحى الرسمية (3 إلى 4 جمل): جملتان تصفان محتوى الشهادة، وجملة أو جملتان توضحان الأثر أو الفائدة العملية المحتملة لعمل مهندس مدني/ري (اتركها بدون جزء الأثر لو مش واضح من محتوى الشهادة)",
+ "tags": ["كلمة مفتاحية 1","كلمة مفتاحية 2"],
  "instructor": "اسم المدرب أو '-'",
  "verification": "رقم/كود/اسم جهة التحقق الظاهر في الشهادة أو '-'",
- "certificate_format": "واحد فقط من: Digital Only, Hard + Scan, Both (Hard + Scan), None",
+ "certificate_format": ["مصفوفة تحتوي واحد أو أكثر من: Digital, Hard Copy, Scanned — بناءً على ما هو واضح من طبيعة الملف المرفوع؛ افتراضيًا Digital فقط لو الملف صورة/PDF رقمي بدون دليل على وجود نسخة ورقية"],
  "suggested_filename": "بصيغة 'YYYY-MM Name.ext' بنفس امتداد الملف الأصلي (${currentFile.ext})، وأضف لاحقة ' - Top Achiever' فقط إذا ظهر تكريم أو تميز واضح بالشهادة"
 }
 قواعد:
-- category: اختر من [${KNOWN_CATEGORIES.join(', ')}] إن ناسب، وإلا اقترح فئة جديدة قصيرة بالإنجليزية.
-- mode: اختر من [${KNOWN_MODES.join(', ')}] إن ناسب، وإلا اقترح قيمة جديدة بنفس الأسلوب.
+- domain: اختر بدقة من هذه القائمة المغلقة فقط: [${getCategoryOptions().join(', ')}] — اختر الأقرب دلاليًا، ولا تخترع فئة جديدة.
+- mode: اختر بدقة من هذه القائمة المغلقة فقط: [${getModeOptions().join(', ')}] — اختر الأقرب لما هو مذكور في الشهادة (مؤتمر/ورشة حضورية = "حضوري"، بث مباشر عبر الإنترنت = "عن بُعد - مباشر"، دورة تسجيلية ذاتية التعلم = "عن بُعد - ذاتي التعلم").
 - date: إن ظهر الشهر والسنة فقط بدون يوم استخدم اليوم 01.
-- short_description بأسلوب رسمي تقني (مثال أسلوب فقط، لا تنسخه): "ندوة تقنية متخصصة تناولت أساسيات هندسة النقل وتخطيط الطرق، وركزت على تكامل تصميم البنية التحتية مع تكنولوجيا BIM."
+- tags: 2 إلى 5 كلمات مفتاحية قصيرة تساعد في البحث والفلترة لاحقًا (مثل: ري، إدارة مشاريع، BIM، السلامة المهنية).
+- description_and_impact بأسلوب رسمي تقني (مثال أسلوب فقط، لا تنسخه): "ندوة تقنية متخصصة تناولت أساسيات هندسة النقل وتخطيط الطرق، وركزت على تكامل تصميم البنية التحتية مع تكنولوجيا BIM. تفيد هذه المعرفة في تحسين دقة مراجعة المخططات الإنشائية بمشاريع الطرق."
 - إن تعذر تحديد حقل بثقة اجعل قيمته "".
 - أعد كائن JSON فقط بدون أي Markdown أو نص إضافي.`;
 
-  const body = {
-    contents: [{ parts: [ { inline_data: { mime_type: currentFile.mime, data: currentFile.base64 } }, { text: promptText } ] }],
-    generationConfig: { responseMimeType: "application/json" }
-  };
-
   try{
-    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash-lite:generateContent?key=${encodeURIComponent(geminiKey)}`, {
-      method:'POST', headers:{ 'Content-Type':'application/json' }, body: JSON.stringify(body)
-    });
-    const data = await response.json();
-    if(!response.ok){
-      const msg = (data && data.error && data.error.message) ? data.error.message : ('HTTP ' + response.status);
-      throw new Error(msg);
-    }
-    const cand = data.candidates && data.candidates[0];
-    const textOut = cand && cand.content && cand.content.parts ? cand.content.parts.map(p=>p.text||'').join('') : '';
-    let clean = textOut.trim().replace(/^```json/i,'').replace(/^```/,'').replace(/```$/,'').trim();
-    let parsed;
-    try{ parsed = JSON.parse(clean); }
-    catch(e){ const m = clean.match(/\{[\s\S]*\}/); if(m){ parsed = JSON.parse(m[0]); } else { throw new Error('تعذّر فهم استجابة النموذج'); } }
+    const textOut = await callGeminiAPI(
+      [ { inline_data: { mime_type: currentFile.mime, data: currentFile.base64 } }, { text: promptText } ],
+      { json: true }
+    );
+    const parsed = parseGeminiJson(textOut);
     populateForm(parsed);
     switchTab('certifications');
     $('formCard').style.display = 'block';
@@ -926,72 +1446,171 @@ async function analyzeCertificate(){
   }
 }
 
+function normalizeHours(v){
+  if(v == null || v === '') return '';
+  const m = String(v).match(/\d+(\.\d+)?/);
+  return m ? m[0] : '';
+}
 function populateForm(d){
   const maxNo = SECTIONS.certifications.rows.reduce((m,r)=> Math.max(m, parseInt(r.no)||0), 0);
   $('f_no').value = String(maxNo + 1);
-  $('f_name').value = d.name || '';
-  setSelectValue($('f_category'), d.category || '');
+  $('f_name').value = d.name_ar || d.name || '';
+  $('f_name_en').value = d.name_en || '';
+  setSelectValue($('f_category'), d.domain || '');
   setSelectValue($('f_mode'), d.mode || '');
   $('f_provider').value = d.provider || '';
   $('f_date').value = d.date || '';
-  $('f_dur').value = d.duration || '';
-  $('f_skills').value = Array.isArray(d.skills) ? d.skills.join(', ') : (d.skills || '');
-  $('f_desc').value = d.short_description || '';
-  $('f_hyperlink').value = d.hyperlink_text || 'Certification';
+  $('f_dur').value = normalizeHours(d.duration);
+  certFormSkillIds = Array.isArray(d.skills) ? d.skills.map(name=> findOrCreateSkillByName(name, { source: d.name ? `شهادة: ${d.name}` : 'شهادة' })).filter(Boolean) : [];
+  renderSkillChipsInto($('f_skills_chips'), certFormSkillIds);
+  $('f_desc').value = d.description_and_impact || d.desc || '';
+  $('f_tags').value = Array.isArray(d.tags) ? d.tags.join(', ') : (d.tags || '');
   $('f_hyperlink_url').value = '';
   $('f_instructor').value = d.instructor || '-';
   $('f_verification').value = d.verification || '-';
   $('f_verification_url').value = '';
-  if(d.certificate_format && [...$('f_format').options].some(o=>o.value===d.certificate_format)){ $('f_format').value = d.certificate_format; }
-  else { $('f_format').value = 'Digital Only'; }
+  setFormatCheckboxes(d.certificate_format);
   $('f_filename').value = d.suggested_filename || buildFallbackFilename(d);
   $('postBox').style.display = 'none';
+}
+function setFormatCheckboxes(formatValue){
+  const text = Array.isArray(formatValue) ? formatValue.join(' ') : String(formatValue || '');
+  const low = text.toLowerCase();
+  $('f_format_digital').checked = /digital/.test(low) || !text;
+  $('f_format_hard').checked = /hard/.test(low);
+  $('f_format_scanned').checked = /scan/.test(low);
+}
+function getFormatString(){
+  const parts = [];
+  if($('f_format_digital').checked) parts.push('Digital');
+  if($('f_format_hard').checked) parts.push('Hard Copy');
+  if($('f_format_scanned').checked) parts.push('Scanned');
+  return parts.length ? parts.join(' + ') : 'None';
 }
 function buildFallbackFilename(d){
   if(!currentFile) return '';
   const dateStr = d.date ? d.date.slice(0,7) : '';
-  const name = d.name || currentFile.name.replace(/\.[^.]+$/, '');
-  return `${dateStr ? dateStr + ' ' : ''}${name}.${currentFile.ext}`.trim();
+  const name = d.name_ar || d.name || d.name_en || currentFile.name.replace(/\.[^.]+$/, '');
+  return `${dateStr ? dateStr + ' ' : ''}${name}.pdf`.trim();
 }
 
 function currentRowData(){
   return {
-    no: $('f_no').value, name: $('f_name').value,
-    category: $('f_category').value === '__custom__' ? '' : $('f_category').value,
+    no: $('f_no').value, name: $('f_name').value, name_en: $('f_name_en').value,
+    domain: $('f_category').value === '__custom__' ? '' : $('f_category').value,
     mode: $('f_mode').value === '__custom__' ? '' : $('f_mode').value,
     provider: $('f_provider').value, date: $('f_date').value, dur: $('f_dur').value,
-    skills: $('f_skills').value, desc: $('f_desc').value, hyperlink: $('f_hyperlink').value,
+    skill_ids: certFormSkillIds.slice(),
+    desc: $('f_desc').value, tags: $('f_tags').value,
     hyperlink_url: $('f_hyperlink_url').value,
-    instructor: $('f_instructor').value, verification: $('f_verification').value,
+    instructor: $('f_instructor').value, verification_code: $('f_verification').value,
     verification_url: $('f_verification_url').value,
-    format: $('f_format').value
+    format: getFormatString()
   };
 }
+// يحوّل نص مهارات مفصول بفواصل لمعرّفات في قائمة skills الموحّدة (ينشئ أي مهارة جديدة تلقائيًا) — الدليل، القاعدة رقم 1
+function parseSkillsInputToIds(text, opts){
+  return String(text||'').split(/[,،؛;\n]+/).map(s=>s.trim()).filter(Boolean).map(name=>findOrCreateSkillByName(name, opts)).filter(Boolean);
+}
 
-// ---------- Confirm & add to sheet ----------
+// ---------- Edit an existing certification row ----------
+let editingState = null; // { section:'certifications', index:number }
+function openEditForm(sectionKey, index){
+  const row = SECTIONS[sectionKey].rows[index];
+  if(!row) return;
+  editingState = { section: sectionKey, index };
+  populateFormFromRow(sectionKey, row);
+  $('formCardHeadingText').textContent = document.documentElement.getAttribute('lang') === 'en' ? 'Edit Record' : 'تعديل البيانات';
+  $('cancelEditBtn').style.display = 'inline-flex';
+  $('confirmBtn').textContent = document.documentElement.getAttribute('lang') === 'en' ? '✅ Save Changes' : '✅ حفظ التعديلات';
+  $('postBox').style.display = 'none';
+  $('formCard').style.display = 'block';
+  $('formCard').scrollIntoView({behavior:'smooth', block:'start'});
+}
+function populateFormFromRow(sectionKey, row){
+  $('f_no').value = row.no || '';
+  $('f_name').value = row.name || '';
+  $('f_name_en').value = row.name_en || '';
+  setSelectValue($('f_category'), row.domain || '');
+  setSelectValue($('f_mode'), row.mode || '');
+  $('f_provider').value = row.provider || '';
+  $('f_date').value = row.date || '';
+  $('f_dur').value = normalizeHours(row.dur);
+  certFormSkillIds = Array.isArray(row.skill_ids) ? row.skill_ids.slice() : [];
+  renderSkillChipsInto($('f_skills_chips'), certFormSkillIds);
+  $('f_desc').value = row.desc || '';
+  $('f_tags').value = row.tags || '';
+  $('f_hyperlink_url').value = row.hyperlink_url || '';
+  $('f_instructor').value = row.instructor || '';
+  $('f_verification').value = row.verification_code || '';
+  $('f_verification_url').value = row.verification_url || '';
+  setFormatCheckboxes(row.format);
+  $('f_filename').value = '';
+}
+function currentLang(){ return document.documentElement.getAttribute('lang') === 'en' ? 'en' : 'ar'; }
+function resetFormToAddMode(){
+  editingState = null;
+  $('formCardHeadingText').setAttribute('data-i18n', 'formCardHeading');
+  const lang = document.documentElement.getAttribute('lang') === 'en' ? 'en' : 'ar';
+  $('formCardHeadingText').textContent = lang === 'en' ? 'Review Data Before Adding to the Record' : 'مراجعة البيانات قبل الإضافة للسجل';
+  $('cancelEditBtn').style.display = 'none';
+  $('confirmBtn').setAttribute('data-i18n', 'confirmBtn');
+  $('confirmBtn').textContent = lang === 'en' ? '✅ Confirm & Add to Record + Download Renamed File' : '✅ تأكيد وإضافة للسجل + تنزيل الملف بالاسم الجديد';
+}
+$('cancelEditBtn').addEventListener('click', ()=>{
+  resetFormToAddMode();
+  $('formCard').style.display = 'none';
+  currentFile = null; $('fileChipHolder').innerHTML='';
+});
+$('f_skills_pick_btn').addEventListener('click', ()=>{
+  openSkillPickerForForm(certFormSkillIds, (ids)=>{
+    certFormSkillIds = ids;
+    renderSkillChipsInto($('f_skills_chips'), certFormSkillIds);
+  });
+});
+
+// ---------- Confirm & add / save edits ----------
 $('confirmBtn').addEventListener('click', confirmAndAdd);
 async function confirmAndAdd(){
-  if(!currentFile){ showError('لا يوجد ملف محمّل.'); return; }
   const row = currentRowData();
-  const filename = $('f_filename').value || currentFile.name;
   if(!row.name && !confirm('حقل "Name" فارغ. هل تريد المتابعة على أي حال؟')) return;
+  const targetKey = 'certifications';
 
+  if(editingState){
+    row.id = SECTIONS[targetKey].rows[editingState.index].id || genId('cer');
+    SECTIONS[targetKey].rows[editingState.index] = row;
+    await persistSection(targetKey);
+    switchTab(targetKey);
+    toast('تم حفظ التعديلات ✅');
+    resetFormToAddMode();
+    $('formCard').style.display = 'none';
+    document.querySelector('.section-title').scrollIntoView({behavior:'smooth'});
+    return;
+  }
+
+  if(!currentFile){ showError('لا يوجد ملف محمّل.'); return; }
+  let filename = $('f_filename').value || currentFile.name;
   try{
-    const blob = new Blob([currentFile.arrayBuffer], { type: currentFile.mime });
+    const { blob, ext } = await buildFinalPdfBlob();
+    if(ext === 'pdf' && !/\.pdf$/i.test(filename)){
+      filename = filename.replace(/\.[^.]+$/, '') + '.pdf';
+    }
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a'); a.href=url; a.download = filename;
     document.body.appendChild(a); a.click(); document.body.removeChild(a);
     setTimeout(()=>URL.revokeObjectURL(url), 4000);
-  }catch(e){ console.error(e); }
+  }catch(e){ console.error(e); showError('تعذّر إنشاء ملف PDF النهائي — تم حفظ بيانات الشهادة في السجل رغم ذلك، لكن راجع الملف يدويًا.'); }
 
-  SECTIONS.certifications.rows.push(row);
-  await persistSection('certifications');
-  switchTab('certifications');
+  row.id = genId('cer');
+  SECTIONS[targetKey].rows.push(row);
+  await persistSection(targetKey);
+  switchTab(targetKey);
+  extraPages = []; renderExtraPagesUI();
 
   $('approvedStamp').classList.remove('show');
   void $('approvedStamp').offsetWidth;
   $('approvedStamp').classList.add('show');
-  toast('تمت إضافة الشهادة للشيت وتنزيل الملف بالاسم الجديد ✅');
+  toast('تمت الإضافة للسجل وتنزيل الملف بالاسم الجديد ✅');
   $('formCard').style.display = 'none';
   currentFile = null; $('fileChipHolder').innerHTML=''; updateKeyStatus();
   document.querySelector('.section-title').scrollIntoView({behavior:'smooth'});
@@ -1009,21 +1628,16 @@ async function generatePost(){
   if(!row.name){ toast('عبّئ اسم الشهادة أولاً'); return; }
   $('postBox').style.display = 'block';
   $('postLoader').innerHTML = `<div class="loader"><div class="spinner"></div> جارِ كتابة المنشور...</div>`;
+  const skillNames = getSkillNames(row.skill_ids).join('، ');
   const prompt = `اكتب منشور لينكدإن (LinkedIn) احترافي وقصير باللغة العربية الفصحى، بضمير المتكلم، يعبر عن اعتزاز مهندس مدني مصري بحصوله على شهادة/دورة جديدة، من غير مبالغة أو أسلوب دعائي فج.
 معلومات الشهادة:
 - الاسم: ${row.name}
 - الجهة المانحة: ${row.provider}
-- المهارات المكتسبة: ${row.skills}
+- المهارات المكتسبة: ${skillNames || '—'}
 - وصف مختصر: ${row.desc}
 اجعل المنشور من 4 إلى 6 أسطر بأسلوب طبيعي، واختم بـ 4-6 هاشتاجات مناسبة بالإنجليزية متعلقة بالهندسة المدنية والتطوير المهني. أعد نص المنشور فقط بدون أي مقدمات أو شرح أو علامات اقتباس.`;
   try{
-    const resp = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash-lite:generateContent?key=${encodeURIComponent(geminiKey)}`, {
-      method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ contents:[{parts:[{text:prompt}]}] })
-    });
-    const data = await resp.json();
-    if(!resp.ok){ throw new Error((data.error && data.error.message) || ('HTTP ' + resp.status)); }
-    const cand = data.candidates && data.candidates[0];
-    const text = cand && cand.content && cand.content.parts ? cand.content.parts.map(p=>p.text||'').join('') : '';
+    const text = await callGeminiAPI([{ text: prompt }]);
     $('postTextarea').value = text.trim();
   }catch(err){
     console.error(err);
@@ -1044,27 +1658,469 @@ function renderTabs(){
     btn.addEventListener('click', ()=> switchTab(btn.dataset.tab));
   });
 }
+window.renderTabsRef = renderTabs;
+const TAB_POLICY_HINTS = {
+  experience: {
+    ar: 'هذا الجدول يضم الخبرات العملية والتطوع معًا — استخدم عمود "Type" في كل صف لتحديد هل هو خبرة عملية أم نشاط تطوعي.',
+    en: 'This table holds both work experience and volunteering — use the "Type" column on each row to mark it as a job or volunteering.'
+  }
+};
 function switchTab(key){
   activeTab = key;
   renderTabs();
   renderTable();
+  const guidedBtn = $('addGuidedBtn');
+  if(guidedBtn) guidedBtn.style.display = (key === 'certifications') ? 'none' : 'inline-flex';
+  const cleanupBtn = $('cleanupSkillsBtn');
+  if(cleanupBtn) cleanupBtn.style.display = (key === 'skills') ? 'inline-flex' : 'none';
+  const hintEl = $('tabPolicyHint');
+  if(hintEl){
+    const hint = TAB_POLICY_HINTS[key];
+    if(hint){
+      hintEl.textContent = currentLang() === 'en' ? hint.en : hint.ar;
+      hintEl.style.display = 'block';
+    } else {
+      hintEl.style.display = 'none';
+    }
+  }
 }
+window.switchTabRef = switchTab;
 
 // ---------- Generic editable table for the active section ----------
+function resolveOptions(colOptions){
+  const opts = typeof colOptions === 'function' ? colOptions() : colOptions;
+  if(!opts) return [];
+  return opts.map(o=> typeof o === 'string' ? {value:o, ar:o, en:o} : o);
+}
+function optionLabel(col, value){
+  const lang = currentLang();
+  const opts = resolveOptions(col.options);
+  const found = opts.find(o=>o.value===value);
+  return found ? (lang==='en' ? (found.en||found.value) : (found.ar||found.value)) : (value||'');
+}
+let tableSortState = {}; // { [sectionKey]: 'asc' | 'desc' } — للعرض فقط، لا يغيّر ترتيب التخزين الفعلي
+function primaryDateKeyFor(section){
+  const col = section.cols.find(c=>isDateKey(c.key));
+  return col ? col.key : null;
+}
 function renderTable(){
   const section = SECTIONS[activeTab];
   const holder = $('tableHolder');
+  const editable = true; // كل الأقسام لها الآن وسيلة تعديل عبر فورم (الشهادات: فورمها الخاص بالذكاء الاصطناعي، الباقي: الفورم العام)
   if(!section.rows.length){
     holder.innerHTML = `<div class="empty-log">صفحة "${escapeHtml(section.tabLabel)}" فارغة — استورد شيتاً سابقاً أو أضف صف يدوي</div>`;
     return;
   }
+  let indices = section.rows.map((_,i)=>i);
+  const dateKey = primaryDateKeyFor(section);
+  const sortDir = tableSortState[activeTab];
+  if(dateKey && sortDir){
+    indices.sort((a,b)=>{
+      const da = Date.parse(section.rows[a][dateKey]) || 0;
+      const db = Date.parse(section.rows[b][dateKey]) || 0;
+      return sortDir === 'asc' ? da-db : db-da;
+    });
+  }
   let thead = '<tr>' + section.cols.map(c=>`<th>${escapeHtml(c.header)}</th>`).join('') + '<th class="del-cell"></th></tr>';
-  let rows = section.rows.map((r,i)=>{
-    let tds = section.cols.map(c=>`<td contenteditable="true" data-row="${i}" data-key="${c.key}" class="${c.wide?'wide':''}${c.isUrl?' col-url':''}">${escapeHtml(r[c.key])}</td>`).join('');
-    return `<tr>${tds}<td class="del-cell"><button class="del-btn" data-del="${i}" title="حذف الصف">✕</button></td></tr>`;
+  let rows = indices.map((i)=>{
+    const r = section.rows[i];
+    let tds = section.cols.map(c=>{
+      if(c.type === 'select'){
+        const opts = resolveOptions(c.options);
+        const optionsHtml = opts.map(o=>`<option value="${escapeHtml(o.value)}"${r[c.key]===o.value?' selected':''}>${escapeHtml(currentLang()==='en'?(o.en||o.value):(o.ar||o.value))}</option>`).join('');
+        return `<td class="${c.wide?'wide':''}"><select data-row="${i}" data-key="${c.key}" class="cell-select">${optionsHtml}</select></td>`;
+      }
+      if(c.type === 'skills'){
+        const names = getSkillNames(r[c.key]||[], currentLang());
+        return `<td class="${c.wide?'wide':''} col-skills"><div class="skill-chips">${names.map(n=>`<span class="skill-chip">${escapeHtml(n)}</span>`).join('')}</div><button class="edit-btn skill-pick-btn" data-row="${i}" data-key="${c.key}" title="اختيار المهارات">🏷️</button></td>`;
+      }
+      if(c.type === 'links'){
+        return `<td class="${c.wide?'wide':''} col-skills"><div class="skill-chips">${renderLinkedSourceChips(r[c.key])}</div><button class="edit-btn source-link-btn" data-row="${i}" title="ربط بمصادر (شهادات/أنشطة/خبرات)">🔗</button></td>`;
+      }
+      if(isDateKey(c.key)){
+        return `<td><input type="date" class="cell-date" data-row="${i}" data-key="${c.key}" value="${escapeHtml(r[c.key]||'')}" style="border:1px solid var(--line,#ccc);border-radius:6px;padding:5px;width:100%;"></td>`;
+      }
+      return `<td contenteditable="true" data-row="${i}" data-key="${c.key}" class="${c.wide?'wide':''}${c.isUrl?' col-url':''}">${escapeHtml(r[c.key])}</td>`;
+    }).join('');
+    const editBtn = editable ? `<button class="edit-btn" data-editrow="${i}" title="تعديل عبر الفورم الكامل">✏️</button>` : '';
+    return `<tr>${tds}<td class="del-cell">${editBtn}<button class="del-btn" data-del="${i}" title="حذف الصف">✕</button></td></tr>`;
   }).join('');
   holder.innerHTML = `<table><thead>${thead}</thead><tbody>${rows}</tbody></table>`;
+  const sortBtn = $('sortByDateBtn');
+  if(sortBtn){
+    if(dateKey){
+      sortBtn.style.display = 'inline-flex';
+      sortBtn.textContent = sortDir === 'asc' ? '↑ الأقدم أولاً' : sortDir === 'desc' ? '↓ الأحدث أولاً' : '↕️ ترتيب حسب التاريخ';
+    } else {
+      sortBtn.style.display = 'none';
+    }
+  }
 }
+
+// ---------- واجهة تنظيف ودمج المهارات المكررة ----------
+let skillCleanupManualSelection = new Set();
+function renderSkillCleanupModal(){
+  const body = $('skillCleanupBody');
+  const groups = findExactDuplicateSkillGroups();
+  const totalSkills = SECTIONS.skills.rows.length;
+
+  let html = `<div style="font-size:12px;color:var(--muted,#777);">إجمالي المهارات الحالية: <b>${totalSkills}</b></div>`;
+
+  if(groups.length){
+    html += `<div>
+      <div style="font-weight:800;font-size:13px;margin-bottom:8px;">✅ تكرارات شبه مؤكدة (نفس الاسم تقريبًا) — ${groups.length} مجموعة</div>
+      <div id="skillCleanupAutoGroups" style="display:flex;flex-direction:column;gap:10px;"></div>
+    </div>`;
+  } else {
+    html += `<div style="font-size:13px;color:#2a8f4f;">🎉 لا توجد تكرارات واضحة (بنفس الاسم تقريبًا) حاليًا.</div>`;
+  }
+
+  html += `<div style="border-top:1px solid #eee;padding-top:12px;">
+    <div style="font-weight:800;font-size:13px;margin-bottom:6px;">🔧 دمج يدوي (لمهارات بأسماء مختلفة لكنها نفس المعنى، مثلاً "PM" و"إدارة المشاريع")</div>
+    <input type="text" id="skillCleanupManualSearch" placeholder="ابحث عن مهارة..." style="width:100%;padding:8px;border:1px solid #ccc;border-radius:8px;margin-bottom:8px;">
+    <div id="skillCleanupManualList" style="max-height:220px;overflow-y:auto;border:1px solid #eee;border-radius:8px;padding:6px;"></div>
+    <div style="display:flex;gap:8px;align-items:center;margin-top:8px;">
+      <input type="text" id="skillCleanupManualName" placeholder="الاسم النهائي بعد الدمج" style="flex:1;padding:8px;border:1px solid #ccc;border-radius:8px;">
+      <button id="skillCleanupManualMergeBtn" class="btn stamp sm">دمج المحدد</button>
+    </div>
+  </div>`;
+
+  body.innerHTML = html;
+
+  if(groups.length){
+    const groupsHolder = $('skillCleanupAutoGroups');
+    groupsHolder.innerHTML = groups.map((g,gi)=>{
+      const names = g.map(s=>escapeHtml(s.skill_name)).join(' = ');
+      return `<div style="border:1px solid #eee;border-radius:8px;padding:8px;display:flex;justify-content:space-between;align-items:center;gap:8px;">
+        <span style="font-size:13px;">${names}</span>
+        <button data-auto-merge="${gi}" class="btn ghost sm">دمج تلقائي ✅</button>
+      </div>`;
+    }).join('');
+    groupsHolder.querySelectorAll('[data-auto-merge]').forEach(btn=>{
+      btn.addEventListener('click', ()=>{
+        const gi = parseInt(btn.dataset.autoMerge);
+        const group = groups[gi];
+        // نختار كناجٍ المهارة اللي عندها أكبر عدد استخدام فعلي (الأكثر ارتباطًا بسجلات)، لتقليل فقد البيانات
+        const survivor = group.reduce((best,s)=> countSkillUsage(s.id) > countSkillUsage(best.id) ? s : best, group[0]);
+        mergeSkillsInto(survivor.id, group.map(s=>s.id), survivor.skill_name);
+        toast(`تم دمج ${group.length} مهارات في "${survivor.skill_name}" ✅`);
+        renderTable();
+        renderSkillCleanupModal();
+      });
+    });
+  }
+
+  renderSkillCleanupManualList('');
+  $('skillCleanupManualSearch').addEventListener('input', e=> renderSkillCleanupManualList(e.target.value));
+  $('skillCleanupManualMergeBtn').addEventListener('click', ()=>{
+    const ids = Array.from(skillCleanupManualSelection);
+    if(ids.length < 2){ toast('اختر مهارتين على الأقل للدمج'); return; }
+    const finalName = $('skillCleanupManualName').value.trim();
+    const survivor = SECTIONS.skills.rows.find(s=>s.id===ids[0]);
+    mergeSkillsInto(survivor.id, ids, finalName || survivor.skill_name);
+    toast(`تم دمج ${ids.length} مهارات ✅`);
+    skillCleanupManualSelection = new Set();
+    renderTable();
+    renderSkillCleanupModal();
+  });
+}
+function renderSkillCleanupManualList(filter){
+  const term = (filter||'').trim().toLowerCase();
+  const listEl = $('skillCleanupManualList');
+  const rows = SECTIONS.skills.rows.filter(s=> !term || (s.skill_name||'').toLowerCase().includes(term));
+  if(!rows.length){ listEl.innerHTML = `<div style="padding:8px;color:#999;font-size:13px;">لا توجد نتائج</div>`; return; }
+  listEl.innerHTML = rows.map(s=>{
+    const checked = skillCleanupManualSelection.has(s.id) ? 'checked' : '';
+    const usage = countSkillUsage(s.id);
+    return `<label style="display:flex;align-items:center;gap:8px;padding:6px;border-bottom:1px solid #f2f2f2;cursor:pointer;">
+      <input type="checkbox" data-manual-skill="${escapeHtml(s.id)}" ${checked}>
+      <span style="font-size:13px;flex:1;">${escapeHtml(s.skill_name)}</span>
+      <span style="font-size:10px;color:#999;">${usage} استخدام</span>
+    </label>`;
+  }).join('');
+  listEl.querySelectorAll('[data-manual-skill]').forEach(cb=>{
+    cb.addEventListener('change', ()=>{
+      if(cb.checked) skillCleanupManualSelection.add(cb.dataset.manualSkill);
+      else skillCleanupManualSelection.delete(cb.dataset.manualSkill);
+    });
+  });
+}
+$('cleanupSkillsBtn')?.addEventListener('click', ()=>{
+  skillCleanupManualSelection = new Set();
+  renderSkillCleanupModal();
+  $('skillCleanupOverlay').style.display = 'flex';
+});
+$('skillCleanupClose')?.addEventListener('click', ()=>{ $('skillCleanupOverlay').style.display='none'; });
+
+
+function openSkillPicker(sectionKey, rowIndex, key){
+  const row = SECTIONS[sectionKey].rows[rowIndex];
+  const selected = new Set(Array.isArray(row[key]) ? row[key] : []);
+  skillPickerState = { mode:'row', section: sectionKey, rowIndex, key, selected };
+  $('skillPickerSearch').value = '';
+  renderSkillPickerList('');
+  $('skillPickerOverlay').style.display = 'flex';
+}
+function openSkillPickerForForm(initialIds, onSave){
+  const selected = new Set(Array.isArray(initialIds) ? initialIds : []);
+  skillPickerState = { mode:'form', selected, onSave };
+  $('skillPickerSearch').value = '';
+  renderSkillPickerList('');
+  $('skillPickerOverlay').style.display = 'flex';
+}
+function renderSkillPickerList(filter){
+  const holder = $('skillPickerList');
+  const f = filter.trim().toLowerCase();
+  const list = SECTIONS.skills.rows.filter(s => !f || (s.skill_name||'').toLowerCase().includes(f));
+  if(!list.length){
+    holder.innerHTML = `<div style="padding:10px;color:#888;">لا توجد مهارات مطابقة — استخدم زر "إضافة كمهارة جديدة" بالأسفل</div>`;
+    return;
+  }
+  holder.innerHTML = list.map(s=>{
+    const checked = skillPickerState.selected.has(s.id) ? 'checked' : '';
+    return `<label style="display:flex;align-items:center;gap:8px;padding:6px;cursor:pointer;">
+      <input type="checkbox" class="skill-pick-item" data-id="${s.id}" ${checked}>
+      <span>${escapeHtml(s.skill_name)}</span>
+      <span style="margin-inline-start:auto;font-size:11px;color:#999;">${escapeHtml(s.type||'')}</span>
+    </label>`;
+  }).join('');
+}
+$('skillPickerSearch').addEventListener('input', e=> renderSkillPickerList(e.target.value));
+document.addEventListener('change', e=>{
+  if(e.target.matches('.skill-pick-item')){
+    const id = e.target.dataset.id;
+    if(e.target.checked) skillPickerState.selected.add(id); else skillPickerState.selected.delete(id);
+  }
+});
+$('skillPickerAddNew').addEventListener('click', ()=>{
+  const name = $('skillPickerSearch').value.trim();
+  if(!name){ toast('اكتب اسم المهارة أولاً في مربع البحث'); return; }
+  const id = findOrCreateSkillByName(name);
+  skillPickerState.selected.add(id);
+  $('skillPickerSearch').value='';
+  renderSkillPickerList('');
+  toast('أُضيفت المهارة لقائمة المهارات الموحّدة ✅');
+});
+$('skillPickerCancel').addEventListener('click', ()=>{ $('skillPickerOverlay').style.display='none'; skillPickerState=null; });
+$('skillPickerSave').addEventListener('click', ()=>{
+  const ids = Array.from(skillPickerState.selected);
+  if(skillPickerState.mode === 'form'){
+    skillPickerState.onSave(ids);
+  } else {
+    const { section, rowIndex, key } = skillPickerState;
+    SECTIONS[section].rows[rowIndex][key] = ids;
+    persistSection(section);
+    renderTable();
+    if(window.updatePdrDashboard) window.updatePdrDashboard();
+    toast('تم حفظ المهارات ✅');
+  }
+  $('skillPickerOverlay').style.display='none';
+  skillPickerState = null;
+});
+
+// ---------- Linked-sources picker for skills (relational: ربط فعلي بسجلات موجودة، مش نص حر) ----------
+// بدل ما عمود "المصدر" في المهارات يكون نص حر بيوصف مصدر واحد بس، بقى ممكن تربط المهارة بأكتر من
+// شهادة/نشاط/خبرة فعليين — والربط بـ ID مش نص منسوخ، يعني لو اتغيّر اسم الشهادة لاحقًا الرابط بيفضل صحيح.
+let sourceLinkState = null; // { mode:'row', rowIndex, selected } | { mode:'form', selected, onSave }
+function openSourceLinkPicker(rowIndex){
+  LINKABLE_SECTIONS.forEach(ensureRowIds);
+  const row = SECTIONS.skills.rows[rowIndex];
+  const existing = Array.isArray(row.linked_sources) ? row.linked_sources : [];
+  const selected = new Set(existing.map(x=>`${x.section}:${x.id}`));
+  sourceLinkState = { mode:'row', rowIndex, selected };
+  $('sourceLinkSearch').value = '';
+  renderSourceLinkList('');
+  $('sourceLinkOverlay').style.display = 'flex';
+}
+function openSourceLinkPickerForForm(initialRefs, onSave){
+  LINKABLE_SECTIONS.forEach(ensureRowIds);
+  const selected = new Set((initialRefs||[]).map(x=>`${x.section}:${x.id}`));
+  sourceLinkState = { mode:'form', selected, onSave };
+  $('sourceLinkSearch').value = '';
+  renderSourceLinkList('');
+  $('sourceLinkOverlay').style.display = 'flex';
+}
+function renderSourceLinkList(filter){
+  const term = (filter||'').trim().toLowerCase();
+  const items = [];
+  LINKABLE_SECTIONS.forEach(sectionKey=>{
+    (SECTIONS[sectionKey].rows||[]).forEach(row=>{
+      const label = linkableRecordLabel(sectionKey, row);
+      if(term && !label.toLowerCase().includes(term)) return;
+      items.push({ sectionKey, row, label });
+    });
+  });
+  const listEl = $('sourceLinkList');
+  if(!items.length){ listEl.innerHTML = `<div style="padding:10px;color:#999;font-size:13px;">لا توجد سجلات مطابقة</div>`; return; }
+  const sectionLabels = { certifications:'📄 شهادة', activities:'🗓️ نشاط', experience:'💼 خبرة' };
+  listEl.innerHTML = items.map(({sectionKey,row,label})=>{
+    const refKey = `${sectionKey}:${row.id}`;
+    const checked = sourceLinkState.selected.has(refKey) ? 'checked' : '';
+    return `<label style="display:flex;align-items:center;gap:8px;padding:7px 6px;border-bottom:1px solid #f2f2f2;cursor:pointer;">
+      <input type="checkbox" data-refkey="${escapeHtml(refKey)}" ${checked}>
+      <span style="font-size:11px;color:#888;min-width:52px;">${sectionLabels[sectionKey]}</span>
+      <span style="font-size:13px;">${escapeHtml(label)}</span>
+    </label>`;
+  }).join('');
+  listEl.querySelectorAll('input[type=checkbox]').forEach(cb=>{
+    cb.addEventListener('change', ()=>{
+      const key = cb.dataset.refkey;
+      if(cb.checked) sourceLinkState.selected.add(key); else sourceLinkState.selected.delete(key);
+    });
+  });
+}
+$('sourceLinkSearch').addEventListener('input', e=> renderSourceLinkList(e.target.value));
+$('sourceLinkCancel').addEventListener('click', ()=>{ $('sourceLinkOverlay').style.display='none'; sourceLinkState=null; });
+$('sourceLinkSave').addEventListener('click', ()=>{
+  const refs = Array.from(sourceLinkState.selected).map(k=>{
+    const idx = k.indexOf(':');
+    return { section: k.slice(0,idx), id: k.slice(idx+1) };
+  });
+  if(sourceLinkState.mode === 'form'){
+    sourceLinkState.onSave(refs);
+  } else {
+    SECTIONS.skills.rows[sourceLinkState.rowIndex].linked_sources = refs;
+    persistSection('skills');
+    renderTable();
+    toast('تم حفظ المصادر المرتبطة ✅');
+  }
+  $('sourceLinkOverlay').style.display='none';
+  sourceLinkState = null;
+});
+function renderLinkedSourceChips(refs){
+  if(!Array.isArray(refs) || !refs.length) return `<span style="color:#999;font-size:11px;">لا يوجد مصادر مرتبطة</span>`;
+  const sectionIcons = { certifications:'📄', activities:'🗓️', experience:'💼' };
+  return refs.map(ref=>{
+    const section = SECTIONS[ref.section];
+    const row = section ? (section.rows||[]).find(r=>r.id === ref.id) : null;
+    if(!row) return `<span class="skill-chip" style="opacity:.5;">⚠️ مصدر محذوف</span>`;
+    return `<span class="skill-chip">${sectionIcons[ref.section]||''} ${escapeHtml(linkableRecordLabel(ref.section,row))}</span>`;
+  }).join('');
+}
+
+// ---------- Generic guided form for sections other than "certifications" ----------
+// الشهادات لها رحلتها الخاصة (رفع + تحليل بالذكاء الاصطناعي). باقي الأقسام (خبرات، أنشطة، تعليم،
+// وظائف مستهدفة، نسخ CV) كانت تُدار فقط عبر جدول خام contenteditable بلا فورم موجَّه ولا تحقق من
+// نوع الحقل (خصوصًا التواريخ). هذا القسم يوفّر فورم عام مبني ديناميكيًا من تعريف أعمدة كل قسم.
+function isDateKey(key){ return /date/i.test(key); }
+let genericFormState = null; // { section, index (null = add new) }
+let genericFormSkillState = {}; // { [colKey]: [skillId, ...] } — لحقول المهارات في الفورم العام
+let genericFormLinksState = {}; // { [colKey]: [{section,id}, ...] } — لحقول الربط (المصادر) في الفورم العام
+function genericFieldHtml(col){
+  const id = `gf_${col.key}`;
+  const labelText = col.header;
+  if(col.type === 'select'){
+    const opts = resolveOptions(col.options);
+    const optionsHtml = opts.map(o=>`<option value="${escapeHtml(o.value)}">${escapeHtml(currentLang()==='en'?(o.en||o.value):(o.ar||o.value))}</option>`).join('');
+    return `<div><label style="display:block;font-size:12px;margin-bottom:4px;color:#555">${escapeHtml(labelText)}</label>
+      <select id="${id}" style="width:100%;padding:9px;border:1px solid #ccc;border-radius:8px;">${optionsHtml}</select></div>`;
+  }
+  if(col.type === 'skills'){
+    return `<div><label style="display:block;font-size:12px;margin-bottom:4px;color:#555">${escapeHtml(labelText)}</label>
+      <div id="${id}_chips" style="display:flex;flex-wrap:wrap;gap:6px;min-height:34px;padding:6px;border:1px solid #ccc;border-radius:8px;"></div>
+      <button type="button" class="btn ghost sm" id="${id}_pick_btn" style="margin-top:6px;">🏷️ اختيار المهارات من القائمة</button>
+    </div>`;
+  }
+  if(col.type === 'links'){
+    return `<div><label style="display:block;font-size:12px;margin-bottom:4px;color:#555">${escapeHtml(labelText)}</label>
+      <div id="${id}_chips" style="display:flex;flex-wrap:wrap;gap:6px;min-height:34px;padding:6px;border:1px solid #ccc;border-radius:8px;"></div>
+      <button type="button" class="btn ghost sm" id="${id}_pick_btn" style="margin-top:6px;">🔗 ربط بمصادر</button>
+    </div>`;
+  }
+  if(isDateKey(col.key)){
+    return `<div><label style="display:block;font-size:12px;margin-bottom:4px;color:#555">${escapeHtml(labelText)}</label>
+      <input type="date" id="${id}" style="width:100%;padding:9px;border:1px solid #ccc;border-radius:8px;"></div>`;
+  }
+  if(col.wide){
+    return `<div><label style="display:block;font-size:12px;margin-bottom:4px;color:#555">${escapeHtml(labelText)}</label>
+      <textarea id="${id}" style="width:100%;min-height:70px;padding:9px;border:1px solid #ccc;border-radius:8px;font-family:inherit;"></textarea></div>`;
+  }
+  return `<div><label style="display:block;font-size:12px;margin-bottom:4px;color:#555">${escapeHtml(labelText)}</label>
+    <input type="text" id="${id}" style="width:100%;padding:9px;border:1px solid #ccc;border-radius:8px;"></div>`;
+}
+function openGenericForm(sectionKey, index){
+  const section = SECTIONS[sectionKey];
+  const cols = section.cols.filter(c=>c.key!=='no');
+  const row = (index!=null) ? section.rows[index] : null;
+  genericFormState = { section: sectionKey, index: (index!=null ? index : null) };
+  $('genericFormTitle').textContent = (index!=null)
+    ? `تعديل — ${section.tabLabel}`
+    : `إضافة سجل جديد — ${section.tabLabel}`;
+  $('genericFormFields').innerHTML = cols.map(genericFieldHtml).join('');
+  genericFormSkillState = {};
+  genericFormLinksState = {};
+  cols.forEach(c=>{
+    if(c.type === 'skills'){
+      const id = `gf_${c.key}`;
+      genericFormSkillState[c.key] = row ? (Array.isArray(row[c.key]) ? row[c.key].slice() : []) : [];
+      renderSkillChipsInto(document.getElementById(`${id}_chips`), genericFormSkillState[c.key]);
+      const pickBtn = document.getElementById(`${id}_pick_btn`);
+      if(pickBtn) pickBtn.addEventListener('click', ()=>{
+        openSkillPickerForForm(genericFormSkillState[c.key], (ids)=>{
+          genericFormSkillState[c.key] = ids;
+          renderSkillChipsInto(document.getElementById(`${id}_chips`), ids);
+        });
+      });
+      return;
+    }
+    if(c.type === 'links'){
+      const id = `gf_${c.key}`;
+      genericFormLinksState[c.key] = row ? (Array.isArray(row[c.key]) ? row[c.key].slice() : []) : [];
+      const chipsEl = document.getElementById(`${id}_chips`);
+      if(chipsEl) chipsEl.innerHTML = renderLinkedSourceChips(genericFormLinksState[c.key]);
+      const pickBtn = document.getElementById(`${id}_pick_btn`);
+      if(pickBtn) pickBtn.addEventListener('click', ()=>{
+        openSourceLinkPickerForForm(genericFormLinksState[c.key], (refs)=>{
+          genericFormLinksState[c.key] = refs;
+          if(chipsEl) chipsEl.innerHTML = renderLinkedSourceChips(refs);
+        });
+      });
+      return;
+    }
+    const el = document.getElementById(`gf_${c.key}`);
+    if(!el) return;
+    if(c.type === 'select'){ el.value = (row && row[c.key]) || (resolveOptions(c.options)[0]||{}).value || ''; }
+    else { el.value = (row && row[c.key]) || ''; }
+  });
+  $('genericFormOverlay').style.display = 'flex';
+}
+$('genericFormCancel').addEventListener('click', ()=>{ $('genericFormOverlay').style.display='none'; genericFormState=null; });
+$('genericFormSave').addEventListener('click', ()=>{
+  if(!genericFormState) return;
+  const { section: sectionKey, index } = genericFormState;
+  const section = SECTIONS[sectionKey];
+  const cols = section.cols.filter(c=>c.key!=='no');
+  const data = {};
+  cols.forEach(c=>{
+    if(c.type === 'skills'){ data[c.key] = (genericFormSkillState[c.key] || []).slice(); return; }
+    if(c.type === 'links'){ data[c.key] = (genericFormLinksState[c.key] || []).slice(); return; }
+    const el = document.getElementById(`gf_${c.key}`);
+    if(!el) return;
+    data[c.key] = el.value;
+  });
+  if(index!=null){
+    data.no = section.rows[index].no;
+    if(!section.rows[index].id) section.rows[index].id = genId(sectionKey.slice(0,3));
+    section.rows[index] = Object.assign({}, section.rows[index], data);
+  } else {
+    const maxNo = section.rows.reduce((m,r)=> Math.max(m, parseInt(r.no)||0), 0);
+    data.no = String(maxNo+1);
+    data.id = genId(sectionKey.slice(0,3));
+    section.rows.push(data);
+  }
+  persistSection(sectionKey);
+  renderTabs(); renderTable();
+  if(window.updatePdrDashboard) window.updatePdrDashboard();
+  $('genericFormOverlay').style.display='none';
+  genericFormState = null;
+  toast(index!=null ? 'تم حفظ التعديلات ✅' : 'تمت إضافة السجل ✅');
+});
+$('addGuidedBtn')?.addEventListener('click', ()=> openGenericForm(activeTab, null));
+$('sortByDateBtn')?.addEventListener('click', ()=>{
+  const current = tableSortState[activeTab];
+  tableSortState[activeTab] = current === 'desc' ? 'asc' : current === 'asc' ? null : 'desc';
+  renderTable();
+});
 
 let saveTimer = null;
 document.addEventListener('input', e=>{
@@ -1075,19 +2131,148 @@ document.addEventListener('input', e=>{
     clearTimeout(saveTimer); saveTimer = setTimeout(()=>persistSection(activeTab), 600);
   }
 });
+document.addEventListener('change', e=>{
+  if(e.target.matches('#tableHolder select.cell-select')){
+    const row = parseInt(e.target.dataset.row); const key = e.target.dataset.key;
+    const section = SECTIONS[activeTab];
+    if(section.rows[row]){ section.rows[row][key] = e.target.value; persistSection(activeTab); if(window.updatePdrDashboard) window.updatePdrDashboard(); }
+  }
+  if(e.target.matches('#tableHolder input.cell-date')){
+    const row = parseInt(e.target.dataset.row); const key = e.target.dataset.key;
+    const section = SECTIONS[activeTab];
+    if(section.rows[row]){ section.rows[row][key] = e.target.value; persistSection(activeTab); if(window.updatePdrDashboard) window.updatePdrDashboard(); }
+  }
+});
+// ---------- Referential integrity: clean up orphaned skill_ids when a skill is removed ----------
+// حذف مهارة من القائمة الموحّدة لا يجب أن يترك IDs يتيمة معلّقة في skill_ids بباقي الأقسام —
+// نحسب أولاً أين تُستخدم هذه المهارة فعليًا، ثم ننبّه المستخدم بالعدد، ثم ننظّف المراجع بعد التأكيد.
+function findSkillsColsPerSection(){
+  const map = {};
+  SECTION_ORDER.forEach(key=>{
+    const cols = SECTIONS[key].cols.filter(c=>c.type==='skills').map(c=>c.key);
+    if(cols.length) map[key] = cols;
+  });
+  return map;
+}
+function countSkillUsage(skillId){
+  const map = findSkillsColsPerSection();
+  let count = 0;
+  Object.keys(map).forEach(key=>{
+    SECTIONS[key].rows.forEach(row=>{
+      map[key].forEach(colKey=>{
+        if(Array.isArray(row[colKey]) && row[colKey].includes(skillId)) count++;
+      });
+    });
+  });
+  return count;
+}
+function removeSkillReferencesEverywhere(skillId){
+  const map = findSkillsColsPerSection();
+  const touchedSections = new Set();
+  Object.keys(map).forEach(key=>{
+    SECTIONS[key].rows.forEach(row=>{
+      map[key].forEach(colKey=>{
+        if(Array.isArray(row[colKey]) && row[colKey].includes(skillId)){
+          row[colKey] = row[colKey].filter(id=>id!==skillId);
+          touchedSections.add(key);
+        }
+      });
+    });
+  });
+  touchedSections.forEach(key=> persistSection(key));
+}
+
+// ---------- دمج المهارات المكررة ----------
+// بيلمّ كل الإشارات (skill_ids) لأي مهارة من المجموعة المدمَجة، ويحوّلها كلها للمهارة الناجية،
+// مع إزالة التكرار داخل كل صف، ثم يحذف صفوف المهارات الزائدة من القائمة الموحّدة.
+function mergeSkillsInto(survivorId, mergedIds, newName){
+  const idsToRemove = mergedIds.filter(id=>id!==survivorId);
+  if(!idsToRemove.length) return;
+  const map = findSkillsColsPerSection();
+  const touchedSections = new Set();
+  Object.keys(map).forEach(key=>{
+    SECTIONS[key].rows.forEach(row=>{
+      map[key].forEach(colKey=>{
+        if(!Array.isArray(row[colKey])) return;
+        let changed = false;
+        const next = row[colKey].map(id=>{
+          if(idsToRemove.includes(id)){ changed = true; return survivorId; }
+          return id;
+        });
+        if(changed){
+          row[colKey] = Array.from(new Set(next));
+          touchedSections.add(key);
+        }
+      });
+    });
+  });
+  const survivorRow = SECTIONS.skills.rows.find(s=>s.id===survivorId);
+  if(survivorRow && newName) survivorRow.skill_name = newName;
+  SECTIONS.skills.rows = SECTIONS.skills.rows.filter(s=> !idsToRemove.includes(s.id));
+  touchedSections.add('skills');
+  touchedSections.forEach(key=> persistSection(key));
+}
+// يجمّع المهارات في مجموعات حسب المفتاح الموحَّد (بعد تطبيع الألف/الهمزة/المسافات) — أي مجموعة
+// فيها أكتر من مهارة تبقى "تكرار شبه مؤكد" ويُقترح دمجها تلقائيًا بضغطة واحدة.
+function findExactDuplicateSkillGroups(){
+  const groups = {};
+  SECTIONS.skills.rows.forEach(row=>{
+    const key = normalizeSkillKey(row.skill_name);
+    if(!key) return;
+    (groups[key] = groups[key] || []).push(row);
+  });
+  return Object.values(groups).filter(g=>g.length>1);
+}
+
 document.addEventListener('click', e=>{
   if(e.target.matches('#tableHolder [data-del]')){
     const idx = parseInt(e.target.dataset.del);
+    if(activeTab === 'skills'){
+      const skillRow = SECTIONS.skills.rows[idx];
+      const usage = skillRow ? countSkillUsage(skillRow.id) : 0;
+      const msg = usage > 0
+        ? `هذه المهارة "${skillRow.skill_name}" مستخدمة في ${usage} سجل${usage>1?'ات':''} بأقسام أخرى. حذفها سيزيلها من هذه السجلات أيضًا. متابعة الحذف؟`
+        : 'حذف هذا الصف؟';
+      if(confirm(msg)){
+        if(skillRow) removeSkillReferencesEverywhere(skillRow.id);
+        SECTIONS.skills.rows.splice(idx,1);
+        persistSection('skills'); renderTabs(); renderTable(); if(window.updatePdrDashboard) window.updatePdrDashboard();
+      }
+      return;
+    }
     if(confirm('حذف هذا الصف؟')){
       SECTIONS[activeTab].rows.splice(idx,1);
       persistSection(activeTab); renderTabs(); renderTable(); if(window.updatePdrDashboard) window.updatePdrDashboard();
     }
   }
+  if(e.target.matches('#tableHolder [data-editrow]')){
+    const idx = parseInt(e.target.dataset.editrow);
+    if(activeTab === 'certifications'){
+      currentFile = null; $('fileChipHolder').innerHTML = '';
+      openEditForm(activeTab, idx);
+    } else {
+      openGenericForm(activeTab, idx);
+    }
+  }
+  if(e.target.matches('#tableHolder .skill-pick-btn')){
+    const idx = parseInt(e.target.dataset.row); const key = e.target.dataset.key;
+    openSkillPicker(activeTab, idx, key);
+  }
+  if(e.target.matches('#tableHolder .source-link-btn')){
+    const idx = parseInt(e.target.dataset.row);
+    openSourceLinkPicker(idx);
+  }
 });
 
 $('addRowBtn').addEventListener('click', ()=>{
   const section = SECTIONS[activeTab];
-  const blank = {}; section.cols.forEach(c=>blank[c.key]='');
+  const blank = {};
+  section.cols.forEach(c=>{
+    if(c.type === 'skills' || c.type === 'links') blank[c.key] = [];
+    else if(c.type === 'select'){ const opts = resolveOptions(c.options); blank[c.key] = opts.length ? opts[0].value : ''; }
+    else blank[c.key] = '';
+  });
+  if(LINKABLE_SECTIONS.includes(activeTab)) blank.id = genId(activeTab.slice(0,3));
   const noCol = section.cols.find(c=>c.key==='no');
   if(noCol){
     const maxNo = section.rows.reduce((m,r)=> Math.max(m, parseInt(r.no)||0), 0);
@@ -1134,6 +2319,7 @@ function normalizeHeader(value){
 }
 function buildAliasMap(cols){
   const map = {};
+  const validKeys = new Set(cols.map(c=>c.key));
   cols.filter(c=>!c.isUrl).forEach(c=>{
     const aliases = [c.header, ...(c.aliases||[])];
     aliases.forEach(a=> map[normalizeHeader(a)] = c.key);
@@ -1142,33 +2328,67 @@ function buildAliasMap(cols){
   const extra = {
     'description':'desc',
     'short description (arabic)':'desc',
+    'short description':'desc',
+    'الوصف':'desc',
     'skills':'skills',
+    'المهارات':'skills',
+    'skills gained':'skills',
     'duration':'dur',
+    'المدة':'dur',
     'date':'date',
+    'التاريخ':'date',
+    'issue date':'date',
+    'name':'name',
+    'اسم':'name',
+    'course name':'name',
+    'certificate name':'name',
+    'title':'name',
+    'provider':'provider',
+    'issuer':'provider',
+    'organization':'organization',
+    'الجهة':'provider',
+    'job title':'job_title',
+    'المسمى الوظيفي':'job_title',
     'meeting title':'title',
     'workshop title':'title',
     'عنوان الاجتماع':'title',
-    'عنوان الاجتماع / الورشة':'title'
+    'عنوان الاجتماع / الورشة':'title',
+    'role':'role',
+    'الدور':'role',
+    'impact':'impact',
+    'الأثر':'impact'
   };
-  Object.keys(extra).forEach(k=>map[normalizeHeader(k)] = extra[k]);
+  // حاسم: لا نضيف اسمًا بديلاً (alias) لحقل مش موجود أصلاً كعمود في هذا القسم تحديدًا.
+  // العلة اللي كانت بتحصل: قسم "المهارات" ملهوش عمود "dur" أو "name"، لكن اسم "duration"/"name"
+  // كان بيتضاف لخريطته زي أي قسم تاني، فلو شيت الشهادات فيه عمود "Duration"، كان بيُحسَب خطأً كتطابق
+  // لصالح قسم المهارات (لأنه بيتفحص أولاً)، فيسرق شيت الشهادات الفعلي قبل ما يوصله دوره الحقيقي.
+  Object.keys(extra).forEach(k=>{
+    const targetKey = extra[k];
+    if(!validKeys.has(targetKey)) return;
+    if(map[normalizeHeader(k)] == null) map[normalizeHeader(k)] = targetKey;
+  });
   return map;
 }
-function resolveSheetName(wb, section){
+function resolveSheetName(wb, section, usedSheets){
+  usedSheets = usedSheets || new Set();
   // 1) Prefer exact/known sheet-name aliases.
   const aliases = [section.sheetLabel, ...(section.sheetAliases||[])].map(normalizeHeader);
-  const byName = wb.SheetNames.find(n=>aliases.includes(normalizeHeader(n)));
+  const byName = wb.SheetNames.find(n=> !usedSheets.has(n) && aliases.includes(normalizeHeader(n)));
   if(byName) return byName;
 
   // 2) Fallback: identify the sheet by its column headers.
   // This makes the importer resilient when the user renames a worksheet tab.
   const expected = buildAliasMap(section.cols);
+  const requiredKey = REQUIRED_KEY_PER_SECTION[section.key]; // العمود المميِّز لهذا القسم (مثلاً "Skill" للمهارات) — لازم يكون موجود، وليس أي عمودين عامّين
   let best = null, bestScore = 0;
   wb.SheetNames.forEach(name=>{
+    if(usedSheets.has(name)) return;
     const ws = wb.Sheets[name];
     const aoa = XLSX.utils.sheet_to_json(ws, {header:1, defval:'', raw:true});
     if(!aoa.length) return;
     const headers = aoa[0].map(normalizeHeader);
     const matched = new Set(headers.filter(h=>expected[h]!=null).map(h=>expected[h]));
+    if(requiredKey && !matched.has(requiredKey)) return; // بدون العمود المميِّز، هذا الشيت مش مرشّح لهذا القسم أصلاً
     const score = matched.size;
     if(score > bestScore){ bestScore=score; best=name; }
   });
@@ -1194,6 +2414,22 @@ function parseSheetRows(ws, cols, urlKeys){
         const y=v.getFullYear(), m=String(v.getMonth()+1).padStart(2,'0'), d=String(v.getDate()).padStart(2,'0');
         v = `${y}-${m}-${d}`;
       } else if(v == null){ v = ''; } else { v = String(v); }
+      if(c.type === 'skills'){ obj[c.key] = parseSkillsInputToIds(v); return; }
+      if(c.type === 'select'){
+        const opts = resolveOptions(c.options);
+        const found = opts.find(o=> o.value===v || o.ar===v || o.en===v);
+        if(found){ obj[c.key] = found.value; }
+        else if(c.allowCustom && v){
+          // القيمة مش من الخيارات الثابتة، لكن هذا العمود يسمح بقيم مخصصة (زي المجال/طريقة الحضور) —
+          // بدل ما نستبدلها بصمت بأول خيار في القائمة (وده كان بيفقد بيانات فعلية عند أي استيراد)،
+          // نسجّلها كخيار مخصص جديد ونحافظ على القيمة الأصلية كما هي.
+          if(c.allowCustom === 'custom-categories' && !customCategories.includes(v)){ customCategories.push(v); saveCustomList('custom-categories', customCategories); }
+          if(c.allowCustom === 'custom-modes' && !customModes.includes(v)){ customModes.push(v); saveCustomList('custom-modes', customModes); }
+          obj[c.key] = v;
+        }
+        else { obj[c.key] = opts[0] ? opts[0].value : v; }
+        return;
+      }
       obj[c.key] = v;
     });
     urlKeys.forEach(baseKey=>{
@@ -1208,29 +2444,92 @@ function parseSheetRows(ws, cols, urlKeys){
 }
 
 $('importBtn').addEventListener('click', ()=> $('importInput').click());
+// ---------- تحقق من جودة البيانات المستوردة (Excel/JSON) مقابل المخطط الحالي للتطبيق ----------
+const REQUIRED_KEY_PER_SECTION = { certifications:'name', experience:'job_title', activities:'title', education:'degree', jobs:'title', skills:'skill_name', cvVersions:'content' };
+function validateSectionRows(sectionKey){
+  const section = SECTIONS[sectionKey];
+  const requiredKey = REQUIRED_KEY_PER_SECTION[sectionKey];
+  const dateKey = primaryDateKeyFor(section);
+  const issues = [];
+  let missingRequired = 0, missingDate = 0;
+  section.rows.forEach((row,i)=>{
+    if(requiredKey && !String(row[requiredKey]||'').trim()) missingRequired++;
+    if(dateKey && !String(row[dateKey]||'').trim()) missingDate++;
+  });
+  if(missingRequired>0){
+    const col = section.cols.find(c=>c.key===requiredKey);
+    issues.push(`⚠️ ${missingRequired} صف بدون "${col?col.header:requiredKey}" (الحقل الأساسي لهذا القسم)`);
+  }
+  if(missingDate>0){
+    issues.push(`⚠️ ${missingDate} صف بدون تاريخ — لن يظهر بشكل صحيح عند الترتيب حسب التاريخ`);
+  }
+  return { section: section.tabLabel, count: section.rows.length, issues };
+}
+function buildImportValidationReport(sectionKeys){
+  const reports = sectionKeys.map(validateSectionRows).filter(r=>r.issues.length);
+  if(!reports.length) return '';
+  const items = reports.map(r=>`<div style="margin-top:6px;"><b>${escapeHtml(r.section)}</b> (${r.count} صف): ${r.issues.map(escapeHtml).join(' — ')}</div>`).join('');
+  return `<div class="errbox" style="margin-top:8px">🔎 ملاحظات على جودة البيانات المستوردة (البيانات اتحفظت رغم ذلك، دي بس تنبيهات تساعدك تكمّلها لاحقًا):${items}</div>`;
+}
+
 $('importInput').addEventListener('change', async e=>{
   const file = e.target.files[0];
   if(!file) return;
+  const totalExisting = SECTION_ORDER.reduce((s,k)=> s + SECTIONS[k].rows.length, 0);
+  if(totalExisting > 0){
+    const proceed = confirm('تنبيه: استيراد ملف Excel يستبدل بيانات أي صفحة يتم التعرّف عليها بالكامل (لا يدمجها مع الموجود حاليًا في التطبيق). الصفحات غير المتعرَّف عليها في الملف تبقى كما هي. صدّر نسخة احتياطية أولاً لو غير متأكد. هل تريد المتابعة بالاستيراد؟');
+    if(!proceed){ e.target.value = ''; return; }
+  }
   $('importMsgHolder').innerHTML = `<div class="loader"><div class="spinner"></div> جارِ استيراد الشيت...</div>`;
   try{
     const buf = await file.arrayBuffer();
     const wb = XLSX.read(buf, { type:'array', cellDates:true });
     importedWorkbook = wb;
     const foundList = [];
-    SECTION_ORDER.forEach(key=>{
+    const catCountBefore = customCategories.length, modeCountBefore = customModes.length;
+    const notFoundList = [];
+    const unknownColsList = [];
+    const usedSheets = new Set();
+    const importOrder = ['skills', ...SECTION_ORDER.filter(k=>k!=='skills')]; // skills أولًا حتى تتوفر المعرفات لباقي الأقسام
+    const importedKeys = [];
+    importOrder.forEach(key=>{
       const section = SECTIONS[key];
-      const match = resolveSheetName(wb, section);
-      if(!match) return;
+      const match = resolveSheetName(wb, section, usedSheets);
+      if(!match){ notFoundList.push(section.tabLabel); return; }
+      usedSheets.add(match);
       section.sheetNameResolved = match;
       const parsed = parseSheetRows(wb.Sheets[match], section.cols, section.urlKeys);
+      if(key === 'skills'){
+        parsed.forEach(row=>{ if(!row.id) row.id = genId('sk'); });
+      }
       section.rows = parsed; // importing a workbook becomes the source of truth; avoid duplicate imports
       foundList.push(`${section.tabLabel} ← ${match} (${parsed.length})`);
+      importedKeys.push(key);
+      // أي أعمدة في الشيت مش متعرَّف عليها في بنية التطبيق الحالية (ممكن تكون من نسخة قديمة أو أعمدة إضافية)
+      const aoa = XLSX.utils.sheet_to_json(wb.Sheets[match], { header:1, defval:'', raw:true });
+      if(aoa.length){
+        const aliasMap = buildAliasMap(section.cols);
+        const unknownHeaders = aoa[0].map(normalizeHeader).filter(h=>h && aliasMap[h]==null);
+        if(unknownHeaders.length) unknownColsList.push(`${section.tabLabel}: ${unknownHeaders.join('، ')}`);
+      }
     });
     SECTION_ORDER.forEach(key=> persistSection(key));
     renderTabs(); renderTable();
     if(window.updatePdrDashboard) window.updatePdrDashboard();
-    if(!foundList.length){ throw new Error('لم يتم العثور على أي من الصفحات المعروفة في الملف'); }
-    $('importMsgHolder').innerHTML = `<div class="okbox">✅ تم الاستيراد: ${foundList.map(escapeHtml).join(' — ')}. أي صفحات أخرى غير معروفة في الملف الأصلي ستبقى محفوظة كما هي عند التصدير.</div>`;
+    if(!foundList.length){ throw new Error('لم يتم العثور على أي من الصفحات المعروفة في الملف. أسماء الصفحات الموجودة فعليًا في الملف: ' + wb.SheetNames.join('، ')); }
+    let msg = `<div class="okbox">✅ تم الاستيراد: ${foundList.map(escapeHtml).join(' — ')}. أي صفحات أخرى غير معروفة في الملف الأصلي ستبقى محفوظة كما هي عند التصدير.</div>`;
+    if(notFoundList.length){
+      msg += `<div class="errbox" style="margin-top:8px">⚠️ لم يتم التعرف على صفحة: ${notFoundList.map(escapeHtml).join('، ')} — لم تُستورد بياناتها (ولن تُمسح أي بيانات سابقة موجودة لها في التطبيق). أسماء الصفحات الفعلية داخل هذا الملف: ${wb.SheetNames.map(escapeHtml).join('، ')}. لو أسماء صفحاتك أو رؤوس أعمدتها مختلفة عن المتوقع، أخبرني بأسمائها الفعلية عشان أوسّع التعرف عليها.</div>`;
+    }
+    if(unknownColsList.length){
+      msg += `<div class="errbox" style="margin-top:8px">❓ أعمدة موجودة في الملف لكن غير معروفة في بنية التطبيق الحالية (لم تُفقد، لكنها مش هتظهر في الواجهة): ${unknownColsList.map(escapeHtml).join(' — ')}</div>`;
+    }
+    msg += buildImportValidationReport(importedKeys);
+    const newCats = customCategories.length - catCountBefore, newModes = customModes.length - modeCountBefore;
+    if(newCats || newModes){
+      msg += `<div class="okbox" style="margin-top:8px">➕ تمت إضافة ${newCats} مجال جديد و${newModes} طريقة حضور جديدة تلقائيًا كخيارات مخصصة (لأنها لم تكن ضمن القائمة الثابتة)، مع الحفاظ على قيمها الأصلية كما هي في بياناتك.</div>`;
+    }
+    $('importMsgHolder').innerHTML = msg;
   }catch(err){
     console.error(err);
     $('importMsgHolder').innerHTML = `<div class="errbox">⚠️ تعذر استيراد الملف: ${escapeHtml(err.message)}</div>`;
@@ -1240,10 +2539,23 @@ $('importInput').addEventListener('change', async e=>{
 });
 
 // ---------- Export xlsx (all sections, LTR, styled header, banded rows, autofilter, real hyperlinks) ----------
+function linksToText(refs){
+  return (Array.isArray(refs)?refs:[]).map(ref=>{
+    const sec = SECTIONS[ref.section];
+    const row = sec ? (sec.rows||[]).find(x=>x.id===ref.id) : null;
+    return row ? linkableRecordLabel(ref.section,row) : null;
+  }).filter(Boolean).join(', ');
+}
 function buildSheetForExport(section){
   const exportCols = section.cols.filter(c=>!c.isUrl);
   const headerRow = exportCols.map(c=>c.header);
-  const aoa = [headerRow].concat(section.rows.map(r => exportCols.map(c => r[c.key] || '')));
+  const cellText = (r,c)=>{
+    if(c.type === 'skills') return getSkillNames(r[c.key]||[]).join(', ');
+    if(c.type === 'links') return linksToText(r[c.key]);
+    if(c.type === 'select') return optionLabel(c, r[c.key]) || '';
+    return r[c.key] || '';
+  };
+  const aoa = [headerRow].concat(section.rows.map(r => exportCols.map(c => cellText(r,c))));
   const ws = XLSX.utils.aoa_to_sheet(aoa);
   ws['!cols'] = exportCols.map(c => ({ wch: c.wide ? 38 : 16 }));
 
@@ -1297,13 +2609,675 @@ $('exportBtn').addEventListener('click', ()=>{
     if(!wb.SheetNames.includes(targetName)) wb.SheetNames.push(targetName);
   });
 
-  XLSX.writeFile(wb, 'Professional_Development_Record.xlsx', { cellStyles:true });
+  XLSX.writeFile(wb, `Personal_Career_Assistant_v${window.APP_VERSION||'x'}.xlsx`, { cellStyles:true });
   toast('تم تصدير السجل الكامل — ارفعه على الدرايف ليحل محل النسخة القديمة');
 });
 
+// ---------- V5.0: Profile ----------
+let PROFILE = { name:'', jobTitle:'', organization:'', yearsExperience:'', email:'', phone:'', linkedin:'', location:'' };
+const PROFILE_STORAGE_KEY = 'profile-data';
+
+async function loadProfile(){
+  try{
+    const res = await storage.get(PROFILE_STORAGE_KEY);
+    if(res && res.value){ PROFILE = Object.assign(PROFILE, JSON.parse(res.value)); }
+  }catch(e){ /* nothing saved yet */ }
+  hydrateProfileForm();
+  renderProfileUI();
+}
+async function persistProfile(){
+  try{ await storage.set(PROFILE_STORAGE_KEY, JSON.stringify(PROFILE)); }
+  catch(e){ console.error('profile save failed', e); }
+  renderProfileUI();
+}
+function hydrateProfileForm(){
+  $('p_name').value = PROFILE.name || '';
+  $('p_title').value = PROFILE.jobTitle || '';
+  $('p_org').value = PROFILE.organization || '';
+  $('p_years').value = PROFILE.yearsExperience || '';
+  $('p_email').value = PROFILE.email || '';
+  $('p_phone').value = PROFILE.phone || '';
+  $('p_linkedin').value = PROFILE.linkedin || '';
+  $('p_location').value = PROFILE.location || '';
+}
+function renderProfileUI(){
+  const name = PROFILE.name || 'مستخدم جديد';
+  const title = PROFILE.jobTitle || 'أضف بياناتك من ⚙';
+  const initials = (PROFILE.name || '').trim().split(/\s+/).filter(Boolean).slice(0,2).map(w=>w[0]).join('').toUpperCase() || '؟';
+  if($('userAvatar')) $('userAvatar').textContent = initials;
+  if($('userNameLabel')) $('userNameLabel').textContent = name;
+  if($('userTitleLabel')) $('userTitleLabel').textContent = title;
+  if($('heroName')) $('heroName').textContent = PROFILE.jobTitle ? `${name} — ${PROFILE.jobTitle}` : name;
+  if($('heroNameLabelTag')) $('heroNameLabelTag').textContent = PROFILE.jobTitle ? 'المهندس' : 'الاسم';
+}
+$('saveProfileBtn').addEventListener('click', async ()=>{
+  PROFILE = {
+    name: $('p_name').value.trim(),
+    jobTitle: $('p_title').value.trim(),
+    organization: $('p_org').value.trim(),
+    yearsExperience: $('p_years').value.trim(),
+    email: $('p_email').value.trim(),
+    phone: $('p_phone').value.trim(),
+    linkedin: $('p_linkedin').value.trim(),
+    location: $('p_location').value.trim()
+  };
+  await persistProfile();
+  toast('تم حفظ الملف الشخصي ✅');
+});
+
+// ---------- V5.0: JSON export / import (full backup — profile + all sections) ----------
+function buildFullExportObject(){
+  const data = {};
+  SECTION_ORDER.forEach(key=> data[key] = SECTIONS[key].rows);
+  return {
+    schemaVersion: 6, // V6.2: إضافة id ثابت لكل سجل، حقول عنوان إنجليزية (name_en/title_en/job_title_en/degree_en)، ربط علائقي linked_sources للمهارات، وحذف expiry_date من الشهادات
+    app: 'Personal Career Assistant',
+    exportedAt: new Date().toISOString(),
+    profile: PROFILE,
+    data
+  };
+}
+function downloadTextFile(filename, mime, content){
+  const blob = new Blob([content], { type: mime });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a'); a.href = url; a.download = filename;
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  setTimeout(()=>URL.revokeObjectURL(url), 4000);
+}
+// تنزيل نص عادي كملف Word قابل للفتح مباشرة (بدون أي مكتبة خارجية — نفس فلسفة "ملف واحد بلا اعتماديات").
+// تقنية معروفة: مستند HTML بسيط بعناصر MS-Office الوصفية، محفوظ بامتداد .doc يفتحه Word مباشرة.
+function downloadPlainTextAsWord(filename, title, plainText){
+  const paragraphs = String(plainText||'').split(/\n{2,}/).map(block=>
+    `<p style="margin:0 0 10px 0;">${escapeHtml(block).replace(/\n/g,'<br>')}</p>`
+  ).join('');
+  const html = `<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word" xmlns="http://www.w3.org/TR/REC-html40">
+<head><meta charset="utf-8"><title>${escapeHtml(title)}</title>
+<!--[if gte mso 9]><xml><w:WordDocument><w:View>Print</w:View></w:WordDocument></xml><![endif]-->
+<style>body{font-family:Calibri, Tahoma, Arial, sans-serif; font-size:13.5pt; line-height:1.8;}</style>
+</head>
+<body dir="rtl" style="direction:rtl;text-align:right;">
+${paragraphs}
+</body></html>`;
+  const blob = new Blob(['\ufeff', html], { type: 'application/msword' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a'); a.href = url; a.download = filename;
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  setTimeout(()=>URL.revokeObjectURL(url), 4000);
+}
+async function exportJson(){
+  const obj = buildFullExportObject();
+  downloadTextFile(`career-profile-v${window.APP_VERSION||'x'}.json`, 'application/json', JSON.stringify(obj, null, 2));
+  toast('تم تصدير ملف JSON — احتفظ به كنسخة احتياطية كاملة ✅');
+}
+async function importJsonFile(file){
+  try{
+    const text = await file.text();
+    const obj = JSON.parse(text);
+    if(obj.profile && typeof obj.profile === 'object'){
+      PROFILE = Object.assign(PROFILE, obj.profile);
+      await persistProfile();
+    }
+    const data = (obj.data && typeof obj.data === 'object') ? obj.data : obj; // tolerate a flat structure too
+    let importedAny = false;
+    const importedKeys = [];
+    const obsoleteKeysFound = [];
+    SECTION_ORDER.forEach(key=>{
+      if(Array.isArray(data[key])){
+        SECTIONS[key].rows = data[key];
+        if(LINKABLE_SECTIONS.includes(key)) ensureRowIds(key); // ملفات JSON قديمة (قبل V6.2) ملهاش id ثابت — نضيفه هنا عشان روابط المصادر تشتغل
+        const knownKeys = new Set(SECTIONS[key].cols.map(c=>c.key));
+        const seenKeys = new Set();
+        SECTIONS[key].rows.forEach(row=> Object.keys(row).forEach(k=>seenKeys.add(k)));
+        const obsolete = Array.from(seenKeys).filter(k=> k!=='id' && !knownKeys.has(k));
+        if(obsolete.length) obsoleteKeysFound.push(`${SECTIONS[key].tabLabel}: ${obsolete.join('، ')}`);
+        persistSection(key);
+        importedAny = true;
+        importedKeys.push(key);
+      }
+    });
+    renderTabs(); renderTable();
+    if(window.updatePdrDashboard) window.updatePdrDashboard();
+    if(!importedAny) throw new Error('لم يتم التعرف على بنية الملف — تأكد أنه مُصدَّر من هذا التطبيق');
+    let msg = 'تم استيراد ملف JSON بنجاح ✅';
+    if(obj.schemaVersion && obj.schemaVersion < 6) msg += ' (الملف من نسخة أقدم من بنية البيانات الحالية — تم استيراده وتحديث المعرّفات المفقودة تلقائيًا)';
+    toast(msg);
+    let reportHtml = buildImportValidationReport(importedKeys);
+    if(obsoleteKeysFound.length){
+      reportHtml += `<div class="errbox" style="margin-top:8px">❓ حقول موجودة في الملف المستورَد لكن غير مستخدمة في بنية التطبيق الحالية (بقيت محفوظة في البيانات لكن مش هتظهر في الواجهة): ${obsoleteKeysFound.map(escapeHtml).join(' — ')}</div>`;
+    }
+    if(reportHtml && $('importMsgHolder')) $('importMsgHolder').innerHTML = reportHtml;
+  }catch(err){
+    console.error(err);
+    toast('تعذر قراءة ملف JSON: ' + err.message);
+  }
+}
+$('exportJsonBtn').addEventListener('click', exportJson);
+$('quickExportJson')?.addEventListener('click', exportJson);
+$('importJsonBtn').addEventListener('click', ()=> $('importJsonInput').click());
+$('importJsonInput').addEventListener('change', async e=>{
+  const file = e.target.files[0];
+  if(!file){ e.target.value=''; return; }
+  const totalExisting = SECTION_ORDER.reduce((s,k)=> s + SECTIONS[k].rows.length, 0);
+  if(totalExisting > 0){
+    const proceed = confirm('تنبيه: استيراد ملف JSON يستبدل بيانات أي قسم موجود داخل الملف المستورَد بالكامل (لا يدمجه مع الموجود حاليًا). صدّر نسخة احتياطية أولاً لو غير متأكد. هل تريد المتابعة؟');
+    if(!proceed){ e.target.value = ''; return; }
+  }
+  if(file) await importJsonFile(file);
+  e.target.value = '';
+});
+
+// ---------- V5.0: Job matching & tailored CV generation ----------
+// ---------- V5.1: Import & analyze a previous CV ----------
+window.cvCurrentFile = null;
+let cvExtractedData = null;
+(function setupCvUpload(){
+  const cvDropzone = $('cvDropzone');
+  const cvFileInput = $('cvFileInput');
+  if(!cvDropzone || !cvFileInput) return;
+  cvDropzone.addEventListener('click', ()=> cvFileInput.click());
+  cvDropzone.addEventListener('dragover', e=>{ e.preventDefault(); cvDropzone.classList.add('drag'); });
+  cvDropzone.addEventListener('dragleave', ()=> cvDropzone.classList.remove('drag'));
+  cvDropzone.addEventListener('drop', e=>{
+    e.preventDefault(); cvDropzone.classList.remove('drag');
+    if(e.dataTransfer.files.length) handleCvFile(e.dataTransfer.files[0]);
+  });
+  cvFileInput.addEventListener('change', e=>{ if(e.target.files.length) handleCvFile(e.target.files[0]); });
+})();
+async function handleCvFile(file){
+  const okTypes = ['image/jpeg','image/png','image/webp','image/gif','application/pdf'];
+  if(!okTypes.includes(file.type)){ $('cvErrHolder').innerHTML = `<div class="errbox">⚠️ نوع الملف غير مدعوم. الرجاء رفع صورة (JPG/PNG/WEBP) أو ملف PDF.</div>`; return; }
+  $('cvErrHolder').innerHTML = '';
+  $('cvResultHolder').innerHTML = '';
+  cvExtractedData = null;
+  const buf = await file.arrayBuffer();
+  const base64 = arrayBufferToBase64(buf);
+  window.cvCurrentFile = { base64, mime: file.type, name: file.name };
+  $('cvFileChipHolder').innerHTML = `
+    <div class="file-chip">
+      <span>${file.type === 'application/pdf' ? '📕' : '🖼️'}</span>
+      <span class="name">${escapeHtml(file.name)}</span>
+      <button id="removeCvFileBtn">إزالة</button>
+    </div>`;
+  $('removeCvFileBtn').addEventListener('click', ()=>{
+    window.cvCurrentFile = null; $('cvFileChipHolder').innerHTML=''; updateKeyStatus();
+  });
+  updateKeyStatus();
+}
+$('analyzeCvBtn').addEventListener('click', analyzeCv);
+async function analyzeCv(){
+  if(!window.cvCurrentFile || !geminiKey) return;
+  $('analyzeCvBtn').disabled = true;
+  $('cvLoaderHolder').innerHTML = `<div class="loader"><div class="spinner"></div> جارِ تحليل السيرة الذاتية بواسطة Gemini...</div>`;
+  $('cvResultHolder').innerHTML = ''; $('cvErrHolder').innerHTML = '';
+
+  const promptText = `أنت خبير توظيف ومحلل سير ذاتية لمهندسين. حلل ملف السيرة الذاتية (CV) المرفق واستخرج البيانات التالية بدقة شديدة، بدون اختراع أي معلومة غير موجودة فعليًا بالملف.
+أعد فقط كائن JSON صالح بالمفاتيح التالية بالضبط (بدون أي نص إضافي):
+{
+ "experience": [ { "job_title":"", "organization":"", "start_date":"YYYY-MM أو YYYY", "end_date":"YYYY-MM أو YYYY أو 'حتى الآن'", "tasks":"المهام الأساسية بإيجاز", "achievements":"أبرز الإنجازات المذكورة إن وجدت" } ],
+ "education": [ { "degree":"", "institution":"", "major":"", "graduation_date":"YYYY", "grade":"" } ],
+ "skills": [ { "skill_name":"", "type":"تقنية/إدارية/لغوية", "level":"" } ],
+ "strengths": ["نقطة قوة 1","نقطة قوة 2"],
+ "weaknesses": ["نقطة تحتاج تطوير أو فجوة محتملة 1","نقطة تحتاج تطوير أو فجوة محتملة 2"],
+ "summary": "فقرة قصيرة (3-4 جمل) بالعربية الفصحى تلخص الملف المهني العام لصاحب السيرة الذاتية"
+}
+قواعد:
+- استخرج كل الخبرات والمؤهلات كما وردت في الملف دون حذف أو دمج أو تلخيص مخل.
+- skills: استخرج المهارات الصريحة المذكورة فقط في الملف.
+- strengths/weaknesses: تقييم موضوعي بنّاء بناءً على تنوع الخبرات، التدرج الوظيفي، وضوح الإنجازات المقاسة رقميًا من عدمه، وأي فجوات زمنية ظاهرة أو نقص في التوثيق الكمي. لا تكن لاذعًا أو مبالغًا في المديح.
+- إن تعذر استخراج قسم بالكامل أعده كمصفوفة فارغة [].
+- أعد كائن JSON فقط بدون أي Markdown أو نص إضافي.`;
+
+  try{
+    const textOut = await callGeminiAPI(
+      [ { inline_data: { mime_type: window.cvCurrentFile.mime, data: window.cvCurrentFile.base64 } }, { text: promptText } ],
+      { json: true }
+    );
+    const parsed = parseGeminiJson(textOut);
+    cvExtractedData = parsed;
+    renderCvResult(parsed);
+  }catch(err){
+    console.error(err);
+    $('cvErrHolder').innerHTML = `<div class="errbox">⚠️ حدث خطأ أثناء التحليل: ${escapeHtml(err.message)}. تأكد من صحة مفتاح Gemini في الإعدادات ⚙.</div>`;
+  }finally{
+    $('cvLoaderHolder').innerHTML = '';
+    updateKeyStatus();
+  }
+}
+function renderCvResult(p){
+  const exp = Array.isArray(p.experience) ? p.experience : [];
+  const edu = Array.isArray(p.education) ? p.education : [];
+  const skl = Array.isArray(p.skills) ? p.skills : [];
+  const strengths = Array.isArray(p.strengths) ? p.strengths : [];
+  const weaknesses = Array.isArray(p.weaknesses) ? p.weaknesses : [];
+  $('cvResultHolder').innerHTML = `
+    <div class="okbox">✅ تم استخراج: ${exp.length} خبرة عملية، ${edu.length} مؤهل تعليمي، ${skl.length} مهارة.</div>
+    <div class="grid" style="margin-top:12px">
+      <div><label>✅ نقاط القوة</label><div class="hint" style="font-size:10px;line-height:1.9">${strengths.map(escapeHtml).join('<br>') || '—'}</div></div>
+      <div><label>⚠️ نقاط تحتاج تطوير</label><div class="hint" style="font-size:10px;line-height:1.9">${weaknesses.map(escapeHtml).join('<br>') || '—'}</div></div>
+    </div>
+    <p class="hint" style="margin-top:10px">${escapeHtml(p.summary || '')}</p>
+    <div class="actions" style="margin-top:10px">
+      <button class="btn stamp sm" id="importCvDataBtn">📥 استيراد البيانات المستخرجة إلى السجل</button>
+      <button class="btn ghost sm" id="discardCvDataBtn">✖ تجاهل</button>
+    </div>`;
+  $('importCvDataBtn').addEventListener('click', importCvData);
+  $('discardCvDataBtn').addEventListener('click', ()=>{ cvExtractedData = null; $('cvResultHolder').innerHTML=''; });
+}
+async function importCvData(){
+  if(!cvExtractedData) return;
+  const p = cvExtractedData;
+  const nextNo = (key) => String(SECTIONS[key].rows.reduce((m,r)=>Math.max(m, parseInt(r.no)||0),0) + 1);
+  let addedExp = 0, addedEdu = 0, addedSkl = 0;
+
+  (p.experience||[]).forEach(e=>{
+    SECTIONS.experience.rows.push({ id:genId('exp'), no:nextNo('experience'), type:'job', job_title:e.job_title||'', job_title_en:'', project_dept:'', organization:e.organization||'', start_date:e.start_date||'', end_date:e.end_date||'', tasks:e.tasks||'', achievements:e.achievements||'', skill_ids:[], tags:'', reference_person:'' });
+    addedExp++;
+  });
+  (p.education||[]).forEach(ed=>{
+    SECTIONS.education.rows.push({ no:nextNo('education'), degree:ed.degree||'', institution:ed.institution||'', major:ed.major||'', graduation_date:ed.graduation_date||'', grade:ed.grade||'' });
+    addedEdu++;
+  });
+  (p.skills||[]).forEach(s=>{
+    if(!s.skill_name || !s.skill_name.trim()) return;
+    const id = findOrCreateSkillByName(s.skill_name.trim(), { type: s.type || '', source: 'سيرة ذاتية سابقة' });
+    const skillRow = getSkillById(id);
+    if(skillRow){
+      if(!skillRow.type && s.type) skillRow.type = s.type;
+      if(!skillRow.level && s.level) skillRow.level = s.level;
+      if(!skillRow.source) skillRow.source = 'سيرة ذاتية سابقة';
+    }
+    addedSkl++;
+  });
+  await persistSection('experience'); await persistSection('education'); await persistSection('skills');
+
+  const importedFileName = (window.cvCurrentFile && window.cvCurrentFile.name) ? window.cvCurrentFile.name : '';
+  SECTIONS.cvVersions.rows.push({
+    no: nextNo('cvVersions'), id: genId('cv'),
+    type: 'general', job_id: '',
+    job_title_ref: importedFileName ? `مستوردة من ملف: ${importedFileName}` : 'سيرة ذاتية مستوردة',
+    language: 'ar', generated_date: new Date().toISOString().slice(0,10),
+    content: p.summary || ''
+  });
+  await persistSection('cvVersions');
+
+  PROFILE.cvAnalysis = { strengths:p.strengths||[], weaknesses:p.weaknesses||[], summary:p.summary||'', analyzedAt:new Date().toISOString() };
+  await persistProfile();
+
+  renderTabs(); renderTable(); if(window.updatePdrDashboard) window.updatePdrDashboard();
+  toast(`تم استيراد ${addedExp} خبرة و${addedEdu} مؤهل و${addedSkl} مهارة، وحُفظت نسخة ضمن السير الذاتية السابقة ✅`);
+  $('cvResultHolder').innerHTML = '';
+  cvExtractedData = null;
+  window.cvCurrentFile = null; $('cvFileChipHolder').innerHTML = '';
+}
+
+function buildRecordSummaryForAI(){
+  return {
+    profile: PROFILE,
+    certifications: SECTIONS.certifications.rows.map(r=>({ name:r.name, name_en:r.name_en, domain:r.domain, provider:r.provider, date:r.date, dur:r.dur, skills:getSkillNames(r.skill_ids), desc:r.desc, tags:r.tags })),
+    experience: SECTIONS.experience.rows.map(r=>({ type:r.type, job_title:r.job_title, job_title_en:r.job_title_en, project_dept:r.project_dept, organization:r.organization, start_date:r.start_date, end_date:r.end_date, tasks:r.tasks, achievements:r.achievements, skills:getSkillNames(r.skill_ids), tags:r.tags })),
+    activities: SECTIONS.activities.rows.map(r=>({ type:r.type, date:r.date, title:r.title, title_en:r.title_en, project_entity:r.project_entity, description:r.description, skills:getSkillNames(r.skill_ids) })),
+    skills: SECTIONS.skills.rows.map(r=>({ skill_name:r.skill_name, type:r.type, level:r.level, evidence_type:r.evidence_type })),
+    education: SECTIONS.education.rows.map(r=>({ degree:r.degree, degree_en:r.degree_en, institution:r.institution, major:r.major, graduation_date:r.graduation_date, grade:r.grade }))
+  };
+}
+$('analyzeJobBtn').addEventListener('click', analyzeJobMatch);
+
+// ---------- المساعد الشخصي (محادثة مع الذكاء الاصطناعي مبنية على السجل المهني كامل) ----------
+let chatHistory = []; // [{role:'user'|'model', text}]
+const CHAT_HISTORY_KEY = 'ai-coach-chat-history';
+const CHAT_HISTORY_LIMIT = 60; // حد أقصى للرسائل المحفوظة محليًا، لمنع تضخم localStorage بلا داعٍ
+function loadChatHistory(){
+  try{ const v = localStorage.getItem(CHAT_HISTORY_KEY); chatHistory = v ? JSON.parse(v) : []; }
+  catch(e){ chatHistory = []; }
+}
+function saveChatHistory(){
+  try{ localStorage.setItem(CHAT_HISTORY_KEY, JSON.stringify(chatHistory.slice(-CHAT_HISTORY_LIMIT))); }catch(e){}
+}
+function buildChatSystemInstruction(){
+  const lang = currentLang();
+  const record = JSON.stringify(buildRecordSummaryForAI());
+  return lang === 'en'
+    ? `You are a personal career-development assistant for a civil engineer working at Egypt's Ministry of Water Resources and Irrigation. You have full access to his real career record below — always ground your answers in it, and never invent achievements, certificates, or experience that aren't in it. You have three roles depending on what he asks: (1) General self-development and career coaching conversation — supportive but honest, like a real mentor. (2) If he pastes a job posting, course ad, or training announcement, assess how well it fits him specifically, structured clearly as: matching strengths (from his real record), gaps or things to prepare, and a clear final recommendation. (3) If he pastes survey or form questions, help him draft honest answers grounded in his real data — flag clearly which questions his current record doesn't have enough information to answer, instead of inventing an answer. Keep replies well-organized and not overly long. Full career record (JSON): ${record}`
+    : `أنت مساعد شخصي للتطوير المهني الذاتي لمهندس مدني يعمل بوزارة الموارد المائية والري في مصر. عندك وصول كامل لسجله المهني الحقيقي بالأسفل — دايمًا ابني إجاباتك عليه، وممنوع تخترع أي إنجاز أو شهادة أو خبرة مش موجودة فيه فعليًا. عندك 3 أدوار حسب اللي هيطلبه منك: (1) نقاش عام في التطوير الذاتي والمهني — داعم لكن صريح، زي مرشد حقيقي مش مجامل. (2) لو بعتلك نص إعلان وظيفة أو كورس أو تدريب، قيّم مدى مناسبته له تحديدًا، بإجابة منظمة وواضحة: نقاط قوة فعلية تتماشى مع الفرصة (من سجله الحقيقي)، نقاط محتاجة تجهيز أو تطوير، وتوصية نهائية واضحة. (3) لو بعتلك أسئلة استبيان أو فورم، ساعده يصيغ إجابات صادقة مبنية على بياناته الفعلية — ولو سؤال معين سجله الحالي مفيهوش معلومة كافية للإجابة عليه، وضّح ده صراحة بدل ما تخترع إجابة. خلي ردودك منظمة بعناوين أو نقاط لما يكون مناسبًا، ومن غير إطالة زيادة عن اللزوم. السجل المهني الكامل بصيغة JSON: ${record}`;
+}
+function renderChatMessages(){
+  const holder = $('chatMessages');
+  if(!chatHistory.length){
+    holder.innerHTML = `<div style="text-align:center;color:var(--muted,#999);font-size:13px;padding:20px;">ابدأ المحادثة — اضغط أحد الأزرار فوق أو اكتب رسالتك مباشرة.</div>`;
+    return;
+  }
+  holder.innerHTML = chatHistory.map(m=>{
+    const isUser = m.role === 'user';
+    return `<div style="align-self:${isUser?'flex-end':'flex-start'};max-width:85%;">
+      <div style="background:${isUser?'var(--purple,#6d5bd0)':'#fff'};color:${isUser?'#fff':'inherit'};border:1px solid ${isUser?'transparent':'var(--line,#e5e5e5)'};border-radius:12px;padding:10px 14px;font-size:13.5px;line-height:1.7;white-space:pre-wrap;">${escapeHtml(m.text)}</div>
+    </div>`;
+  }).join('');
+  holder.scrollTop = holder.scrollHeight;
+}
+async function sendChatMessage(text){
+  if(!geminiKey){ toast('محتاج مفتاح Gemini أولاً — افتح ⚙'); $('settingsPanel').classList.add('open'); return; }
+  const trimmed = (text||'').trim();
+  if(!trimmed) return;
+  chatHistory.push({ role:'user', text: trimmed });
+  renderChatMessages();
+  saveChatHistory();
+  $('chatInput').value = '';
+  $('chatLoader').innerHTML = `<div class="loader"><div class="spinner"></div> جارِ الرد...</div>`;
+  $('chatSendBtn').disabled = true;
+  try{
+    const systemText = buildChatSystemInstruction();
+    const replyText = await callGeminiChat(chatHistory, systemText);
+    chatHistory.push({ role:'model', text: replyText || '—' });
+    saveChatHistory();
+    renderChatMessages();
+  }catch(e){
+    console.error(e);
+    chatHistory.push({ role:'model', text: '⚠️ حصل خطأ أثناء الاتصال بـ Gemini: ' + e.message });
+    renderChatMessages();
+  }finally{
+    $('chatLoader').innerHTML = '';
+    $('chatSendBtn').disabled = false;
+  }
+}
+$('chatSendBtn').addEventListener('click', ()=> sendChatMessage($('chatInput').value));
+$('chatInput').addEventListener('keydown', e=>{
+  if(e.key === 'Enter' && !e.shiftKey){ e.preventDefault(); sendChatMessage($('chatInput').value); }
+});
+$('chatClearBtn').addEventListener('click', ()=>{
+  if(!chatHistory.length) return;
+  if(confirm('مسح المحادثة بالكامل؟ (السجل المهني نفسه مش هيتأثر، بس تاريخ المحادثة هيتمسح)')){
+    chatHistory = [];
+    saveChatHistory();
+    renderChatMessages();
+  }
+});
+$('chatStarterCoach').addEventListener('click', ()=>{
+  $('chatInput').value = 'عايز أتكلم معاك في تطوير نفسي مهنيًا بناءً على سجلي الحالي — إيه رأيك في مساري لحد دلوقتي، وإيه أهم حاجة تنصحني أركّز عليها بعد كده؟';
+  $('chatInput').focus();
+});
+$('chatStarterOpportunity').addEventListener('click', ()=>{
+  $('chatInput').value = 'قيّم مدى مناسبة الفرصة دي ليا بناءً على سجلي المهني الحقيقي:\n\n[الصق هنا نص الوظيفة أو الكورس أو الإعلان]';
+  $('chatInput').focus();
+});
+$('chatStarterSurvey').addEventListener('click', ()=>{
+  $('chatInput').value = 'ساعدني أملأ الاستبيان ده بإجابات مبنية على بياناتي الحقيقية، ولو سؤال معلوماته ناقصة عندي وضّحلي:\n\n[الصق هنا أسئلة الاستبيان أو الفورم]';
+  $('chatInput').focus();
+});
+loadChatHistory();
+renderChatMessages();
+
+async function analyzeJobMatch(){
+  if(!geminiKey){ toast('محتاج مفتاح Gemini أولاً — افتح ⚙'); $('settingsPanel').classList.add('open'); return; }
+  const jobTitle = $('jobTitleInput').value.trim();
+  const jd = $('jobDescInput').value.trim();
+  if(!jd){ toast('الصق نص الوظيفة أو متطلباتها أولاً'); return; }
+
+  const totalRows = SECTION_ORDER.reduce((s,k)=> s + SECTIONS[k].rows.length, 0);
+  if(!totalRows){ toast('السجل المهني فارغ — أضف شهادات/خبرات أولاً حتى يبني التطبيق سيرة ذاتية من بياناتك الحقيقية'); return; }
+
+  $('analyzeJobBtn').disabled = true;
+  $('jobMatchLoader').innerHTML = `<div class="loader"><div class="spinner"></div> جارِ تحليل التطابق وإنشاء السيرة الذاتية...</div>`;
+  $('jobMatchResult').innerHTML = '';
+
+  const summary = buildRecordSummaryForAI();
+  const promptText = `أنت مستشار توظيف وخبير صياغة سير ذاتية (CV) للمهندسين. لديك سجل مهني موثّق (JSON) ووصف وظيفة مستهدفة.
+مهمتك بدقة:
+1) قيّم نسبة التطابق (0-100) بين السجل والوظيفة، بناءً فقط على البيانات المعطاة في الـ JSON — لا تخترع أي بيانات أو خبرات غير موجودة فيه.
+2) استخرج قائمة بالمهارات/المتطلبات المتطابقة بين السجل والوظيفة، وقائمة منفصلة بالمهارات المطلوبة في الوظيفة والغير موجودة (أو غير واضحة) في السجل.
+3) اكتب فقرة قصيرة (match_summary) تشرح سبب النسبة بإيجاز.
+4) اكتب سيرة ذاتية (CV) احترافية مخصصة لهذه الوظيفة تحديدًا، تعتمد فقط على أقوى وأنسب العناصر من السجل المعطى (لا تُدرج كل شيء، اختر الأصلح لمتطلبات الوظيفة)، بصيغة نصية عادية منظمة بعناوين واضحة بالعربية: (الملف الشخصي، ملخص مهني، الخبرات العملية، الشهادات والدورات ذات الصلة، المهارات، التطوع إن وجد). استخدم بيانات profile (الاسم، المسمى، الجهة، سنوات الخبرة، البريد، الهاتف، LinkedIn، محل الإقامة) في رأس السيرة الذاتية.
+   - قسم "ملخص مهني" تحديدًا يجب أن يكون فقرة واحدة (3-5 أسطر) مصاغة خصيصًا لهذه الوظيفة، وليست فقرة عامة قابلة لأي وظيفة أخرى — تربط بوضوح بين: مسمى الوظيفة المستهدفة، أقوى 2-3 مهارات من matched_skills الفعلية الموجودة في السجل، وأبرز شهادة أو مؤهل من السجل له صلة مباشرة بمتطلبات هذه الوظيفة تحديدًا. لا تستخدم عبارات عامة فضفاضة (مثل "شخص طموح يسعى للتميز") بدون ربطها بدليل فعلي من السجل.
+
+سجل المهندس (JSON — هذا هو مصدر الحقيقة الوحيد المسموح استخدامه):
+${JSON.stringify(summary)}
+
+مسمى الوظيفة المستهدفة: ${jobTitle || '(غير محدد)'}
+وصف الوظيفة/المتطلبات:
+"""${jd}"""
+
+أعد فقط كائن JSON صالح بالمفاتيح التالية بالضبط وبدون أي نص إضافي أو Markdown:
+{
+ "match_score": رقم صحيح من 0 إلى 100,
+ "matched_skills": ["..."],
+ "missing_skills": ["..."],
+ "match_summary": "فقرة قصيرة (2-3 جمل)",
+ "cv_text": "نص السيرة الذاتية كاملاً كنص عادي منسق بعناوين وأسطر جديدة"
+}`;
+
+  try{
+    const textOut = await callGeminiAPI([{ text: promptText }], { json: true });
+    const parsed = parseGeminiJson(textOut);
+    renderJobMatchResult(parsed);
+  }catch(err){
+    console.error(err);
+    $('jobMatchResult').innerHTML = `<div class="errbox">⚠️ حدث خطأ أثناء التحليل: ${escapeHtml(err.message)}. تأكد من صحة مفتاح Gemini في الإعدادات ⚙.</div>`;
+  }finally{
+    $('jobMatchLoader').innerHTML = '';
+    $('analyzeJobBtn').disabled = false;
+  }
+}
+let lastJobMatchAnalysis = null; // { jobTitle, jd, parsed } — الفحص لحظي ولا يُخزَّن إلا بالحفظ الصريح
+function renderJobMatchResult(p){
+  const jobTitle = $('jobTitleInput').value.trim();
+  const jd = $('jobDescInput').value.trim();
+  lastJobMatchAnalysis = { jobTitle, jd, parsed: p };
+  const score = Math.max(0, Math.min(100, parseInt(p.match_score) || 0));
+  const matched = Array.isArray(p.matched_skills) ? p.matched_skills : [];
+  const missing = Array.isArray(p.missing_skills) ? p.missing_skills : [];
+  const scoreColor = score >= 70 ? 'var(--green)' : (score >= 40 ? 'var(--orange)' : 'var(--danger)');
+  $('jobMatchResult').innerHTML = `
+    <div class="okbox" style="font-size:11px;border-color:${scoreColor};color:${scoreColor}">
+      <b style="font-size:16px">نسبة التطابق: ${score}%</b><br>
+      ${escapeHtml(p.match_summary || '')}
+    </div>
+    <div class="grid" style="margin-top:12px">
+      <div><label>✅ مهارات متطابقة</label><div class="hint" style="font-size:10px;line-height:1.9">${matched.map(escapeHtml).join('، ') || '—'}</div></div>
+      <div><label>⚠️ مهارات ناقصة عن متطلبات الوظيفة</label><div class="hint" style="font-size:10px;line-height:1.9">${missing.map(escapeHtml).join('، ') || '—'}</div></div>
+    </div>
+    <div class="actions" style="margin-top:10px">
+      <button class="btn stamp sm" id="saveTargetJobBtn">💾 احفظ كوظيفة مستهدفة + نسخة CV</button>
+    </div>
+    <div class="full" style="margin-top:14px">
+      <label>السيرة الذاتية المخصصة لهذه الوظيفة (قابلة للتعديل قبل الاستخدام)</label>
+      <textarea id="cvOutputTextarea" style="min-height:340px;font-size:11px;line-height:1.8">${escapeHtml(p.cv_text || '')}</textarea>
+      <div class="actions">
+        <button class="btn ghost sm" id="selectCvBtn">تحديد الكل للنسخ</button>
+        <button class="btn stamp sm" id="downloadCvBtn">⬇ تنزيل كملف نصي</button>
+        <button class="btn stamp sm" id="downloadCvWordBtn">⬇ تنزيل كملف Word</button>
+      </div>
+    </div>`;
+  $('selectCvBtn').addEventListener('click', ()=>{ const ta = $('cvOutputTextarea'); ta.focus(); ta.select(); toast('محدد — استخدم Ctrl+C (أو Cmd+C) للنسخ'); });
+  $('downloadCvBtn').addEventListener('click', ()=>{
+    const safeName = (PROFILE.name || 'CV').replace(/[^\p{L}\p{N}]+/gu, '_');
+    downloadTextFile(`CV-${safeName}.txt`, 'text/plain;charset=utf-8', $('cvOutputTextarea').value);
+  });
+  $('downloadCvWordBtn').addEventListener('click', ()=>{
+    const safeName = (PROFILE.name || 'CV').replace(/[^\p{L}\p{N}]+/gu, '_');
+    downloadPlainTextAsWord(`CV-${safeName}.doc`, `CV - ${PROFILE.name||''}`, $('cvOutputTextarea').value);
+  });
+  $('saveTargetJobBtn').addEventListener('click', saveAsTargetJob);
+}
+// حفظ صريح فقط — الفحوصات السريعة غير المحفوظة لا تلمس jobs[] أو cvVersions[] (الدليل، القسم 6)
+async function saveAsTargetJob(){
+  if(!lastJobMatchAnalysis) return;
+  const { jobTitle, jd, parsed } = lastJobMatchAnalysis;
+  const nextNo = (key) => String(SECTIONS[key].rows.reduce((m,r)=>Math.max(m, parseInt(r.no)||0),0) + 1);
+  const jobId = genId('job');
+  const requiredSkillIds = (Array.isArray(parsed.missing_skills) ? parsed.missing_skills : []).concat(Array.isArray(parsed.matched_skills) ? parsed.matched_skills : []).map(n=>findOrCreateSkillByName(n)).filter(Boolean);
+  SECTIONS.jobs.rows.push({
+    no: nextNo('jobs'), id: jobId,
+    title: jobTitle || 'وظيفة بدون مسمى محدد',
+    status: 'active',
+    match_score: String(Math.max(0, Math.min(100, parseInt(parsed.match_score) || 0))),
+    required_experience_years: '',
+    required_skill_ids: requiredSkillIds,
+    date_added: new Date().toISOString().slice(0,10),
+    raw_description: jd,
+    count_volunteering_as_experience: false
+  });
+  await persistSection('jobs');
+  SECTIONS.cvVersions.rows.push({
+    no: nextNo('cvVersions'), id: genId('cv'),
+    type: 'tailored', job_id: jobId,
+    job_title_ref: jobTitle || 'وظيفة بدون مسمى محدد',
+    language: 'ar', generated_date: new Date().toISOString().slice(0,10),
+    content: $('cvOutputTextarea') ? $('cvOutputTextarea').value : (parsed.cv_text||'')
+  });
+  await persistSection('cvVersions');
+  renderTabs(); renderTable(); if(window.updatePdrDashboard) window.updatePdrDashboard();
+  toast('تم حفظ الوظيفة كهدف متابَع + نسخة السيرة الذاتية ✅');
+}
+$('quickJobMatch')?.addEventListener('click', ()=> $('jobMatchSection')?.scrollIntoView({behavior:'smooth', block:'start'}));
+
 // ---------- Init ----------
 loadKey();
+loadProfile();
 loadAllSections();
+</script>
+
+<script>
+// ===== V5.0: Bilingual (AR/EN) support =====
+(function(){
+  const TRANSLATIONS = {
+    ar: {
+      brandName:'PERSONAL CAREER ASSISTANT', brandTagline:'نظام إدارة السجل المهني الشخصي', searchPh:'ابحث في السجل المهني...', themeLabel:'المظهر',
+      heroEyebrow:'PERSONAL CAREER ASSISTANT', heroTitle:'السجل المهني الشامل', heroDesc:'كل إنجازاتك المهنية في مكان واحد — الشهادات، الخبرات، التطوع، الأنشطة والمهارات، وكل ما يعكس تطورك المهني.',
+      heroNameLabel:'الاسم', heroDateLabel:'التاريخ', heroDayLabel:'اليوم', heroTimeLabel:'الوقت (القاهرة)', gearBtnTitle:'إعدادات مفتاح Gemini',
+      statCertsLabel:'الشهادات', statCertsNote:'دليل مهني موثّق', statExpLabel:'الخبرات', statExpNote:'سجلات مهنية',
+      statActLabel:'الأنشطة', statActNote:'ورش، اجتماعات، مأموريات',
+      statSkillsLabel:'المهارات الموثّقة', statSkillsNote:'من سجلاتك',
+      statEduLabel:'التعليم', statEduNote:'المؤهلات الدراسية', statJobsLabel:'الوظائف المستهدفة', statJobsNote:'أهداف متابَعة',
+      quickActionsTitle:'إجراءات سريعة', quickUploadT:'رفع شهادة جديدة', quickUploadS:'استخراج البيانات بالذكاء الاصطناعي',
+      quickImportT:'استيراد من Excel', quickImportS:'قراءة الصفحات الأربع تلقائيًا', quickExportT:'تصدير إلى Excel', quickExportS:'حفظ النسخة المحدثة',
+      quickSkillsT:'إدارة المهارات', quickSkillsS:'عرض المهارات المستخرجة', quickJobT:'مطابقة وظيفة + CV', quickJobS:'تحليل التطابق وإنشاء سيرة ذاتية',
+      quickJsonT:'تصدير JSON', quickJsonS:'نسخة احتياطية كاملة',
+      navHome:'الرئيسية', navCerts:'الشهادات', navExp:'الخبرات', navAct:'الأنشطة', navSkills:'المهارات', navEdu:'التعليم', navJobs:'الوظائف المستهدفة', navCvs:'نسخ السيرة الذاتية',
+      navProfile:'الملف الشخصي', navJobMatch:'مطابقة وCV', navAiCoach:'المساعد الشخصي', navSettings:'الإعدادات',
+      aiCoachHeading:'🤖 المساعد الشخصي للتطوير المهني',
+      aiCoachHint:'مساعد محادثة مطّلع على سجلك المهني كامل (الشهادات، الخبرات، المهارات، التعليم، الأنشطة) — استخدمه للنقاش في تطوير نفسك، أو الصق له وصف وظيفة/كورس ليقيّم مدى مناسبته لك، أو استعن به لملء استبيان بناءً على بياناتك الفعلية.',
+      profileSectionTitle:'الملف الشخصي (يظهر في الواجهة ويُستخدم عند بناء السيرة الذاتية)',
+      p_name_label:'الاسم', p_title_label:'المسمى الوظيفي', p_org_label:'الجهة', p_years_label:'سنوات الخبرة', p_email_label:'البريد الإلكتروني', p_phone_label:'الهاتف', p_linkedin_label:'حساب LinkedIn', p_location_label:'محل الإقامة',
+      saveProfileBtn:'💾 حفظ الملف الشخصي',
+      geminiKeyTitle:'مفتاح Gemini API', geminiKeyDesc:'التحليل يعمل من المتصفح مباشرة باستخدام مفتاحك الشخصي. المفتاح يُخزّن محليًا داخل متصفحك فقط (localStorage) ولا يُرسل لأي سيرفر غير Google Gemini API مباشرة.',
+      geminiKeyPh:'الصق مفتاح Gemini API هنا...', saveKeyBtn:'حفظ المفتاح', keyStatusMissing:'لا يوجد مفتاح محفوظ', keyStatusSaved:'مفتاح محفوظ ✓',
+      getKeyLink:'🔗 ما عندكش مفتاح؟ احصل عليه مجانًا من Google AI Studio',
+      cvImportSectionTitle:'استيراد سيرة ذاتية سابقة', cvImportHeading:'حلّل سيرتك الذاتية القديمة',
+      cvDropzoneMain:'اضغط هنا لاختيار ملف السيرة الذاتية، أو اسحبه وأفلته',
+      analyzeCvBtn:'🔍 تحليل السيرة الذاتية واستخراج البيانات',
+      cvImportHint:'هيتم استخراج الخبرات والمهارات والتعليم، وتقييم نقاط القوة والضعف. راجع النتيجة قبل استيرادها للسجل — البيانات لا تُضاف تلقائيًا إلا بعد ضغطك على زر الاستيراد.',
+      jobMatchSectionTitle:'مطابقة وظيفة وإنشاء سيرة ذاتية (CV)', jobMatchHeading:'حلّل وظيفة مستهدفة',
+      jobTitleLabel:'مسمى الوظيفة (اختياري)', jobTitlePh:'مثال: مهندس ري أول - إدارة مشاريع',
+      jobDescLabel:'الصق نص الوظيفة / المتطلبات كاملاً', jobDescPh:'الصق هنا وصف الوظيفة والمتطلبات المطلوبة...',
+      analyzeJobBtn:'🎯 تحليل التطابق وإنشاء CV مخصص',
+      jobMatchHint:'التحليل يعتمد فقط على بياناتك المسجّلة في السجل (الشهادات، الخبرات، التطوع، الأنشطة) والملف الشخصي — لا يُخترع أي بيانات غير موجودة. الفحص هنا لحظي؛ اضغط "احفظ كوظيفة مستهدفة" بعد النتيجة لو عاوز تتابعها.',
+      certSectionHeading:'تحليل شهادة جديدة', certPolicyHint:'هذا القسم للشهادات الموثَّقة فقط (لها شهادة فعلية بعد الانتهاء). أي دورة أو ورشة أو اجتماع بدون شهادة رسمية يُسجَّل في قسم "الأنشطة" بدلاً من هنا.', dropzoneMain:'اضغط هنا لاختيار ملف، أو اسحب الشهادة وأفلتها',
+      analyzeBtn:'🔍 تحليل الشهادة بالذكاء الاصطناعي', formCardHeading:'مراجعة البيانات قبل الإضافة للسجل',
+      f_hyperlink_url_label:'رابط الشهادة (درايف)', f_hyperlink_url_ph:'رابط الملف بعد رفعه على Drive (اختياري)',
+      f_domain_label:'المجال (Domain)', f_name_en_label:'الاسم بالإنجليزية (لتسهيل البحث)',
+      f_desc_label:'الوصف والأثر العملي', f_desc_ph:'وصف الشهادة/الدورة، وكيف استفدت منها عمليًا في عملك...',
+      f_format_label:'Certificate Format', f_format_digital:'نسخة رقمية (Digital)', f_format_hard:'نسخة ورقية (Hard Copy)', f_format_scanned:'ممسوحة ضوئيًا (Scanned)',
+      cancelEditBtn:'✖ إلغاء التعديل',
+      f_tags_label:'Tags (كلمات مفتاحية مفصولة بفاصلة)', f_tags_ph:'ري، إدارة مشاريع، BIM',
+      f_verification_url_label:'رابط التحقق الفعلي — اختياري', f_filename_label:'اسم الملف الجديد المقترح',
+      confirmBtn:'✅ تأكيد وإضافة للسجل + تنزيل الملف بالاسم الجديد', generatePostBtn:'📝 اكتب منشور إنجاز (LinkedIn)',
+      postBoxLabel:'مسودة المنشور', selectAllCopy:'تحديد الكل للنسخ',
+      fullRecordTitle:'السجل الكامل — Personal Career Assistant', recordsHeading:'كل صفحات السجل',
+      importExcelBtn:'⬆ استيراد Excel', exportExcelBtn:'⬇ تصدير Excel', importJsonBtn:'⬆ استيراد JSON', exportJsonBtn:'⬇ تصدير JSON',
+      addRowBtn:'➕ صف يدوي', clearLogBtn:'🗑 مسح هذه الصفحة', autoSavedNote:'البيانات محفوظة تلقائيًا في المتصفح',
+      editCellsHint:'يمكن تعديل الخلايا مباشرة. البيانات تحفظ محليًا، ويمكن تصديرها إلى Excel أو JSON في أي وقت.'
+    },
+    en: {
+      brandName:'PERSONAL CAREER ASSISTANT', brandTagline:'Personal Career Management System', searchPh:'Search your career record...', themeLabel:'Theme',
+      heroEyebrow:'PERSONAL CAREER ASSISTANT', heroTitle:'Your Complete Career Record', heroDesc:'All your professional achievements in one place — certificates, experience, volunteering, activities and skills, reflecting your career growth.',
+      heroNameLabel:'Name', heroDateLabel:'Date', heroDayLabel:'Day', heroTimeLabel:'Time (Cairo)', gearBtnTitle:'Gemini API key settings',
+      statCertsLabel:'Certificates', statCertsNote:'Professional evidence', statExpLabel:'Experience', statExpNote:'Career records',
+      statActLabel:'Activities', statActNote:'Workshops, meetings, missions',
+      statSkillsLabel:'Documented Skills', statSkillsNote:'From your records',
+      statEduLabel:'Education', statEduNote:'Academic qualifications', statJobsLabel:'Target Jobs', statJobsNote:'Tracked goals',
+      quickActionsTitle:'Quick Actions', quickUploadT:'Upload New Certificate', quickUploadS:'AI-powered data extraction',
+      quickImportT:'Import from Excel', quickImportS:'Read all four sheets automatically', quickExportT:'Export to Excel', quickExportS:'Save the updated version',
+      quickSkillsT:'Manage Skills', quickSkillsS:'View extracted skills', quickJobT:'Job Match + CV', quickJobS:'Analyze fit and generate a CV',
+      quickJsonT:'Export JSON', quickJsonS:'Full backup file',
+      navHome:'Home', navCerts:'Certificates', navExp:'Experience', navAct:'Activities', navSkills:'Skills', navEdu:'Education', navJobs:'Target Jobs', navCvs:'CV Versions',
+      navProfile:'Profile', navJobMatch:'Match & CV', navAiCoach:'AI Assistant', navSettings:'Settings',
+      aiCoachHeading:'🤖 Personal Career Development Assistant',
+      aiCoachHint:'A chat assistant with full access to your career record (certificates, experience, skills, education, activities) — use it to discuss self-development, paste a job/course description for a fit assessment, or get help drafting survey answers grounded in your real data.',
+      profileSectionTitle:'Personal Profile (shown in the UI and used when building your CV)',
+      p_name_label:'Name', p_title_label:'Job Title', p_org_label:'Organization', p_years_label:'Years of Experience', p_email_label:'Email', p_phone_label:'Phone', p_linkedin_label:'LinkedIn Profile', p_location_label:'Location',
+      saveProfileBtn:'💾 Save Profile',
+      geminiKeyTitle:'Gemini API Key', geminiKeyDesc:"Analysis runs directly from your browser using your personal key. The key is stored locally in your browser only (localStorage) and is never sent to any server other than Google's Gemini API directly.",
+      geminiKeyPh:'Paste your Gemini API key here...', saveKeyBtn:'Save Key', keyStatusMissing:'No key saved', keyStatusSaved:'Key saved ✓',
+      getKeyLink:"🔗 Don't have a key? Get one for free from Google AI Studio",
+      cvImportSectionTitle:'Import a Previous CV', cvImportHeading:'Analyze your old CV',
+      cvDropzoneMain:'Click here to choose your CV file, or drag & drop it',
+      analyzeCvBtn:'🔍 Analyze CV & Extract Data',
+      cvImportHint:'Experience, skills and education will be extracted, along with a strengths/weaknesses assessment. Review the results before importing — nothing is added automatically until you click Import.',
+      jobMatchSectionTitle:'Job Match & Tailored CV Generator', jobMatchHeading:'Analyze a target job',
+      jobTitleLabel:'Job title (optional)', jobTitlePh:'e.g. Senior Irrigation Engineer - Project Management',
+      jobDescLabel:'Paste the full job description / requirements', jobDescPh:'Paste the job description and requirements here...',
+      analyzeJobBtn:'🎯 Analyze Match & Generate CV',
+      jobMatchHint:'The analysis relies only on your recorded data (certificates, experience, volunteering, activities) and profile — no data is invented. This is a quick check; click "Save as target job" after the result if you want to track it.',
+      certSectionHeading:'Analyze a New Certificate', certPolicyHint:'This section is for documented certificates only (an actual certificate was issued upon completion). Any course, workshop, or meeting without a formal certificate should be logged under "Activities" instead.', dropzoneMain:'Click here to choose a file, or drag & drop your certificate',
+      analyzeBtn:'🔍 Analyze Certificate with AI', formCardHeading:'Review Data Before Adding to the Record',
+      f_hyperlink_url_label:'Certificate File / Drive Link', f_hyperlink_url_ph:'Link to the file after uploading to Drive (optional)',
+      f_domain_label:'Domain', f_name_en_label:'English Name (helps with search)',
+      f_desc_label:'Description & Practical Impact', f_desc_ph:'Describe the certificate/course, and how you applied it practically in your work...',
+      f_format_label:'Certificate Format', f_format_digital:'Digital', f_format_hard:'Hard Copy', f_format_scanned:'Scanned',
+      cancelEditBtn:'✖ Cancel Edit',
+      f_tags_label:'Tags (comma-separated)', f_tags_ph:'irrigation, project management, BIM',
+      f_verification_url_label:'Actual verification link — optional', f_filename_label:'Suggested new file name',
+      confirmBtn:'✅ Confirm & Add to Record + Download Renamed File', generatePostBtn:'📝 Draft Achievement Post (LinkedIn)',
+      postBoxLabel:'Post Draft', selectAllCopy:'Select All to Copy',
+      fullRecordTitle:'Full Record — Personal Career Assistant', recordsHeading:'All Record Sheets',
+      importExcelBtn:'⬆ Import Excel', exportExcelBtn:'⬇ Export Excel', importJsonBtn:'⬆ Import JSON', exportJsonBtn:'⬇ Export JSON',
+      addRowBtn:'➕ Manual Row', clearLogBtn:'🗑 Clear This Sheet', autoSavedNote:'Data is auto-saved in your browser',
+      editCellsHint:'Cells can be edited directly. Data is saved locally and can be exported to Excel or JSON at any time.'
+    }
+  };
+  const EN_TAB_LABELS = { certifications:'Certificates', experience:'Experience', activities:'Activities', skills:'Skills', education:'Education', jobs:'Target Jobs', cvVersions:'CV Versions' };
+  const AR_TAB_LABELS = { certifications:'الشهادات', experience:'الخبرات', activities:'الأنشطة', skills:'المهارات', education:'التعليم', jobs:'الوظائف المستهدفة', cvVersions:'نسخ السيرة الذاتية' };
+
+  function applyLanguage(lang){
+    const dict = TRANSLATIONS[lang] || TRANSLATIONS.ar;
+    document.documentElement.setAttribute('lang', lang);
+    document.documentElement.setAttribute('dir', lang === 'en' ? 'ltr' : 'rtl');
+    document.querySelectorAll('[data-i18n]').forEach(el=>{
+      const key = el.getAttribute('data-i18n');
+      if(dict[key] != null) el.textContent = dict[key];
+    });
+    document.querySelectorAll('[data-i18n-ph]').forEach(el=>{
+      const key = el.getAttribute('data-i18n-ph');
+      if(dict[key] != null) el.setAttribute('placeholder', dict[key]);
+    });
+    document.querySelectorAll('[data-i18n-title]').forEach(el=>{
+      const key = el.getAttribute('data-i18n-title');
+      if(dict[key] != null) el.setAttribute('title', dict[key]);
+    });
+    if(typeof window.syncVersionUI === 'function') window.syncVersionUI(lang);
+    // Localize dynamic tab labels (in-memory SECTIONS object used by renderTabs)
+    if(window.SECTIONS_REF){
+      const map = lang === 'en' ? EN_TAB_LABELS : AR_TAB_LABELS;
+      Object.keys(map).forEach(k=>{ if(window.SECTIONS_REF[k]) window.SECTIONS_REF[k].tabLabel = map[k]; });
+      if(typeof window.renderTabsRef === 'function') window.renderTabsRef();
+    }
+    // Key status label (depends on whether a key is saved — re-render via existing updater if present)
+    const st = document.getElementById('keyStatus');
+    if(st){ st.textContent = st.classList.contains('missing') ? dict.keyStatusMissing : dict.keyStatusSaved; }
+    localStorage.setItem('pdr-lang', lang);
+    const btn = document.getElementById('langToggle');
+    if(btn) btn.textContent = lang === 'en' ? 'EN / AR' : 'AR / EN';
+  }
+
+  const savedLang = localStorage.getItem('pdr-lang') || 'ar';
+  applyLanguage(savedLang);
+
+  document.getElementById('langToggle')?.addEventListener('click', ()=>{
+    const current = document.documentElement.getAttribute('lang') === 'en' ? 'en' : 'ar';
+    applyLanguage(current === 'en' ? 'ar' : 'en');
+  });
+
+  window.applyLanguage = applyLanguage;
+})();
 </script>
 <script>
 (function(){
@@ -1316,6 +3290,7 @@ loadAllSections();
   tg?.addEventListener('click',()=>{root.dataset.theme=root.dataset.theme==='dark'?'light':'dark';localStorage.setItem('pdr-v4-theme',root.dataset.theme);syncTheme();});
 
   const q=(id)=>document.getElementById(id);
+  const get = k => (SECTIONS[k] && Array.isArray(SECTIONS[k].rows)) ? SECTIONS[k].rows.length : 0;
   q('quickUpload')?.addEventListener('click',()=>q('fileInput')?.click());
   q('quickImport')?.addEventListener('click',()=>q('importBtn')?.click());
   q('quickExport')?.addEventListener('click',()=>q('exportBtn')?.click());
@@ -1325,11 +3300,13 @@ loadAllSections();
     if(skillBtn) skillBtn.click();
     else if(typeof toast==='function') toast('المهارات تُحسب من الحقول Skills Gained داخل السجل');
   });
+  let hasScrolledForSearch = false;
   q('globalSearch')?.addEventListener('input',e=>{
     const term=e.target.value.trim().toLowerCase();
     if(!term){
       renderTable();
       const oldNote=q('globalSearchNote'); if(oldNote) oldNote.remove();
+      hasScrolledForSearch = false;
       return;
     }
 
@@ -1338,7 +3315,12 @@ loadAllSections();
     SECTION_ORDER.forEach(key=>{
       const section=SECTIONS[key];
       section.rows.forEach((row,index)=>{
-        const haystack=section.cols.map(c=>String(row[c.key]||'')).join(' ').toLowerCase();
+        const haystack=section.cols.map(c=>{
+          if(c.type==='select') return optionLabel(c, row[c.key]);
+          if(c.type==='skills') return getSkillNames(row[c.key]||[]).join(' ');
+          if(c.type==='links') return linksToText(row[c.key]);
+          return String(row[c.key]||'');
+        }).join(' ').toLowerCase();
         if(haystack.includes(term)) results.push({key,index,row});
       });
     });
@@ -1350,7 +3332,12 @@ loadAllSections();
       const rows=results.map(x=>{
         const s=SECTIONS[x.key];
         const title=s.tabLabel;
-        const summary=s.cols.slice(0,4).map(c=>String(x.row[c.key]||'')).filter(Boolean).join(' • ');
+        const summary=s.cols.slice(0,4).map(c=>{
+          if(c.type==='select') return optionLabel(c, x.row[c.key]);
+          if(c.type==='skills') return getSkillNames(x.row[c.key]||[]).join('، ');
+          if(c.type==='links') return linksToText(x.row[c.key]);
+          return String(x.row[c.key]||'');
+        }).filter(Boolean).join(' • ');
         return `<tr>
           <td>${escapeHtml(title)}</td>
           <td>${escapeHtml(String(x.row.no||x.index+1))}</td>
@@ -1363,6 +3350,10 @@ loadAllSections();
           <thead><tr><th>القسم</th><th>No.</th><th>البيانات</th><th></th></tr></thead>
           <tbody>${rows}</tbody>
         </table>`;
+    }
+    if(!hasScrolledForSearch){
+      q('recordsSection')?.scrollIntoView({behavior:'smooth',block:'start'});
+      hasScrolledForSearch = true;
     }
   });
 
@@ -1382,35 +3373,55 @@ loadAllSections();
   function updateDashboard(){
     // SECTIONS is a lexical const in the main application scope, not window.SECTIONS.
     // Using window.SECTIONS here caused all dashboard counters to remain 0.
-    const get = k => (SECTIONS[k] && Array.isArray(SECTIONS[k].rows)) ? SECTIONS[k].rows.length : 0;
-
-    const all = SECTION_ORDER.flatMap(k =>
-      (SECTIONS[k] && Array.isArray(SECTIONS[k].rows)) ? SECTIONS[k].rows : []
-    );
-
-    const skills = new Set();
-    all.forEach(r => {
-      ['skills','skills_applied'].forEach(key => {
-        String(r[key] || '')
-          .split(/[,،;|\n]/)
-          .map(x => x.trim())
-          .filter(Boolean)
-          .forEach(x => skills.add(x.toLowerCase()));
-      });
-    });
-
     const vals = {
       statCerts: get('certifications'),
       statExperience: get('experience'),
-      statMeetings: get('meetings'),
-      statVolunteering: get('volunteering'),
-      statSkills: skills.size
+      statActivities: get('activities'),
+      statEducation: get('education'),
+      statJobs: get('jobs'),
+      statSkills: get('skills')
     };
 
     Object.entries(vals).forEach(([id,v]) => {
       const el = q(id);
       if(el) el.textContent = v;
     });
+
+    updateMomentumBanner();
+  }
+
+  // مؤشر "زخم" آخر 30 يوم — بيانات موجودة أصلاً (حقول التاريخ)، فقط نجمّعها زمنيًا بدل عرض
+  // إجماليات ثابتة فقط. هدفه تحفيزي: يُظهر النشاط الحديث لا التراكم الكلي فقط.
+  function updateMomentumBanner(){
+    const banner = q('momentumBanner');
+    if(!banner) return;
+    const since = Date.now() - 30*24*60*60*1000;
+    const isRecent = (dateStr) => {
+      if(!dateStr) return false;
+      const t = Date.parse(dateStr);
+      return !isNaN(t) && t >= since && t <= Date.now();
+    };
+    const recentCerts = (SECTIONS.certifications?.rows||[]).filter(r=>isRecent(r.date)).length;
+    const recentActivities = (SECTIONS.activities?.rows||[]).filter(r=>isRecent(r.date)).length;
+    const recentExp = (SECTIONS.experience?.rows||[]).filter(r=>isRecent(r.start_date)).length;
+    const totalRecent = recentCerts + recentActivities + recentExp;
+    const lang = document.documentElement.getAttribute('lang')==='en' ? 'en' : 'ar';
+    if(totalRecent > 0){
+      const parts = [];
+      if(recentCerts) parts.push(lang==='en' ? `${recentCerts} certificate(s)` : `${recentCerts} شهادة/دورة`);
+      if(recentExp) parts.push(lang==='en' ? `${recentExp} experience record(s)` : `${recentExp} سجل خبرة`);
+      if(recentActivities) parts.push(lang==='en' ? `${recentActivities} activity(ies)` : `${recentActivities} نشاط`);
+      banner.textContent = lang==='en'
+        ? `🔥 Last 30 days: ${parts.join(' • ')} — keep the momentum going!`
+        : `🔥 خلال آخر 30 يومًا: ${parts.join(' • ')} — استمر على نفس الزخم!`;
+      banner.style.display = 'block';
+    } else {
+      const anyData = get('certifications') + get('experience') + get('activities') > 0;
+      banner.textContent = lang==='en'
+        ? 'No new entries in the last 30 days — a good moment to log recent progress.'
+        : 'لا توجد إضافات جديدة خلال آخر 30 يومًا — فرصة مناسبة لتوثيق أي تقدّم حديث.';
+      banner.style.display = anyData ? 'block' : 'none';
+    }
   }
   window.updatePdrDashboard=updateDashboard;
   setTimeout(updateDashboard,300);
@@ -1445,24 +3456,43 @@ loadAllSections();
     try{
       const now = new Date();
       const locale = 'ar-EG-u-nu-latn';
+      const tz = 'Africa/Cairo'; // العنوان يقول "الوقت (القاهرة)" صراحةً، فيجب تثبيت المنطقة الزمنية بدل الاعتماد على توقيت جهاز المستخدم
       const dateEl = document.getElementById('heroDate');
       const dayEl = document.getElementById('heroDay');
       const timeEl = document.getElementById('heroTime');
-      if(dateEl) dateEl.textContent = new Intl.DateTimeFormat(locale,{day:'numeric',month:'long',year:'numeric'}).format(now);
-      if(dayEl) dayEl.textContent = new Intl.DateTimeFormat(locale,{weekday:'long'}).format(now);
-      if(timeEl) timeEl.textContent = new Intl.DateTimeFormat(locale,{hour:'2-digit',minute:'2-digit',hour12:true}).format(now);
+      if(dateEl) dateEl.textContent = new Intl.DateTimeFormat(locale,{day:'numeric',month:'long',year:'numeric',timeZone:tz}).format(now);
+      if(dayEl) dayEl.textContent = new Intl.DateTimeFormat(locale,{weekday:'long',timeZone:tz}).format(now);
+      if(timeEl) timeEl.textContent = new Intl.DateTimeFormat(locale,{hour:'2-digit',minute:'2-digit',hour12:true,timeZone:tz}).format(now);
     }catch(e){}
   }
   updateHeroClock();
   setInterval(updateHeroClock,1000);
 
+  // ---------- Mobile off-canvas navigation drawer ----------
+  const sidebarEl = document.getElementById('appSidebar');
+  const navToggleBtn = document.getElementById('mobileNavToggle');
+  const navBackdrop = document.getElementById('mobileNavBackdrop');
+  function openMobileNav(){ sidebarEl?.classList.add('mobile-open'); navBackdrop?.classList.add('show'); }
+  function closeMobileNav(){ sidebarEl?.classList.remove('mobile-open'); navBackdrop?.classList.remove('show'); }
+  navToggleBtn?.addEventListener('click', ()=>{
+    sidebarEl?.classList.contains('mobile-open') ? closeMobileNav() : openMobileNav();
+  });
+  navBackdrop?.addEventListener('click', closeMobileNav);
+
   document.querySelectorAll('.side-item').forEach(btn=>{
     btn.addEventListener('click',()=>{
       const id=btn.dataset.target;
+      const tab=btn.dataset.tab;
+      if(tab && typeof window.switchTabRef === 'function') window.switchTabRef(tab);
+      if(id === 'gearBtn'){
+        const panel = document.getElementById('settingsPanel');
+        if(panel) panel.classList.add('open');
+      }
       const el=document.getElementById(id);
       if(el) el.scrollIntoView({behavior:'smooth',block:'start'});
       document.querySelectorAll('.side-item').forEach(x=>x.classList.remove('active'));
       btn.classList.add('active');
+      closeMobileNav();
     });
   });
 })();
